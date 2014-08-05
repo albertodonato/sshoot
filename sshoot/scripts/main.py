@@ -126,7 +126,7 @@ class Sshoot(Script):
 
     def _action_list(self, config, args):
         """Print out the list of profiles as a table."""
-        columns = ["Profile", "Active", "Remote host", "Subnets"]
+        columns = ["", "Profile", "Remote host", "Subnets"]
         if args.verbose:
             columns.extend(
                 ("Auto hosts", "Auto nets", "DNS forward", "Exclude subnets",
@@ -142,8 +142,8 @@ class Sshoot(Script):
 
         for name, profile in config.profiles.iteritems():
             row = [
-                name,
                 "*" if is_profile_running(name, SESSIONS_DIR) else "",
+                name,
                 self._format(profile.remote),
                 self._format(profile.subnets)]
             if args.verbose:
