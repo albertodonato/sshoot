@@ -23,8 +23,8 @@ from signal import SIGTERM
 from prettytable import PrettyTable, HEADER
 
 from sshoot.script import Script, ErrorExitMessage
-from sshoot.profile import Profile, ProfileError, is_profile_running
-from sshoot.config import Config, CONFIG_FILE, SESSIONS_DIR
+from sshoot.profile import Profile, ProfileError
+from sshoot.manager import Manager, DEFAULT_CONFIG_DIR
 
 
 class Sshoot(Script):
@@ -33,8 +33,8 @@ class Sshoot(Script):
     def get_parser(self):
         parser = ArgumentParser(description=self.__doc__)
         parser.add_argument(
-            "-c", "--config", default=CONFIG_FILE,
-            help="configuration file to use [default %(default)s)]")
+            "-C", "--config", default=DEFAULT_CONFIG_DIR,
+            help="configuration directory [default %(default)s)]")
         subparsers = parser.add_subparsers(
             metavar="ACTION", dest="action", help="action to perform")
         # List profiles
@@ -88,44 +88,16 @@ class Sshoot(Script):
 
     def main(self, args):
         try:
-            config = self._get_config(filename=args.config)
+            manager = Manager(config_dir=args.config)
+            manager.load()
         except IOError as e:
             raise ErrorExitMessage(str(e))
         method = getattr(self, "_action_" + args.action)
-        return method(config, args)
+        return method(manager, args)
 
-    def _get_config(self, filename=None):
-        """Return the config from the specified filename."""
-        config = Config()
-        config.load(filename=filename)
-        return config
-
-    def _action_create(self, config, args):
-        """Create a new profile."""
-        name = args.name
-        if name in config.profiles:
-            raise ErrorExitMessage(
-                "Profile name already in use: {}".format(name))
-
-        try:
-            profile = Profile.from_dict(args.__dict__)
-            config.add_profile(name, profile)
-        except ProfileError as e:
-            raise ErrorExitMessage(str(e))
-
-        config.save(filename=args.config)
-
-    def _action_delete(self, config, args):
-        """Delete profile with the given name."""
-        name = args.name
-        try:
-            config.remove_profile(name)
-        except KeyError:
-            raise ErrorExitMessage("Unknown profile: {}".format(name))
-        config.save(filename=args.config)
-
-    def _action_list(self, config, args):
+    def _action_list(self, manager, args):
         """Print out the list of profiles as a table."""
+        config = manager.config
         columns = ["", "Profile", "Remote host", "Subnets"]
         if args.verbose:
             columns.extend(
@@ -142,7 +114,7 @@ class Sshoot(Script):
 
         for name, profile in config.profiles.iteritems():
             row = [
-                "*" if is_profile_running(name, SESSIONS_DIR) else "",
+                "*" if manager.is_running(name) else "",
                 name,
                 self._format(profile.remote),
                 self._format(profile.subnets)]
@@ -157,23 +129,49 @@ class Sshoot(Script):
             table.add_row(row)
         print(table.get_string(sortby="Profile"))
 
-    def _action_start(self, config, args):
-        """Start sshuttle for the specified profile."""
+    def _action_create(self, manager, args):
+        """Create a new profile."""
+        config = manager.config
         name = args.name
+
+        if name in config.profiles:
+            raise ErrorExitMessage(
+                "Profile name already in use: {}".format(name))
+
+        try:
+            profile = Profile.from_dict(args.__dict__)
+            config.add_profile(name, profile)
+        except ProfileError as e:
+            raise ErrorExitMessage(str(e))
+
+        config.save()
+
+    def _action_delete(self, manager, args):
+        """Delete profile with the given name."""
+        config = manager.config
+        name = args.name
+
+        try:
+            config.remove_profile(name)
+        except KeyError:
+            raise ErrorExitMessage("Unknown profile: {}".format(name))
+        config.save()
+
+    def _action_start(self, manager, args):
+        """Start sshuttle for the specified profile."""
+        config = manager.config
+        name = args.name
+
         try:
             profile = config.profiles[name]
         except KeyError:
             raise ErrorExitMessage("Unknown profile: {}".format(name))
 
-        if not os.path.exists(SESSIONS_DIR):
-            os.path.makedir(SESSIONS_DIR)
-
-        pidfile = os.path.join(SESSIONS_DIR, "{}.pid".format(name))
-        if is_profile_running(name, SESSIONS_DIR):
+        if manager.is_running(name):
             raise ErrorExitMessage("Profile is already running.")
 
         executable = config.executable or "sshuttle"
-        extra_opts = ("--daemon", "--pidfile", pidfile)
+        extra_opts = ("--daemon", "--pidfile", manager.get_pidfile(name))
         cmdline = profile.cmdline(executable=executable, extra_opts=extra_opts)
 
         try:
@@ -184,19 +182,20 @@ class Sshoot(Script):
             # XXX don't show process output
             print("Profile started.")
 
-    def _action_stop(self, config, args):
+    def _action_stop(self, manager, args):
         """Stop sshuttle for the specified profile."""
+        config = manager.config
         name = args.name
+
         try:
             config.profiles[name]
         except KeyError:
             raise ErrorExitMessage("Unknown profile: {}".format(name))
-        if not is_profile_running(name, SESSIONS_DIR):
+        if not manager.is_running(name):
             raise ErrorExitMessage("Profile is not running.")
 
-        pidfile = os.path.join(SESSIONS_DIR, "{}.pid".format(name))
         try:
-            with open(pidfile) as fh:
+            with open(manager.get_pidfile(name)) as fh:
                 os.kill(int(fh.read()), SIGTERM)
         except (IOError, OSError) as e:
             raise ErrorExitMessage("Failed to stop profile: {}".format(e))

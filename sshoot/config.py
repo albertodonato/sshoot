@@ -20,10 +20,6 @@ import os
 
 from sshoot.profile import Profile
 
-CONFIG_DIR = os.path.expanduser(os.path.join("~", ".sshoot"))
-CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yaml")
-SESSIONS_DIR = os.path.join(CONFIG_DIR, "sessions")
-
 
 def yaml_dump(data, fh=None):
     """Dump data in YAML format with sane defaults for readability."""
@@ -34,19 +30,17 @@ def yaml_dump(data, fh=None):
 class Config(object):
     """Hold configuration."""
 
-    def __init__(self):
+    def __init__(self, config_file):
+        self._config_file = config_file
         self._profiles = {}
         self._executable = None
 
-    def load(self, filename=None):
+    def load(self):
         """Load configuration from file."""
-        if filename is None:
-            filename = CONFIG_FILE
-            if not os.path.exists(filename):
-                # No default config file, don't error, just return
-                return
+        if not os.path.exists(self._config_file):
+            return
 
-        with open(filename) as fh:
+        with open(self._config_file) as fh:
             config = yaml.load(fh)
         # Load profiles
         profiles = config.get("profiles", {})
@@ -54,15 +48,9 @@ class Config(object):
             self._profiles[name] = Profile.from_dict(conf)
         self._executable = config.get("executable")
 
-    def save(self, filename=None):
+    def save(self):
         """Save configuration to file."""
-        if filename is None:
-            filename = CONFIG_FILE
-            dirname = os.path.dirname(filename)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-
-        with open(filename, "w") as fh:
+        with open(self._config_file, "w") as fh:
             yaml_dump(self._build_config(), fh)
 
     def add_profile(self, name, profile):

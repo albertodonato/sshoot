@@ -15,8 +15,6 @@
 
 """A sshuttle VPN profile."""
 
-import os
-
 
 class Profile(object):
     """Hold information about a sshuttle profile."""
@@ -91,23 +89,3 @@ class ProfileError(Exception):
 
     def __init__(self, message="Subnets must be specified"):
         super(ProfileError, self).__init__(message)
-
-
-def is_profile_running(name, piddir):
-    """Return whether the specified profile is running."""
-    pidfile = os.path.join(piddir, "{}.pid".format(name))
-    try:
-        with open(pidfile) as fh:
-            pid = int(fh.read())
-    except Exception:
-        # If anything fails, the pid can't be signalled, so the rofile is not
-        # running.
-        return False
-
-    try:
-        os.kill(pid, 0)
-    except OSError:
-        # Delete stale pidfile
-        os.unlink(pidfile)
-        return False
-    return True
