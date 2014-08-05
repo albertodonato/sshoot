@@ -18,6 +18,7 @@
 import os
 from argparse import ArgumentParser
 import subprocess
+from signal import SIGTERM
 
 from prettytable import PrettyTable, HEADER
 
@@ -167,8 +168,11 @@ class Sshoot(Script):
         if not os.path.exists(SESSIONS_DIR):
             os.path.makedir(SESSIONS_DIR)
 
-        executable = config.executable or "sshuttle"
         pidfile = os.path.join(SESSIONS_DIR, "{}.pid".format(name))
+        if is_profile_running(name, SESSIONS_DIR):
+            raise ErrorExitMessage("Profile is already running.")
+
+        executable = config.executable or "sshuttle"
         extra_opts = ("--daemon", "--pidfile", pidfile)
         cmdline = profile.cmdline(executable=executable, extra_opts=extra_opts)
 
@@ -178,11 +182,24 @@ class Sshoot(Script):
             raise ErrorExitMessage("Profile failed to start.")
         else:
             # XXX don't show process output
-            print("VPN session for profile started.")
+            print("Profile started.")
 
     def _action_stop(self, config, args):
         """Stop sshuttle for the specified profile."""
-        # XXX todo
+        name = args.name
+        try:
+            config.profiles[name]
+        except KeyError:
+            raise ErrorExitMessage("Unknown profile: {}".format(name))
+        if not is_profile_running(name, SESSIONS_DIR):
+            raise ErrorExitMessage("Profile is not running.")
+
+        pidfile = os.path.join(SESSIONS_DIR, "{}.pid".format(name))
+        try:
+            with open(pidfile) as fh:
+                os.kill(int(fh.read()), SIGTERM)
+        except (IOError, OSError) as e:
+            raise ErrorExitMessage("Failed to stop profile: {}".format(e))
 
     def _format(self, value):
         if isinstance(value, (list, tuple)):
