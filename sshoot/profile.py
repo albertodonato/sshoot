@@ -16,6 +16,13 @@
 """A sshuttle VPN profile."""
 
 
+class ProfileError(Exception):
+    """Profile configuration is not correct."""
+
+    def __init__(self):
+        super(ProfileError, self).__init__("Subnets must be specified")
+
+
 class Profile(object):
     """Hold information about a sshuttle profile."""
 
@@ -46,7 +53,7 @@ class Profile(object):
 
         profile = Profile(subnets=subnets)
         for attr in cls._config_attrs:
-            value = config.get(attr)
+            value = config.get(attr.replace("_", "-"))
             if value is not None:
                 setattr(profile, attr, value)
         return profile
@@ -64,12 +71,11 @@ class Profile(object):
             cmd.append("--dns")
         if self.exclude_subnets:
             cmd.extend(
-                "--exclude={}".format(
-                    subnet for subnet in self.exclude_subnets.split()))
+                "--exclude={}".format(net) for net in self.exclude_subnets)
         if self.seed_hosts:
             cmd.append("--seed-hosts={}".format(",".join(self.seed_hosts)))
         if self.extra_opts:
-            cmd.extend(self.extra_opts.split())
+            cmd.extend(self.extra_opts)
         if extra_opts:
             cmd.extend(extra_opts)
         return cmd
@@ -79,13 +85,12 @@ class Profile(object):
         conf = {}
         for attr in self._config_attrs:
             value = getattr(self, attr)
+            attr = attr.replace("_", "-")
             if value:
                 conf[attr] = value
         return dict(conf)
 
-
-class ProfileError(Exception):
-    """Profile configuration is not correct."""
-
-    def __init__(self, message="Subnets must be specified"):
-        super(ProfileError, self).__init__(message)
+    def __eq__(self, other):
+        return all(
+            getattr(self, attr) == getattr(other, attr)
+            for attr in self._config_attrs)
