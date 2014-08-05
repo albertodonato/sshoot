@@ -15,6 +15,8 @@
 
 """A sshuttle VPN profile."""
 
+import os
+
 
 class Profile(object):
     """Hold information about a sshuttle profile."""
@@ -32,48 +34,44 @@ class Profile(object):
     seed_hosts = None
     extra_opts = None
 
-    def __init__(self, remote=None, subnets=None):
-        if not remote and not subnets:
-            raise ProfileError()
-
-        self.remote = remote
+    def __init__(self, subnets):
         self.subnets = subnets
 
     @classmethod
     def from_dict(cls, config):
         """Create a profile from a dict holding config attributes."""
         config = config.copy()  # shallow, only first-level keys are changed
-        remote = config.pop("remote", None)
-        subnets = config.pop("subnets", None)
+        try:
+            subnets = config.pop("subnets")
+        except KeyError:
+            raise ProfileError()
 
-        profile = Profile(remote=remote, subnets=subnets)
+        profile = Profile(subnets=subnets)
         for attr in cls._config_attrs:
             value = config.get(attr)
             if value is not None:
                 setattr(profile, attr, value)
         return profile
 
-    def cmdline(self, binary="sshuttle", extra_opts=None):
+    def cmdline(self, executable="sshuttle", extra_opts=None):
         """Return a sshuttle cmdline based on the profile."""
-        cmd = [binary]
+        cmd = [executable] + self.subnets
+        if self.remote:
+            cmd.append("--remote={}".format(self.remote))
         if self.auto_hosts:
             cmd.append("--auto-hosts")
         if self.auto_nets:
             cmd.append("--auto-nets")
         if self.dns:
             cmd.append("--dns")
-        if self.extra_opts:
-            cmd.extend(self.extra_opts.split())
-        if self.remote:
-            cmd.append("--remote={}".format(self.remote))
-        if self.subnets:
-            cmd.extend(self.subnets)
         if self.exclude_subnets:
             cmd.extend(
                 "--exclude={}".format(
                     subnet for subnet in self.exclude_subnets.split()))
         if self.seed_hosts:
             cmd.append("--seed-hosts={}".format(",".join(self.seed_hosts)))
+        if self.extra_opts:
+            cmd.extend(self.extra_opts.split())
         if extra_opts:
             cmd.extend(extra_opts)
         return cmd
@@ -91,7 +89,25 @@ class Profile(object):
 class ProfileError(Exception):
     """Profile configuration is not correct."""
 
-    def __init__(self, message=None):
-        if not message:
-            message = "Remote host or subnets must be specified."
+    def __init__(self, message="Subnets must be specified"):
         super(ProfileError, self).__init__(message)
+
+
+def is_profile_running(name, piddir):
+    """Return whether the specified profile is running."""
+    pidfile = os.path.join(piddir, "{}.pid".format(name))
+    try:
+        with open(pidfile) as fh:
+            pid = int(fh.read())
+    except Exception:
+        # If anything fails, the pid can't be signalled, so the rofile is not
+        # running.
+        return False
+
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        # Delete stale pidfile
+        os.unlink(pidfile)
+        return False
+    return True

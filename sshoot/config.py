@@ -25,8 +25,10 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yaml")
 SESSIONS_DIR = os.path.join(CONFIG_DIR, "sessions")
 
 
-def yaml_dump(data, fh):
-    yaml.safe_dump(data, fh, default_flow_style=False, allow_unicode=True)
+def yaml_dump(data, fh=None):
+    """Dump data in YAML format with sane defaults for readability."""
+    return yaml.safe_dump(
+        data, fh, default_flow_style=False, allow_unicode=True)
 
 
 class Config(object):
@@ -34,19 +36,23 @@ class Config(object):
 
     def __init__(self):
         self._profiles = {}
+        self._executable = None
 
     def load(self, filename=None):
         """Load configuration from file."""
         if filename is None:
             filename = CONFIG_FILE
             if not os.path.exists(filename):
+                # No default config file, don't error, just return
                 return
 
         with open(filename) as fh:
             config = yaml.load(fh)
+        # Load profiles
         profiles = config.get("profiles", {})
-        for name, config in profiles.iteritems():
-            self._profiles[name] = Profile.from_dict(config)
+        for name, conf in profiles.iteritems():
+            self._profiles[name] = Profile.from_dict(conf)
+        self._executable = config.get("executable")
 
     def save(self, filename=None):
         """Save configuration to file."""
@@ -67,9 +73,15 @@ class Config(object):
         """Add the given profile to the configuration."""
         del self._profiles[name]
 
+    @property
     def profiles(self):
         """Return a dict with profiles, using names as key."""
         return self._profiles.copy()
+
+    @property
+    def executable(self):
+        """Return the sshuttle executable to use, or None if set to default."""
+        return self._executable
 
     def _build_config(self):
         config = {}
@@ -77,4 +89,6 @@ class Config(object):
             name: profile.config() for name, profile
             in self._profiles.iteritems()}
         config["profiles"] = profiles
+        if self._executable:
+            config["executable"] = self._executable
         return config

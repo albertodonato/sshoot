@@ -15,22 +15,22 @@
 
 """Command-line interface to handle sshuttle VPN sessions."""
 
-
+import os
 from argparse import ArgumentParser
+import subprocess
 
 from prettytable import PrettyTable, HEADER
 
 from sshoot.script import Script, ErrorExitMessage
-from sshoot.profile import Profile, ProfileError
-from sshoot.config import Config, CONFIG_FILE
+from sshoot.profile import Profile, ProfileError, is_profile_running
+from sshoot.config import Config, CONFIG_FILE, SESSIONS_DIR
 
 
 class Sshoot(Script):
-    """Handle sshuttle VPN sessions."""
+    """Manage multiple sshuttle VPN sessions."""
 
     def get_parser(self):
-        parser = ArgumentParser(
-            description="Handle multiple sshuttle sessions")
+        parser = ArgumentParser(description=self.__doc__)
         parser.add_argument(
             "-c", "--config", default=CONFIG_FILE,
             help="configuration file to use [default %(default)s)]")
@@ -47,10 +47,9 @@ class Sshoot(Script):
             "create", help="define a new profile")
         create_parser.add_argument("name", help="profile name")
         create_parser.add_argument(
-            "-r", "--remote", help="remote host to connect to")
+            "subnets", nargs="+", help="subnets to route over the VPN")
         create_parser.add_argument(
-            "-s", "--subnets", nargs="+",
-            help="subnets to route over the VPN")
+            "-r", "--remote", help="remote host to connect to")
         create_parser.add_argument(
             "-H", "--auto-hosts", action="store_true",
             help="automatically update /etc/hosts with hosts from VPN")
@@ -103,7 +102,7 @@ class Sshoot(Script):
     def _action_create(self, config, args):
         """Create a new profile."""
         name = args.name
-        if name in config.profiles():
+        if name in config.profiles:
             raise ErrorExitMessage(
                 "Profile name already in use: {}".format(name))
 
@@ -114,7 +113,6 @@ class Sshoot(Script):
             raise ErrorExitMessage(str(e))
 
         config.save(filename=args.config)
-        print("Profile created: {}".format(name))
 
     def _action_delete(self, config, args):
         """Delete profile with the given name."""
@@ -124,7 +122,6 @@ class Sshoot(Script):
         except KeyError:
             raise ErrorExitMessage("Unknown profile: {}".format(name))
         config.save(filename=args.config)
-        print("Profile deleted: {}".format(name))
 
     def _action_list(self, config, args):
         """Print out the list of profiles as a table."""
@@ -142,10 +139,10 @@ class Sshoot(Script):
         table.right_padding_width = 1
         table.hrules = HEADER
 
-        for name, profile in config.profiles().iteritems():
+        for name, profile in config.profiles.iteritems():
             row = [
                 name,
-                " ",  # XXX implement
+                "*" if is_profile_running(name, SESSIONS_DIR) else "",
                 self._format(profile.remote),
                 self._format(profile.subnets)]
             if args.verbose:
@@ -158,6 +155,34 @@ class Sshoot(Script):
                      self._format(profile.extra_opts)))
             table.add_row(row)
         print(table.get_string(sortby="Profile"))
+
+    def _action_start(self, config, args):
+        """Start sshuttle for the specified profile."""
+        name = args.name
+        try:
+            profile = config.profiles[name]
+        except KeyError:
+            raise ErrorExitMessage("Unknown profile: {}".format(name))
+
+        if not os.path.exists(SESSIONS_DIR):
+            os.path.makedir(SESSIONS_DIR)
+
+        executable = config.executable or "sshuttle"
+        pidfile = os.path.join(SESSIONS_DIR, "{}.pid".format(name))
+        extra_opts = ("--daemon", "--pidfile", pidfile)
+        cmdline = profile.cmdline(executable=executable, extra_opts=extra_opts)
+
+        try:
+            subprocess.check_call(cmdline, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            raise ErrorExitMessage("Profile failed to start.")
+        else:
+            # XXX don't show process output
+            print("VPN session for profile started.")
+
+    def _action_stop(self, config, args):
+        """Stop sshuttle for the specified profile."""
+        # XXX todo
 
     def _format(self, value):
         if isinstance(value, (list, tuple)):
