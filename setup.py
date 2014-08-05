@@ -22,7 +22,7 @@ config = {
     "name": "sshoot",
     "version": __version__,
     "license": "GPL",
-    # "description": "",
+    "description": "Manage multiple sshuttle VPN sessions.",
     "long_description": open("README.txt").read(),
     "author": "Alberto Donato",
     "author_email": "<alberto.donato@gmail.com>",
@@ -40,13 +40,12 @@ config = {
     "keywords": "ssh sshuttle vpn",
     "classifiers": [
         "Development Status :: 3 - Alpha",
-        # "Intended Audience :: Developers",
-        # "Intended Audience :: System Administrators"
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators"
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Topic :: System :: Networking",
-        "Topic :: System :: Networking :: Monitoring",
         "Topic :: Utilities"]}
 
 setup(**config)

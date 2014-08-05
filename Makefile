@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with sshoot.  If not, see <http://www.gnu.org/licenses/>.
 
-PRJDIR = procs
-
 all:
 	python setup.py sdist bdist
 
@@ -25,10 +23,5 @@ clean:
 	find -name \*.pyc -delete
 	rm -rf MANIFEST html build dist *.egg-info
 
-doc html:
-	epydoc --no-private ${PRJDIR}
-
 lint:
-	find -name \*.py | xargs flake8 -v
-
-.PHONY: html
+	flake8 .
