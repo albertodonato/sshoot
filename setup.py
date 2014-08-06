@@ -29,7 +29,7 @@ config = {
     "maintainer": "Alberto Donato",
     "maintainer_email": "<alberto.donato@gmail.com>",
     "url": "https://launchpad.net/sshoot",
-    # "download_url": "",
+    "download_url": "https://launchpad.net/sshoot/+download",
     "packages": find_packages(exclude=["*.test.*", "*.test", "test.*"]),
     "include_package_data": True,
     "entry_points": {
