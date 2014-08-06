@@ -34,7 +34,7 @@ class Sshoot(Script):
         parser = ArgumentParser(description=self.__doc__)
         parser.add_argument(
             "-C", "--config", default=DEFAULT_CONFIG_DIR,
-            help="configuration directory [default %(default)s)]")
+            help="configuration directory (default: %(default)s)")
         subparsers = parser.add_subparsers(
             metavar="ACTION", dest="action", help="action to perform")
         # List profiles
@@ -64,7 +64,7 @@ class Sshoot(Script):
             "-x", "--exclude-subnets", nargs="+",
             help="exclude subnets from VPN forward")
         create_parser.add_argument(
-            "-S", "--seed-host", nargs="+",
+            "-S", "--seed-hosts", nargs="+",
             help="comma-separated list of hosts to seed to auto-hosts")
         create_parser.add_argument(
             "--extra-opts",

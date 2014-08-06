@@ -53,7 +53,7 @@ class Profile(object):
 
         profile = Profile(subnets=subnets)
         for attr in cls._config_attrs:
-            value = config.get(attr.replace("_", "-"))
+            value = config.get(attr)
             if value is not None:
                 setattr(profile, attr, value)
         return profile
@@ -85,7 +85,6 @@ class Profile(object):
         conf = {}
         for attr in self._config_attrs:
             value = getattr(self, attr)
-            attr = attr.replace("_", "-")
             if value:
                 conf[attr] = value
         return dict(conf)
