@@ -28,7 +28,7 @@ config = {
     "author_email": "<alberto.donato@gmail.com>",
     "maintainer": "Alberto Donato",
     "maintainer_email": "<alberto.donato@gmail.com>",
-    # "url": "",
+    "url": "https://launchpad.net/sshoot",
     # "download_url": "",
     "packages": find_packages(exclude=["*.test.*", "*.test", "test.*"]),
     "include_package_data": True,
