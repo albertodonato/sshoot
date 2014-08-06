@@ -106,4 +106,3 @@ class ProfileTests(TestCase):
         profile = Profile(["1.1.1.0/24", "10.10.0.0/16"])
         profile.auto_hosts = True
         self.assertNotEqual(profile, self.profile)
-        

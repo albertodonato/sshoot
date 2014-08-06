@@ -21,7 +21,7 @@ from sshoot.version import __version__
 config = {
     "name": "sshoot",
     "version": __version__,
-    "license": "GPL",
+    "license": "GPLv3",
     "description": "Manage multiple sshuttle VPN sessions.",
     "long_description": open("README.rst").read(),
     "author": "Alberto Donato",
@@ -39,10 +39,12 @@ config = {
     "tests_require": ["fixtures"],
     "keywords": "ssh sshuttle vpn",
     "classifiers": [
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
+        "Environment :: Console",
         "Intended Audience :: Developers",
-        "Intended Audience :: System Administrators"
-        "License :: OSI Approved :: GNU General Public License (GPL)",
+        "Intended Audience :: System Administrators",
+        ("License :: OSI Approved :: "
+         "GNU General Public License v3 or later (GPLv3+)"),
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Topic :: System :: Networking",

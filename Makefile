@@ -24,4 +24,4 @@ clean:
 	rm -rf MANIFEST html build dist *.egg-info
 
 lint:
-	flake8 .
+	@flake8 .
