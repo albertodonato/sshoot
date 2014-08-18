@@ -56,8 +56,8 @@ class ConfigTests(TestWithFixtures):
     def test_add_profile(self):
         """Profiles can be added to the config."""
         profiles = {
-            "profile1": Profile(["10.0.0.0/24", "192.168.0.0/16"]),
-            "profile2": Profile(["10.0.0.0/24", "192.168.0.0/16"])}
+            "profile1": Profile(["10.0.0.0/24"]),
+            "profile2": Profile(["192.168.0.0/16"])}
         for name, profile in profiles.iteritems():
             self.config.add_profile(name, profile)
         self.assertEqual(self.config.profiles, profiles)
@@ -65,8 +65,8 @@ class ConfigTests(TestWithFixtures):
     def test_remove_profile(self):
         """Profiles can be removed to the config."""
         profiles = {
-            "profile1": Profile(["10.0.0.0/24", "192.168.0.0/16"]),
-            "profile2": Profile(["10.0.0.0/24", "192.168.0.0/16"])}
+            "profile1": Profile(["10.0.0.0/24"]),
+            "profile2": Profile(["192.168.0.0/16"])}
         for name, profile in profiles.iteritems():
             self.config.add_profile(name, profile)
         self.config.remove_profile("profile1")
