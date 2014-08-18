@@ -21,7 +21,7 @@ from sshoot.version import __version__
 config = {
     "name": "sshoot",
     "version": __version__,
-    "license": "GPLv3",
+    "license": "GPLv3+",
     "description": "Manage multiple sshuttle VPN sessions.",
     "long_description": open("README.rst").read(),
     "author": "Alberto Donato",

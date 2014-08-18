@@ -17,7 +17,7 @@
 
 import os
 from argparse import ArgumentParser
-import subprocess
+from subprocess import Popen, PIPE, CalledProcessError
 from signal import SIGTERM
 
 from prettytable import PrettyTable, HEADER
@@ -174,13 +174,22 @@ class Sshoot(Script):
         extra_opts = ("--daemon", "--pidfile", manager.get_pidfile(name))
         cmdline = profile.cmdline(executable=executable, extra_opts=extra_opts)
 
+        message = "Profile failed to start: {}"
         try:
-            subprocess.check_call(cmdline, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError:
-            raise ErrorExitMessage("Profile failed to start.")
-        else:
-            # XXX don't show process output
+            process = Popen(cmdline, stdout=PIPE, stderr=PIPE)
+            process.wait()
+
+        except OSError as e:
+            # To catch file not found errors
+            raise ErrorExitMessage(message.format(e))
+        except CalledProcessError:
+            pass  # The return code is checked anyway
+
+        if process.returncode == 0:
             print("Profile started.")
+        else:
+            error = process.stderr.read()
+            raise ErrorExitMessage(message.format(error))
 
     def _action_stop(self, manager, args):
         """Stop sshuttle for the specified profile."""
