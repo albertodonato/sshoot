@@ -28,7 +28,7 @@ def yaml_dump(data, fh=None):
 
 
 class Config(object):
-    """Hold configuration."""
+    """Handle configuration file loading/saving."""
 
     def __init__(self, config_file):
         self._config_file = config_file
@@ -41,7 +41,9 @@ class Config(object):
             return
 
         with open(self._config_file) as fh:
-            config = yaml.load(fh)
+            # None is returned for empty config file
+            config = yaml.load(fh) or {}
+
         # Load profiles
         profiles = config.get("profiles", {})
         for name, conf in profiles.iteritems():
@@ -72,6 +74,7 @@ class Config(object):
         return self._executable
 
     def _build_config(self):
+        """Return the config dict to be saved to file."""
         config = {}
         profiles = {
             name: profile.config() for name, profile
