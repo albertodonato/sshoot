@@ -30,7 +30,7 @@ class ProfileTests(TestCase):
             {"remote": "1.2.3.4",
              "subnets": ["1.1.1.0/24", "10.10.0.0/16"],
              "dns": True,
-             "auto-hosts": True})
+             "auto_hosts": True})
         self.assertEqual(profile.remote, "1.2.3.4")
         self.assertEqual(profile.subnets, ["1.1.1.0/24", "10.10.0.0/16"])
         self.assertTrue(profile.dns)
