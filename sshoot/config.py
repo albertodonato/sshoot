@@ -32,11 +32,11 @@ class Config(object):
 
     def __init__(self, config_file):
         self._config_file = config_file
-        self._profiles = {}
-        self._executable = None
+        self._reset()
 
     def load(self):
         """Load configuration from file."""
+        self._reset()
         if not os.path.exists(self._config_file):
             return
 
@@ -57,6 +57,8 @@ class Config(object):
 
     def add_profile(self, name, profile):
         """Add a profile to the configuration."""
+        if name in self._profiles:
+            raise KeyError(name)
         self._profiles[name] = profile
 
     def remove_profile(self, name):
@@ -72,6 +74,11 @@ class Config(object):
     def executable(self):
         """Return the sshuttle executable to use, or None if set to default."""
         return self._executable
+
+    def _reset(self):
+        """Reset default empty config."""
+        self._profiles = {}
+        self._executable = None
 
     def _build_config(self):
         """Return the config dict to be saved to file."""

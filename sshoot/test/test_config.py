@@ -62,6 +62,13 @@ class ConfigTests(TestWithFixtures):
             self.config.add_profile(name, profile)
         self.assertEqual(self.config.profiles, profiles)
 
+    def test_add_profile_name_present(self):
+        """An exception is raised if the profile name is already used."""
+        self.config.add_profile("profile", Profile(["10.0.0.0/24"]))
+        self.assertRaises(
+            KeyError, self.config.add_profile, "profile",
+            Profile(["192.168.0.0/16"]))
+
     def test_remove_profile(self):
         """Profiles can be removed to the config."""
         profiles = {
@@ -71,6 +78,10 @@ class ConfigTests(TestWithFixtures):
             self.config.add_profile(name, profile)
         self.config.remove_profile("profile1")
         self.assertEqual(["profile2"], self.config.profiles.keys())
+
+    def test_remove_profile_not_present(self):
+        """An exception is raised if the profile name is not known."""
+        self.assertRaises(KeyError, self.config.remove_profile, "profile")
 
     def test_load_missing(self):
         """If no config file is found, config is empty."""
