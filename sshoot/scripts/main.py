@@ -134,13 +134,12 @@ class Sshoot(Script):
         config = manager.config
         name = args.name
 
-        if name in config.profiles:
-            raise ErrorExitMessage(
-                "Profile name already in use: {}".format(name))
-
         try:
             profile = Profile.from_dict(args.__dict__)
             config.add_profile(name, profile)
+        except KeyError:
+            raise ErrorExitMessage(
+                "Profile name already in use: {}".format(name))
         except ProfileError as e:
             raise ErrorExitMessage(str(e))
 
@@ -178,7 +177,6 @@ class Sshoot(Script):
         try:
             process = Popen(cmdline, stdout=PIPE, stderr=PIPE)
             process.wait()
-
         except OSError as e:
             # To catch file not found errors
             raise ErrorExitMessage(message.format(e))
