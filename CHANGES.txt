@@ -1,1 +1,7 @@
-v0.0.1, 2014-08-05 -- Initial release.
+v0.0.2 - 2014-08-24
+
+ - Support for managing sshuttle sessions (add, remove start, stop).
+
+v0.0.1 - 2014-08-05
+
+ - Initial release.
