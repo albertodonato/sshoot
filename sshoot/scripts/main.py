@@ -39,6 +39,10 @@ class Sshoot(Script):
         list_parser.add_argument(
             "-v", "--verbose", action="store_true",
             help="show verbose listing")
+        # Show profile
+        show_parser = subparsers.add_parser(
+            "show", help="show profile configuration")
+        show_parser.add_argument("name", help="profile name")
         # Add profile
         create_parser = subparsers.add_parser(
             "create", help="define a new profile")
@@ -107,7 +111,7 @@ class Sshoot(Script):
         table.right_padding_width = 1
         table.hrules = HEADER
 
-        for name, profile in manager.get_profiles.iteritems():
+        for name, profile in manager.get_profiles().iteritems():
             row = [
                 "*" if manager.is_running(name) else "",
                 name,
@@ -123,6 +127,29 @@ class Sshoot(Script):
                      self._format(profile.extra_opts)))
             table.add_row(row)
         print(table.get_string(sortby="Profile"))
+
+    def _action_show(self, manager, args):
+        """Show details on a profile."""
+        name = args.name
+        try:
+            profile = manager.get_profile(name)
+        except ManagerProfileError as e:
+            raise ErrorExitMessage(str(e))
+
+        table = PrettyTable(
+            field_names=["key", "value"], header=False, border=False)
+        table.align["key"] = table.align["value"] = "l"
+        table.add_row(("Name:", name))
+        table.add_row(("Remote host:", profile.remote))
+        table.add_row(("Subnets:", self._format(profile.subnets)))
+        table.add_row(("Auto hosts:", self._format(profile.auto_hosts)))
+        table.add_row(("Auto nets:", self._format(profile.auto_nets)))
+        table.add_row(("DNS forward:", self._format(profile.dns)))
+        table.add_row(
+            ("Exclude subnets:", self._format(profile.exclude_subnets)))
+        table.add_row(("Seed hosts:", self._format(profile.seed_hosts)))
+        table.add_row(("Extra options:", self._format(profile.extra_opts)))
+        print(table.get_string(align="l"))
 
     def _action_create(self, manager, args):
         """Create a new profile."""

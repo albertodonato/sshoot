@@ -73,6 +73,13 @@ class Manager(object):
         """Return profiles defined in config."""
         return self._config.profiles
 
+    def get_profile(self, name):
+        """Return profile with given name."""
+        try:
+            return self._config.profiles[name]
+        except KeyError:
+            raise ManagerProfileError("Unknown profile: {}".format(name))
+
     def start_profile(self, name):
         """Start profile with given name."""
         try:

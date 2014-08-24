@@ -108,7 +108,7 @@ class ManagerTests(TestWithFixtures):
             ManagerProfileError, self.manager.remove_profile, "unknown")
 
     def test_get_profiles(self):
-        """Manager.geT_profiles returns defined profiles."""
+        """Manager.get_profiles returns defined profiles."""
         self.manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
         self.manager.create_profile(
             "profile2", {"subnets": ["192.168.0.0/16"]})
@@ -116,6 +116,18 @@ class ManagerTests(TestWithFixtures):
             "profile1": Profile.from_dict({"subnets": ["10.0.0.0/24"]}),
             "profile2": Profile.from_dict({"subnets": ["192.168.0.0/16"]})}
         self.assertEqual(self.manager.get_profiles(), profiles)
+
+    def test_get_profile(self):
+        """Manager.get_profile returns a profile."""
+        config = {"subnets": ["10.0.0.0/24"]}
+        self.manager.create_profile("profile", config)
+        profile = self.manager.get_profile("profile")
+        self.assertEqual(profile, Profile.from_dict(config))
+
+    def test_get_profile_unknown(self):
+        """Manager.get_profile raises an error if the name is unknown."""
+        self.assertRaises(
+            ManagerProfileError, self.manager.get_profile, "unknown")
 
     def test_start_profile(self):
         """Manager.start_profile starts a profile."""
