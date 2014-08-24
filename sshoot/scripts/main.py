@@ -92,10 +92,10 @@ class Sshoot(Script):
             manager.load_config()
         except IOError as e:
             raise ErrorExitMessage(str(e))
-        method = getattr(self, "_action_" + args.action)
+        method = getattr(self, "action_" + args.action)
         return method(manager, args)
 
-    def _action_list(self, manager, args):
+    def action_list(self, manager, args):
         """Print out the list of profiles as a table."""
         columns = ["", "Profile", "Remote host", "Subnets"]
         if args.verbose:
@@ -128,7 +128,7 @@ class Sshoot(Script):
             table.add_row(row)
         print(table.get_string(sortby="Profile"))
 
-    def _action_show(self, manager, args):
+    def action_show(self, manager, args):
         """Show details on a profile."""
         name = args.name
         try:
@@ -151,21 +151,21 @@ class Sshoot(Script):
         table.add_row(("Extra options:", self._format(profile.extra_opts)))
         print(table.get_string(align="l"))
 
-    def _action_create(self, manager, args):
+    def action_create(self, manager, args):
         """Create a new profile."""
         try:
             manager.create_profile(args.name, args.__dict__)
         except ManagerProfileError as e:
             raise ErrorExitMessage(str(e))
 
-    def _action_delete(self, manager, args):
+    def action_delete(self, manager, args):
         """Delete profile with the given name."""
         try:
             manager.remove_profile(args.name)
         except ManagerProfileError as e:
             raise ErrorExitMessage(str(e))
 
-    def _action_start(self, manager, args):
+    def action_start(self, manager, args):
         """Start sshuttle for the specified profile."""
         try:
             manager.start_profile(args.name)
@@ -174,7 +174,7 @@ class Sshoot(Script):
 
         print("Profile started.")
 
-    def _action_stop(self, manager, args):
+    def action_stop(self, manager, args):
         """Stop sshuttle for the specified profile."""
         try:
             manager.stop_profile(args.name)
