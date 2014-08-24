@@ -20,9 +20,7 @@ from argparse import ArgumentParser
 from prettytable import PrettyTable, HEADER
 
 from sshoot.script import Script, ErrorExitMessage
-from sshoot.profile import Profile, ProfileError
-from sshoot.manager import (
-    Manager, DEFAULT_CONFIG_PATH, StartProfileError, StopProfileError)
+from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
 
 
 class Sshoot(Script):
@@ -129,36 +127,23 @@ class Sshoot(Script):
 
     def _action_create(self, manager, args):
         """Create a new profile."""
-        config = manager.config
-        name = args.name
-
         try:
-            profile = Profile.from_dict(args.__dict__)
-            config.add_profile(name, profile)
-        except KeyError:
-            raise ErrorExitMessage(
-                "Profile name already in use: {}".format(name))
-        except ProfileError as e:
+            manager.create_profile(args.name, args.__dict__)
+        except ManagerProfileError as e:
             raise ErrorExitMessage(str(e))
-
-        config.save()
 
     def _action_delete(self, manager, args):
         """Delete profile with the given name."""
-        config = manager.config
-        name = args.name
-
         try:
-            config.remove_profile(name)
-        except KeyError:
-            raise ErrorExitMessage("Unknown profile: {}".format(name))
-        config.save()
+            manager.remove_profile(args.name)
+        except ManagerProfileError as e:
+            raise ErrorExitMessage(str(e))
 
     def _action_start(self, manager, args):
         """Start sshuttle for the specified profile."""
         try:
             manager.start_profile(args.name)
-        except StartProfileError as e:
+        except ManagerProfileError as e:
             raise ErrorExitMessage(str(e))
 
         print("Profile started.")
@@ -167,7 +152,7 @@ class Sshoot(Script):
         """Stop sshuttle for the specified profile."""
         try:
             manager.stop_profile(args.name)
-        except StopProfileError as e:
+        except ManagerProfileError as e:
             raise ErrorExitMessage(str(e))
 
         print("Profile stopped.")

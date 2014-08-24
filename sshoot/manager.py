@@ -19,24 +19,24 @@ import os
 from signal import SIGTERM
 from subprocess import Popen, PIPE, CalledProcessError
 
+from sshoot.profile import Profile, ProfileError
 from sshoot.config import Config
 
 DEFAULT_CONFIG_PATH = os.path.expanduser(os.path.join("~", ".sshoot"))
 
 
-class StartProfileError(Exception):
-    """Profile start failed."""
-
-
-class StopProfileError(Exception):
-    """Profile stop failed."""
+class ManagerProfileError(Exception):
+    """Profile management failed."""
 
 
 class Manager(object):
 
+    kill = os.kill  # for testing
+
     def __init__(self, config_path=None):
         self.config_path = config_path or DEFAULT_CONFIG_PATH
         self.sessions_path = os.path.join(self.config_path, "sessions")
+        self.config = Config(os.path.join(self.config_path, "config.yaml"))
 
     def load_config(self):
         """Load configuration from file."""
@@ -45,18 +45,39 @@ class Manager(object):
         if not os.path.exists(self.sessions_path):
             os.mkdir(self.sessions_path)
 
-        self.config = Config(os.path.join(self.config_path, "config.yaml"))
         self.config.load()
+
+    def create_profile(self, name, details):
+        """Create a profile with provided details."""
+        try:
+            profile = Profile.from_dict(details)
+            self.config.add_profile(name, profile)
+        except KeyError:
+            raise ManagerProfileError(
+                "Profile name already in use: {}".format(name))
+        except ProfileError as e:
+            raise ManagerProfileError(str(e))
+
+        self.config.save()
+
+    def remove_profile(self, name):
+        """Remove profile with given name."""
+        try:
+            self.config.remove_profile(name)
+        except KeyError:
+            raise ManagerProfileError("Unknown profile: {}".format(name))
+
+        self.config.save()
 
     def start_profile(self, name):
         """Start profile with given name."""
         try:
             profile = self.config.profiles[name]
         except KeyError:
-            raise StartProfileError("Unknown profile: {}".format(name))
+            raise ManagerProfileError("Unknown profile: {}".format(name))
 
         if self.is_running(name):
-            raise StartProfileError("Profile is already running.")
+            raise ManagerProfileError("Profile is already running.")
 
         executable = self.config.executable or "sshuttle"
         extra_opts = ("--daemon", "--pidfile", self._get_pidfile(name))
@@ -65,31 +86,32 @@ class Manager(object):
         message = "Profile failed to start: {}"
         try:
             process = Popen(cmdline, stdout=PIPE, stderr=PIPE)
+            # Wait until process is started (it daemonizes)
             process.wait()
         except OSError as e:
             # To catch file not found errors
-            raise StartProfileError(message.format(e))
+            raise ManagerProfileError(message.format(e))
         except CalledProcessError:
             pass  # The return code is checked anyway
 
         if process.returncode != 0:
             error = process.stderr.read()
-            raise StartProfileError(message.format(error))
+            raise ManagerProfileError(message.format(error))
 
     def stop_profile(self, name):
         """Stop profile with given name."""
         try:
             self.config.profiles[name]
         except KeyError:
-            raise StopProfileError("Unknown profile: {}".format(name))
+            raise ManagerProfileError("Unknown profile: {}".format(name))
         if not self.is_running(name):
-            raise StopProfileError("Profile is not running.")
+            raise ManagerProfileError("Profile is not running.")
 
         try:
             with open(self._get_pidfile(name)) as fh:
-                os.kill(int(fh.read()), SIGTERM)
+                self.kill(int(fh.read()), SIGTERM)
         except (IOError, OSError) as e:
-            raise StopProfileError("Failed to stop profile: {}".format(e))
+            raise ManagerProfileError("Failed to stop profile: {}".format(e))
 
     def is_running(self, name):
         """Return whether the specified profile is running."""
@@ -103,7 +125,7 @@ class Manager(object):
             return False
 
         try:
-            os.kill(pid, 0)
+            self.kill(pid, 0)
         except OSError:
             # Delete stale pidfile
             os.unlink(pidfile)
