@@ -24,7 +24,7 @@ from prettytable import PrettyTable, HEADER
 
 from sshoot.script import Script, ErrorExitMessage
 from sshoot.profile import Profile, ProfileError
-from sshoot.manager import Manager, DEFAULT_CONFIG_DIR
+from sshoot.manager import Manager, DEFAULT_CONFIG_PATH
 
 
 class Sshoot(Script):
@@ -33,7 +33,7 @@ class Sshoot(Script):
     def get_parser(self):
         parser = ArgumentParser(description=self.__doc__)
         parser.add_argument(
-            "-C", "--config", default=DEFAULT_CONFIG_DIR,
+            "-C", "--config", default=DEFAULT_CONFIG_PATH,
             help="configuration directory (default: %(default)s)")
         subparsers = parser.add_subparsers(
             metavar="ACTION", dest="action", help="action to perform")
@@ -88,7 +88,7 @@ class Sshoot(Script):
 
     def main(self, args):
         try:
-            manager = Manager(config_dir=args.config)
+            manager = Manager(config_path=args.config)
             manager.load()
         except IOError as e:
             raise ErrorExitMessage(str(e))
