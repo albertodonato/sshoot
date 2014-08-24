@@ -18,7 +18,8 @@ import yaml
 
 from fixtures import TestWithFixtures, TempDir
 
-from sshoot.manager import Manager, DEFAULT_CONFIG_PATH, ManagerProfileError
+from sshoot.profile import Profile
+from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
 
 
 class ManagerTests(TestWithFixtures):
@@ -105,6 +106,16 @@ class ManagerTests(TestWithFixtures):
         """Manager.remove_profile raises an error if name is unknown."""
         self.assertRaises(
             ManagerProfileError, self.manager.remove_profile, "unknown")
+
+    def test_get_profiles(self):
+        """Manager.geT_profiles returns defined profiles."""
+        self.manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
+        self.manager.create_profile(
+            "profile2", {"subnets": ["192.168.0.0/16"]})
+        profiles = {
+            "profile1": Profile.from_dict({"subnets": ["10.0.0.0/24"]}),
+            "profile2": Profile.from_dict({"subnets": ["192.168.0.0/16"]})}
+        self.assertEqual(self.manager.get_profiles(), profiles)
 
     def test_start_profile(self):
         """Manager.start_profile starts a profile."""

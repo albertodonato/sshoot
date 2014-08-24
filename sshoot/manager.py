@@ -69,6 +69,10 @@ class Manager(object):
 
         self.config.save()
 
+    def get_profiles(self):
+        """Return profiles defined in config."""
+        return self.config.profiles
+
     def start_profile(self, name):
         """Start profile with given name."""
         try:
