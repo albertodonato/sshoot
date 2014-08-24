@@ -26,6 +26,17 @@ from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
 class Sshoot(Script):
     """Manage multiple sshuttle VPN sessions."""
 
+    # Map names to profile fileds
+    _fields_map = (
+        ("Remote host", "remote"),
+        ("Subnets", "subnets"),
+        ("Auto hosts", "auto_hosts"),
+        ("Auto nets", "auto_nets"),
+        ("DNS forward", "dns"),
+        ("Exclude subnets", "exclude_subnets"),
+        ("Seed hosts", "seed_hosts"),
+        ("Extra options", "extra_opts"))
+
     def get_parser(self):
         parser = ArgumentParser(description=self.__doc__)
         parser.add_argument(
@@ -97,11 +108,13 @@ class Sshoot(Script):
 
     def action_list(self, manager, args):
         """Print out the list of profiles as a table."""
-        columns = ["", "Profile", "Remote host", "Subnets"]
-        if args.verbose:
-            columns.extend(
-                ("Auto hosts", "Auto nets", "DNS forward", "Exclude subnets",
-                 "Seed hosts", "Extra options"))
+        fields = tuple(self._fields_map)
+        if not args.verbose:
+            # Only most basic info
+            fields = fields[:2]
+        columns = [name for name, _ in fields]
+        columns = ["", "Profile"] + columns
+
         table = PrettyTable(columns)
         table.align = "l"
         table.vertical_char = " "
@@ -112,19 +125,9 @@ class Sshoot(Script):
         table.hrules = HEADER
 
         for name, profile in manager.get_profiles().iteritems():
-            row = [
-                "*" if manager.is_running(name) else "",
-                name,
-                self._format(profile.remote),
-                self._format(profile.subnets)]
-            if args.verbose:
-                row.extend(
-                    (self._format(profile.auto_hosts),
-                     self._format(profile.auto_nets),
-                     self._format(profile.dns),
-                     self._format(profile.exclude_subnets),
-                     self._format(profile.seed_hosts),
-                     self._format(profile.extra_opts)))
+            row = ["*" if manager.is_running(name) else "", name]
+            for _, field in fields:
+                row.append(self._format(getattr(profile, field)))
             table.add_row(row)
         print(table.get_string(sortby="Profile"))
 
@@ -140,16 +143,10 @@ class Sshoot(Script):
             field_names=["key", "value"], header=False, border=False)
         table.align["key"] = table.align["value"] = "l"
         table.add_row(("Name:", name))
-        table.add_row(("Remote host:", profile.remote))
-        table.add_row(("Subnets:", self._format(profile.subnets)))
-        table.add_row(("Auto hosts:", self._format(profile.auto_hosts)))
-        table.add_row(("Auto nets:", self._format(profile.auto_nets)))
-        table.add_row(("DNS forward:", self._format(profile.dns)))
-        table.add_row(
-            ("Exclude subnets:", self._format(profile.exclude_subnets)))
-        table.add_row(("Seed hosts:", self._format(profile.seed_hosts)))
-        table.add_row(("Extra options:", self._format(profile.extra_opts)))
-        print(table.get_string(align="l"))
+        for name, field in self._fields_map:
+            table.add_row(
+                ("{}:".format(name), self._format(getattr(profile, field))))
+        print(table.get_string())
 
     def action_create(self, manager, args):
         """Create a new profile."""
