@@ -15,16 +15,12 @@
 
 """Command-line interface to handle sshuttle VPN sessions."""
 
-import os
 from argparse import ArgumentParser
-from subprocess import Popen, PIPE, CalledProcessError
-from signal import SIGTERM
 
 from prettytable import PrettyTable, HEADER
 
 from sshoot.script import Script, ErrorExitMessage
-from sshoot.profile import Profile, ProfileError
-from sshoot.manager import Manager, DEFAULT_CONFIG_PATH
+from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
 
 
 class Sshoot(Script):
@@ -89,7 +85,7 @@ class Sshoot(Script):
     def main(self, args):
         try:
             manager = Manager(config_path=args.config)
-            manager.load()
+            manager.load_config()
         except IOError as e:
             raise ErrorExitMessage(str(e))
         method = getattr(self, "_action_" + args.action)
@@ -131,81 +127,35 @@ class Sshoot(Script):
 
     def _action_create(self, manager, args):
         """Create a new profile."""
-        config = manager.config
-        name = args.name
-
         try:
-            profile = Profile.from_dict(args.__dict__)
-            config.add_profile(name, profile)
-        except KeyError:
-            raise ErrorExitMessage(
-                "Profile name already in use: {}".format(name))
-        except ProfileError as e:
+            manager.create_profile(args.name, args.__dict__)
+        except ManagerProfileError as e:
             raise ErrorExitMessage(str(e))
-
-        config.save()
 
     def _action_delete(self, manager, args):
         """Delete profile with the given name."""
-        config = manager.config
-        name = args.name
-
         try:
-            config.remove_profile(name)
-        except KeyError:
-            raise ErrorExitMessage("Unknown profile: {}".format(name))
-        config.save()
+            manager.remove_profile(args.name)
+        except ManagerProfileError as e:
+            raise ErrorExitMessage(str(e))
 
     def _action_start(self, manager, args):
         """Start sshuttle for the specified profile."""
-        config = manager.config
-        name = args.name
-
         try:
-            profile = config.profiles[name]
-        except KeyError:
-            raise ErrorExitMessage("Unknown profile: {}".format(name))
+            manager.start_profile(args.name)
+        except ManagerProfileError as e:
+            raise ErrorExitMessage(str(e))
 
-        if manager.is_running(name):
-            raise ErrorExitMessage("Profile is already running.")
-
-        executable = config.executable or "sshuttle"
-        extra_opts = ("--daemon", "--pidfile", manager.get_pidfile(name))
-        cmdline = profile.cmdline(executable=executable, extra_opts=extra_opts)
-
-        message = "Profile failed to start: {}"
-        try:
-            process = Popen(cmdline, stdout=PIPE, stderr=PIPE)
-            process.wait()
-        except OSError as e:
-            # To catch file not found errors
-            raise ErrorExitMessage(message.format(e))
-        except CalledProcessError:
-            pass  # The return code is checked anyway
-
-        if process.returncode == 0:
-            print("Profile started.")
-        else:
-            error = process.stderr.read()
-            raise ErrorExitMessage(message.format(error))
+        print("Profile started.")
 
     def _action_stop(self, manager, args):
         """Stop sshuttle for the specified profile."""
-        config = manager.config
-        name = args.name
-
         try:
-            config.profiles[name]
-        except KeyError:
-            raise ErrorExitMessage("Unknown profile: {}".format(name))
-        if not manager.is_running(name):
-            raise ErrorExitMessage("Profile is not running.")
+            manager.stop_profile(args.name)
+        except ManagerProfileError as e:
+            raise ErrorExitMessage(str(e))
 
-        try:
-            with open(manager.get_pidfile(name)) as fh:
-                os.kill(int(fh.read()), SIGTERM)
-        except (IOError, OSError) as e:
-            raise ErrorExitMessage("Failed to stop profile: {}".format(e))
+        print("Profile stopped.")
 
     def _format(self, value):
         if isinstance(value, (list, tuple)):
