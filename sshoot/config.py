@@ -47,7 +47,7 @@ class Config(object):
         # Load profiles
         profiles = config.get("profiles", {})
         for name, conf in profiles.iteritems():
-            self._profiles[name] = Profile.from_dict(conf)
+            self._profiles[name] = Profile.from_dict(self._from_config(conf))
         self._executable = config.get("executable")
 
     def save(self):
@@ -84,9 +84,21 @@ class Config(object):
         """Return the config dict to be saved to file."""
         config = {}
         profiles = {
-            name: profile.config() for name, profile
-            in self._profiles.iteritems()}
+            name: self._to_config(profile.config())
+            for name, profile in self._profiles.iteritems()}
         config["profiles"] = profiles
         if self._executable:
             config["executable"] = self._executable
         return config
+
+    def _from_config(self, config):
+        """Convert a config to a params dict."""
+        return {
+            key.replace("-", "_"): value
+            for key, value in config.iteritems()}
+
+    def _to_config(self, params):
+        """Convert a params dict to a config."""
+        return {
+            key.replace("_", "-"): value
+            for key, value in params.iteritems()}

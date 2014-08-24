@@ -16,6 +16,7 @@
 import os
 from StringIO import StringIO
 import yaml
+from textwrap import dedent
 
 from unittest import TestCase
 
@@ -83,6 +84,20 @@ class ConfigTests(TestWithFixtures):
         """An exception is raised if the profile name is not known."""
         self.assertRaises(KeyError, self.config.remove_profile, "profile")
 
+    def test_load_from_file(self):
+        """The config is loaded from file."""
+        config = {
+            "profiles": {
+                "profile": {
+                    "subnets": ["10.0.0.0/24"],
+                    "auto-nets": True}}}
+        with open(self.config_name, "w") as fh:
+            yaml.dump(config, stream=fh)
+        self.config.load()
+        profile = self.config.profiles["profile"]
+        self.assertEqual(profile.subnets, ["10.0.0.0/24"])
+        self.assertTrue(profile.auto_nets)
+
     def test_load_missing(self):
         """If no config file is found, config is empty."""
         self.config.load()
@@ -137,3 +152,25 @@ class ConfigTests(TestWithFixtures):
         with open(self.config_name) as fh:
             config = yaml.load(fh)
         self.assertEqual(config["profiles"], profiles)
+
+    def test_save_from_file(self):
+        """The config is saved to file."""
+        conf = {"subnets": ["10.0.0.0/24"], "auto_nets": True}
+        self.config.add_profile("profile", Profile.from_dict(conf))
+        self.config.save()
+
+        config = dedent(
+            """\
+            profiles:
+              profile:
+                auto-nets: true
+                subnets:
+                - 10.0.0.0/24
+            """)
+        with open(self.config_name) as fh:
+            content = fh.read()
+        self.assertEqual(content, config)
+
+
+'profiles:\n  profile:\n    auto-nets: true\n    subnets:\n    - 10.0.0.0/24\n'
+'profiles:\n  profile:\n    auto-nets: true\n    subnets:\n    - 10.0.0.0/24\n'
