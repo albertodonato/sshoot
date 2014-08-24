@@ -43,25 +43,25 @@ class ManagerTests(TestWithFixtures):
         self.assertEqual(self.manager.config_path, self.config_path)
         self.assertEqual(self.manager.sessions_path, self.sessions_path)
 
-    def test_load_create_dirs(self):
-        """Manager.load creates config directories."""
-        self.manager.load()
+    def test_load_config_create_dirs(self):
+        """Manager.load_config creates config directories."""
+        self.manager.load_config()
         self.assertTrue(os.path.isdir(self.config_path))
         self.assertTrue(os.path.isdir(self.sessions_path))
 
     def test_load_config(self):
-        """Manager.load loads the config in the specified directory."""
+        """Manager.load_config loads the config in the specified directory."""
         config_file_path = os.path.join(self.config_path, "config.yaml")
         with open(config_file_path, "w") as fh:
             config = {
                 "profiles": {"profile": {"subnets": ["10.0.0.0/16"]}}}
             yaml.dump(config, stream=fh)
-        self.manager.load()
+        self.manager.load_config()
         self.assertEqual(self.manager.config.profiles.keys(), ["profile"])
 
-    def test_get_pidfile(self):
-        """Manager.get_pidfile returns the pidfile path for a session."""
-        self.assertEqual(self.manager.get_pidfile("profile"), self.pid_path)
+    def test_wb_get_pidfile(self):
+        """Manager._get_pidfile returns the pidfile path for a session."""
+        self.assertEqual(self.manager._get_pidfile("profile"), self.pid_path)
 
     def test_is_running(self):
         """If the process is present, the profile is running."""
