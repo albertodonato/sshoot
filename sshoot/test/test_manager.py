@@ -18,7 +18,8 @@ import yaml
 
 from fixtures import TestWithFixtures, TempDir
 
-from sshoot.manager import Manager, DEFAULT_CONFIG_PATH, ManagerProfileError
+from sshoot.profile import Profile
+from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
 
 
 class ManagerTests(TestWithFixtures):
@@ -70,7 +71,7 @@ class ManagerTests(TestWithFixtures):
                 "profiles": {"profile": {"subnets": ["10.0.0.0/16"]}}}
             yaml.dump(config, stream=fh)
         self.manager.load_config()
-        self.assertEqual(self.manager.config.profiles.keys(), ["profile"])
+        self.assertEqual(self.manager.get_profiles().keys(), ["profile"])
 
     def test_create_profile(self):
         """Manager.create_profile adds a profile with specified details."""
@@ -106,14 +107,24 @@ class ManagerTests(TestWithFixtures):
         self.assertRaises(
             ManagerProfileError, self.manager.remove_profile, "unknown")
 
+    def test_get_profiles(self):
+        """Manager.geT_profiles returns defined profiles."""
+        self.manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
+        self.manager.create_profile(
+            "profile2", {"subnets": ["192.168.0.0/16"]})
+        profiles = {
+            "profile1": Profile.from_dict({"subnets": ["10.0.0.0/24"]}),
+            "profile2": Profile.from_dict({"subnets": ["192.168.0.0/16"]})}
+        self.assertEqual(self.manager.get_profiles(), profiles)
+
     def test_start_profile(self):
         """Manager.start_profile starts a profile."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
-        self.manager.config._executable = self.make_fake_executable()
+        self.manager._config._executable = self.make_fake_executable()
         self.manager.start_profile("profile")
         # self.assertTrue(os.path.exists(self.pid_path)) XXXXX
         output_file = os.path.join(
-            os.path.dirname(self.manager.config._executable), "cmdline")
+            os.path.dirname(self.manager._config._executable), "cmdline")
         with open(output_file) as fh:
             cmdline = fh.read()
         expected_cmdline = (
@@ -124,7 +135,7 @@ class ManagerTests(TestWithFixtures):
     def test_start_profile_fail(self):
         """An error if starting a profile fails."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
-        self.manager.config._executable = self.make_fake_executable(
+        self.manager._config._executable = self.make_fake_executable(
             exit_code=1)
         self.assertRaises(
             ManagerProfileError, self.manager.start_profile, "profile")
@@ -132,7 +143,7 @@ class ManagerTests(TestWithFixtures):
     def test_start_profile_executable_not_found(self):
         """Profile start raises an error if executable is not found."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
-        self.manager.config._executable = "/not/here"
+        self.manager._config._executable = "/not/here"
         self.assertRaises(
             ManagerProfileError, self.manager.start_profile, "profile")
 

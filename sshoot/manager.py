@@ -36,7 +36,7 @@ class Manager(object):
     def __init__(self, config_path=None):
         self.config_path = config_path or DEFAULT_CONFIG_PATH
         self.sessions_path = os.path.join(self.config_path, "sessions")
-        self.config = Config(os.path.join(self.config_path, "config.yaml"))
+        self._config = Config(os.path.join(self.config_path, "config.yaml"))
 
     def load_config(self):
         """Load configuration from file."""
@@ -45,41 +45,45 @@ class Manager(object):
         if not os.path.exists(self.sessions_path):
             os.mkdir(self.sessions_path)
 
-        self.config.load()
+        self._config.load()
 
     def create_profile(self, name, details):
         """Create a profile with provided details."""
         try:
             profile = Profile.from_dict(details)
-            self.config.add_profile(name, profile)
+            self._config.add_profile(name, profile)
         except KeyError:
             raise ManagerProfileError(
                 "Profile name already in use: {}".format(name))
         except ProfileError as e:
             raise ManagerProfileError(str(e))
 
-        self.config.save()
+        self._config.save()
 
     def remove_profile(self, name):
         """Remove profile with given name."""
         try:
-            self.config.remove_profile(name)
+            self._config.remove_profile(name)
         except KeyError:
             raise ManagerProfileError("Unknown profile: {}".format(name))
 
-        self.config.save()
+        self._config.save()
+
+    def get_profiles(self):
+        """Return profiles defined in config."""
+        return self._config.profiles
 
     def start_profile(self, name):
         """Start profile with given name."""
         try:
-            profile = self.config.profiles[name]
+            profile = self._config.profiles[name]
         except KeyError:
             raise ManagerProfileError("Unknown profile: {}".format(name))
 
         if self.is_running(name):
             raise ManagerProfileError("Profile is already running.")
 
-        executable = self.config.executable or "sshuttle"
+        executable = self._config.executable or "sshuttle"
         extra_opts = ("--daemon", "--pidfile", self._get_pidfile(name))
         cmdline = profile.cmdline(executable=executable, extra_opts=extra_opts)
 
@@ -101,7 +105,7 @@ class Manager(object):
     def stop_profile(self, name):
         """Stop profile with given name."""
         try:
-            self.config.profiles[name]
+            self._config.profiles[name]
         except KeyError:
             raise ManagerProfileError("Unknown profile: {}".format(name))
         if not self.is_running(name):

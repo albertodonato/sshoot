@@ -93,7 +93,6 @@ class Sshoot(Script):
 
     def _action_list(self, manager, args):
         """Print out the list of profiles as a table."""
-        config = manager.config
         columns = ["", "Profile", "Remote host", "Subnets"]
         if args.verbose:
             columns.extend(
@@ -108,7 +107,7 @@ class Sshoot(Script):
         table.right_padding_width = 1
         table.hrules = HEADER
 
-        for name, profile in config.profiles.iteritems():
+        for name, profile in manager.get_profiles.iteritems():
             row = [
                 "*" if manager.is_running(name) else "",
                 name,
