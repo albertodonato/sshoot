@@ -19,27 +19,27 @@ import os
 
 from sshoot.config import Config
 
-DEFAULT_CONFIG_DIR = os.path.expanduser(os.path.join("~", ".sshoot"))
+DEFAULT_CONFIG_PATH = os.path.expanduser(os.path.join("~", ".sshoot"))
 
 
 class Manager(object):
 
-    def __init__(self, config_dir=None):
-        self.config_dir = config_dir or DEFAULT_CONFIG_DIR
-        self.sessions_dir = os.path.join(self.config_dir, "sessions")
+    def __init__(self, config_path=None):
+        self.config_path = config_path or DEFAULT_CONFIG_PATH
+        self.sessions_path = os.path.join(self.config_path, "sessions")
 
     def load(self):
-        if not os.path.exists(self.config_dir):
-            os.mkdir(self.config_dir)
-        if not os.path.exists(self.sessions_dir):
-            os.mkdir(self.sessions_dir)
+        if not os.path.exists(self.config_path):
+            os.mkdir(self.config_path)
+        if not os.path.exists(self.sessions_path):
+            os.mkdir(self.sessions_path)
 
-        self.config = Config(os.path.join(self.config_dir, "config.yaml"))
+        self.config = Config(os.path.join(self.config_path, "config.yaml"))
         self.config.load()
 
     def get_pidfile(self, name):
         """Return the path of the pidfile for the specified profile."""
-        return os.path.join(self.sessions_dir, "{}.pid".format(name))
+        return os.path.join(self.sessions_path, "{}.pid".format(name))
 
     def is_running(self, name):
         """Return whether the specified profile is running."""
@@ -48,7 +48,7 @@ class Manager(object):
             with open(pidfile) as fh:
                 pid = int(fh.read())
         except Exception:
-            # If anything fails, the pid can't be signalled, so the profile is
+            # If anything fails, a valid pid can't be found, so the profile is
             # not running
             return False
 
