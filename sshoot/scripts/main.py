@@ -21,6 +21,7 @@ from prettytable import PrettyTable, HEADER
 
 from sshoot.script import Script, ErrorExitMessage
 from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
+from sshoot.version import __version__ as VERSION
 
 
 class Sshoot(Script):
@@ -39,6 +40,9 @@ class Sshoot(Script):
 
     def get_parser(self):
         parser = ArgumentParser(description=self.__doc__)
+        parser.add_argument(
+            "-V", "--version", action="version",
+            version="%(prog)s {}".format(VERSION))
         parser.add_argument(
             "-C", "--config", default=DEFAULT_CONFIG_PATH,
             help="configuration directory (default: %(default)s)")
