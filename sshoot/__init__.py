@@ -16,4 +16,4 @@
 """Tool for handling ssshuttle VPN sessions."""
 
 
-__version__ = "0.0.3-dev"
+__version__ = "0.0.3"
