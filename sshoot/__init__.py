@@ -14,3 +14,6 @@
 # along with sshoot.  If not, see <http://www.gnu.org/licenses/>.
 
 """Tool for handling ssshuttle VPN sessions."""
+
+
+__version__ = "0.0.3-dev"

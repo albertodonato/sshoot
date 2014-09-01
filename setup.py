@@ -15,7 +15,7 @@
 
 from setuptools import setup, find_packages
 
-from sshoot.version import __version__
+from sshoot import __version__
 
 
 config = {
@@ -36,7 +36,7 @@ config = {
         "console_scripts": [
             "sshoot = sshoot.scripts.main:sshoot"]},
     "test_suite": "sshoot.tests",
-    "install_requires": ["prettytable"],
+    "install_requires": ["PyYAML", "prettytable"],
     "tests_require": ["fixtures"],
     "keywords": "ssh sshuttle vpn",
     "classifiers": [
