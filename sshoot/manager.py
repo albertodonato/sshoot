@@ -88,7 +88,7 @@ class Manager(object):
             raise ManagerProfileError("Unknown profile: {}".format(name))
 
         if self.is_running(name):
-            raise ManagerProfileError("Profile is already running.")
+            raise ManagerProfileError("Profile is already running")
 
         executable = self._config.executable or "sshuttle"
         extra_opts = ("--daemon", "--pidfile", self._get_pidfile(name))
@@ -116,7 +116,7 @@ class Manager(object):
         except KeyError:
             raise ManagerProfileError("Unknown profile: {}".format(name))
         if not self.is_running(name):
-            raise ManagerProfileError("Profile is not running.")
+            raise ManagerProfileError("Profile is not running")
 
         try:
             with open(self._get_pidfile(name)) as fh:

@@ -42,7 +42,7 @@ class ProfileTests(TestCase):
         self.assertIsNone(profile.extra_opts)
 
     def test_from_dict_raise_error(self):
-        """If the "subnets" key is missing in config, an error is raise."""
+        """If the "subnets" key is missing in config, an error is raised."""
         self.assertRaises(
             ProfileError, Profile.from_dict, {"remote": "1.2.3.4"})
 
