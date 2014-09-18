@@ -17,12 +17,22 @@
 
 import os
 from signal import SIGTERM
+from tempfile import gettempdir
+from getpass import getuser
 from subprocess import Popen, PIPE, CalledProcessError
 
 from sshoot.profile import Profile, ProfileError
 from sshoot.config import Config
 
+
 DEFAULT_CONFIG_PATH = os.path.expanduser(os.path.join("~", ".sshoot"))
+
+
+def get_rundir(prefix):
+    """Return the directory holding runtime data."""
+    return os.path.join(
+        gettempdir(), "{prefix}-{username}".format(
+            prefix=prefix, username=getuser()))
 
 
 class ManagerProfileError(Exception):
@@ -33,17 +43,18 @@ class Manager(object):
 
     kill = os.kill  # for testing
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=None, rundir=None):
         self.config_path = config_path or DEFAULT_CONFIG_PATH
-        self.sessions_path = os.path.join(self.config_path, "sessions")
+        self.rundir = rundir or get_rundir("sshoot")
+        self.sessions_path = os.path.join(self.rundir, "sessions")
         self._config = Config(os.path.join(self.config_path, "config.yaml"))
 
     def load_config(self):
         """Load configuration from file."""
         if not os.path.exists(self.config_path):
-            os.mkdir(self.config_path)
+            os.makedirs(self.config_path)
         if not os.path.exists(self.sessions_path):
-            os.mkdir(self.sessions_path)
+            os.makedirs(self.sessions_path)
 
         self._config.load()
 
