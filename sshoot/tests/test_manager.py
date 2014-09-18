@@ -15,11 +15,15 @@
 
 import os
 import yaml
+from unittest import TestCase
+from tempfile import gettempdir
+from getpass import getuser
 
 from fixtures import TestWithFixtures, TempDir
 
 from sshoot.profile import Profile
-from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
+from sshoot.manager import (
+    DEFAULT_CONFIG_PATH, get_rundir, Manager, ManagerProfileError)
 
 
 class ManagerTests(TestWithFixtures):
@@ -27,11 +31,14 @@ class ManagerTests(TestWithFixtures):
     def setUp(self):
         super(ManagerTests, self).setUp()
         self.config_path = self.useFixture(TempDir()).path
-        self.sessions_path = os.path.join(self.config_path, "sessions")
+        self.rundir = self.useFixture(TempDir()).path
+        self.sessions_path = os.path.join(self.rundir, "sessions")
         self.pid_path = os.path.join(self.sessions_path, "profile.pid")
         self.config_file_path = os.path.join(self.config_path, "config.yaml")
         os.mkdir(self.sessions_path)
-        self.manager = Manager(config_path=self.config_path)
+        self.manager = Manager(
+            config_path=self.config_path, rundir=self.rundir)
+        self.manager.sessions_path = self.sessions_path
 
     def make_fake_executable(self, exit_code=0):
         """Create a fake executable logging command line parameters."""
@@ -50,8 +57,6 @@ class ManagerTests(TestWithFixtures):
         """A default config path is set if not specified."""
         manager = Manager()
         self.assertEqual(manager.config_path, DEFAULT_CONFIG_PATH)
-        sessions_path = os.path.join(DEFAULT_CONFIG_PATH, "sessions")
-        self.assertEqual(manager.sessions_path, sessions_path)
 
     def test_paths(self):
         """The config and sessions are set in the Manager."""
@@ -231,3 +236,11 @@ class ManagerTests(TestWithFixtures):
         self.assertFalse(self.manager.is_running("profile"))
         # The stale pidfile is deleted.
         self.assertFalse(os.path.exists(self.pid_path))
+
+
+class GetRundirTests(TestCase):
+
+    def test_rundir_path(self):
+        """get_rundir returns a user-specific tempdir path."""
+        rundir_path = os.path.join(gettempdir(), "foo-{}".format(getuser()))
+        self.assertEqual(get_rundir("foo"), rundir_path)
