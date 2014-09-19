@@ -147,6 +147,8 @@ class Sshoot(Script):
             field_names=["key", "value"], header=False, border=False)
         table.align["key"] = table.align["value"] = "l"
         table.add_row(("Name:", name))
+        status = "ACTIVE" if manager.is_running(name) else "STOPPED"
+        table.add_row(("Status", status))
         for name, field in self._fields_map:
             table.add_row(
                 ("{}:".format(name), self._format(getattr(profile, field))))
