@@ -50,9 +50,10 @@ class ConfigTests(TestWithFixtures):
 
     def setUp(self):
         super(ConfigTests, self).setUp()
-        self.tempdir = self.useFixture(TempDir())
-        self.config_name = os.path.join(self.tempdir.path, "config.yaml")
-        self.config = Config(self.config_name)
+        self.tempdir = self.useFixture(TempDir()).path
+        self.config_path = os.path.join(self.tempdir, "config.yaml")
+        self.profiles_path = os.path.join(self.tempdir, "profiles.yaml")
+        self.config = Config(self.tempdir)
 
     def test_add_profile(self):
         """Profiles can be added to the config."""
@@ -86,62 +87,47 @@ class ConfigTests(TestWithFixtures):
 
     def test_load_from_file(self):
         """The config is loaded from file."""
-        config = {
-            "profiles": {
-                "profile": {
-                    "subnets": ["10.0.0.0/24"],
-                    "auto-nets": True}}}
-        with open(self.config_name, "w") as fh:
-            yaml.dump(config, stream=fh)
+        profiles = {
+            "profile": {
+                "subnets": ["10.0.0.0/24"],
+                "auto-nets": True}}
+        with open(self.profiles_path, "w") as fh:
+            yaml.dump(profiles, stream=fh)
         self.config.load()
         profile = self.config.profiles["profile"]
         self.assertEqual(profile.subnets, ["10.0.0.0/24"])
         self.assertTrue(profile.auto_nets)
 
     def test_load_missing(self):
-        """If no config file is found, config is empty."""
+        """If no config files are found, config is empty."""
         self.config.load()
         self.assertEqual(self.config.profiles, {})
-        self.assertIsNone(self.config.executable)
+        self.assertEqual(self.config.config, {})
 
-    def test_load_executable(self):
-        """The "executable" config field is loaded from the config file."""
-        with open(self.config_name, "w") as fh:
-            yaml.dump({"executable": "/usr/local/bin/sshuttle"}, stream=fh)
+    def test_load_config_options(self):
+        """Only known config options are loaded from config file."""
+        config = {"executable": "/usr/bin/shuttle", "other-conf": "no"}
+        with open(self.config_path, "w") as fh:
+            yaml.dump(config, stream=fh)
         self.config.load()
-        self.assertEqual(self.config.executable, "/usr/local/bin/sshuttle")
+        self.assertEqual(
+            self.config.config, {"executable": "/usr/bin/shuttle"})
 
     def test_load_profiles(self):
         """The "profiles" config field is loaded from the config file."""
         profiles = {
             "profile1": {"subnets": ["10.0.0.0/24"]},
             "profile2": {"subnets": ["192.168.0.0/16"]}}
-        with open(self.config_name, "w") as fh:
-            yaml.dump({"profiles": profiles}, stream=fh)
+        with open(self.profiles_path, "w") as fh:
+            yaml.dump(profiles, stream=fh)
         self.config.load()
         expected = {
             name: Profile.from_dict(config)
             for name, config in profiles.iteritems()}
         self.assertEqual(self.config.profiles, expected)
 
-    def test_save_empty_config(self):
-        """Empty conifguration is saved to file, without default values."""
-        self.config.save()
-        with open(self.config_name) as fh:
-            config = yaml.load(fh)
-        # The "executable" field is not saved.
-        self.assertEqual(config, {"profiles": {}})
-
-    def test_save_executable(self):
-        """The "executable" attribute is saved to config file."""
-        self.config._executable = "/usr/local/bin/sshuttle"
-        self.config.save()
-        with open(self.config_name) as fh:
-            config = yaml.load(fh)
-        self.assertEqual(config["executable"], "/usr/local/bin/sshuttle")
-
     def test_save_profiles(self):
-        """Profiles are saved to config file."""
+        """Profiles are saved to file."""
         profiles = {
             "profile1": {"subnets": ["10.0.0.0/24"], "remote": "hostname1"},
             "profile2": {"subnets": ["192.168.0.0/16"], "remote": "hostname2"}}
@@ -149,9 +135,9 @@ class ConfigTests(TestWithFixtures):
         for name, conf in profiles.iteritems():
             self.config.add_profile(name, Profile.from_dict(conf))
         self.config.save()
-        with open(self.config_name) as fh:
+        with open(self.profiles_path) as fh:
             config = yaml.load(fh)
-        self.assertEqual(config["profiles"], profiles)
+        self.assertEqual(config, profiles)
 
     def test_save_from_file(self):
         """The config is saved to file."""
@@ -161,16 +147,11 @@ class ConfigTests(TestWithFixtures):
 
         config = dedent(
             """\
-            profiles:
-              profile:
-                auto-nets: true
-                subnets:
-                - 10.0.0.0/24
+            profile:
+              auto-nets: true
+              subnets:
+              - 10.0.0.0/24
             """)
-        with open(self.config_name) as fh:
+        with open(self.profiles_path) as fh:
             content = fh.read()
         self.assertEqual(content, config)
-
-
-'profiles:\n  profile:\n    auto-nets: true\n    subnets:\n    - 10.0.0.0/24\n'
-'profiles:\n  profile:\n    auto-nets: true\n    subnets:\n    - 10.0.0.0/24\n'

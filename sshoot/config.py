@@ -30,30 +30,25 @@ def yaml_dump(data, fh=None):
 class Config(object):
     """Handle configuration file loading/saving."""
 
-    def __init__(self, config_file):
-        self._config_file = config_file
+    CONFIG_KEYS = frozenset(["executable"])
+
+    def __init__(self, path):
+        self._config_file = os.path.join(path, "config.yaml")
+        self._profiles_file = os.path.join(path, "profiles.yaml")
         self._reset()
 
     def load(self):
         """Load configuration from file."""
         self._reset()
-        if not os.path.exists(self._config_file):
-            return
-
-        with open(self._config_file) as fh:
-            # None is returned for empty config file
-            config = yaml.load(fh) or {}
-
-        # Load profiles
-        profiles = config.get("profiles", {})
+        self._config = self._load_yaml_file(self._config_file)
+        profiles = self._load_yaml_file(self._profiles_file)
         for name, conf in profiles.iteritems():
             self._profiles[name] = Profile.from_dict(self._from_config(conf))
-        self._executable = config.get("executable")
 
     def save(self):
-        """Save configuration to file."""
-        with open(self._config_file, "w") as fh:
-            yaml_dump(self._build_config(), fh)
+        """Save profiles configuration to file."""
+        with open(self._profiles_file, "w") as fh:
+            yaml_dump(self._build_profiles_config(), fh)
 
     def add_profile(self, name, profile):
         """Add a profile to the configuration."""
@@ -71,25 +66,31 @@ class Config(object):
         return self._profiles.copy()
 
     @property
-    def executable(self):
-        """Return the sshuttle executable to use, or None if set to default."""
-        return self._executable
+    def config(self):
+        """Return a dict with the configuration."""
+        return {
+            key: value for key, value in self._config.iteritems()
+            if key in self.CONFIG_KEYS}
 
     def _reset(self):
         """Reset default empty config."""
         self._profiles = {}
-        self._executable = None
+        self._config = {}
 
-    def _build_config(self):
-        """Return the config dict to be saved to file."""
-        config = {}
-        profiles = {
+    def _load_yaml_file(self, path):
+        """Load the specified YAML file."""
+        if not os.path.exists(path):
+            return {}
+
+        with open(path) as fh:
+            # None is returned for empty config file
+            return yaml.load(fh) or {}
+
+    def _build_profiles_config(self):
+        """Return the profiles config dict to be saved to file."""
+        return {
             name: self._to_config(profile.config())
             for name, profile in self._profiles.iteritems()}
-        config["profiles"] = profiles
-        if self._executable:
-            config["executable"] = self._executable
-        return config
 
     def _from_config(self, config):
         """Convert a config to a params dict."""
