@@ -34,6 +34,8 @@ class ManagerTests(TestWithFixtures):
         self.rundir = self.useFixture(TempDir()).path
         self.sessions_path = os.path.join(self.rundir, "sessions")
         self.pid_path = os.path.join(self.sessions_path, "profile.pid")
+        self.profiles_file_path = os.path.join(
+            self.config_path, "profiles.yaml")
         self.config_file_path = os.path.join(self.config_path, "config.yaml")
         os.mkdir(self.sessions_path)
         self.manager = Manager(
@@ -69,22 +71,20 @@ class ManagerTests(TestWithFixtures):
         self.assertTrue(os.path.isdir(self.config_path))
         self.assertTrue(os.path.isdir(self.sessions_path))
 
-    def test_load_config(self):
-        """Manager.load_config loads the config in the specified directory."""
-        with open(self.config_file_path, "w") as fh:
-            config = {
-                "profiles": {"profile": {"subnets": ["10.0.0.0/16"]}}}
-            yaml.dump(config, stream=fh)
+    def test_load_profiles(self):
+        """Manager.load_config loads the profiles."""
+        profiles = {"profile": {"subnets": ["10.0.0.0/16"]}}
+        with open(self.profiles_file_path, "w") as fh:
+            yaml.dump(profiles, stream=fh)
         self.manager.load_config()
         self.assertEqual(self.manager.get_profiles().keys(), ["profile"])
 
     def test_create_profile(self):
         """Manager.create_profile adds a profile with specified details."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
-        with open(self.config_file_path) as fh:
-            config = yaml.load(fh)
-        self.assertEqual(
-            config, {"profiles": {"profile": {"subnets": ["10.0.0.0/24"]}}})
+        with open(self.profiles_file_path) as fh:
+            profiles = yaml.load(fh)
+        self.assertEqual(profiles, {"profile": {"subnets": ["10.0.0.0/24"]}})
 
     def test_create_profile_in_use(self):
         """Manager.create_profile raises an error if profile name is in use."""
@@ -103,9 +103,9 @@ class ManagerTests(TestWithFixtures):
         """Manager.remove_profile removes the specified profile."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
         self.manager.remove_profile("profile")
-        with open(self.config_file_path) as fh:
+        with open(self.profiles_file_path) as fh:
             config = yaml.load(fh)
-        self.assertEqual(config["profiles"], {})
+        self.assertEqual(config, {})
 
     def test_remove_profile_unknown(self):
         """Manager.remove_profile raises an error if name is unknown."""
@@ -137,11 +137,11 @@ class ManagerTests(TestWithFixtures):
     def test_start_profile(self):
         """Manager.start_profile starts a profile."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
-        self.manager._config._executable = self.make_fake_executable()
+        executable = self.make_fake_executable()
+        self.manager._get_executable = lambda: executable
+
         self.manager.start_profile("profile")
-        # self.assertTrue(os.path.exists(self.pid_path)) XXXXX
-        output_file = os.path.join(
-            os.path.dirname(self.manager._config._executable), "cmdline")
+        output_file = os.path.join(os.path.dirname(executable), "cmdline")
         with open(output_file) as fh:
             cmdline = fh.read()
         expected_cmdline = (
@@ -152,15 +152,15 @@ class ManagerTests(TestWithFixtures):
     def test_start_profile_fail(self):
         """An error if starting a profile fails."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
-        self.manager._config._executable = self.make_fake_executable(
-            exit_code=1)
+        executable = self.make_fake_executable(exit_code=1)
+        self.manager._get_executable = lambda: executable
         self.assertRaises(
             ManagerProfileError, self.manager.start_profile, "profile")
 
     def test_start_profile_executable_not_found(self):
         """Profile start raises an error if executable is not found."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
-        self.manager._config._executable = "/not/here"
+        self.manager._get_executable = lambda: "/not/here"
         self.assertRaises(
             ManagerProfileError, self.manager.start_profile, "profile")
 

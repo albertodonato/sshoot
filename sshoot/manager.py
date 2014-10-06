@@ -47,7 +47,7 @@ class Manager(object):
         self.config_path = config_path or DEFAULT_CONFIG_PATH
         self.rundir = rundir or get_rundir("sshoot")
         self.sessions_path = os.path.join(self.rundir, "sessions")
-        self._config = Config(os.path.join(self.config_path, "config.yaml"))
+        self._config = Config(self.config_path)
 
     def load_config(self):
         """Load configuration from file."""
@@ -101,7 +101,7 @@ class Manager(object):
         if self.is_running(name):
             raise ManagerProfileError("Profile is already running")
 
-        executable = self._config.executable or "sshuttle"
+        executable = self._get_executable()
         extra_opts = ("--daemon", "--pidfile", self._get_pidfile(name))
         cmdline = profile.cmdline(executable=executable, extra_opts=extra_opts)
 
@@ -157,3 +157,7 @@ class Manager(object):
     def _get_pidfile(self, name):
         """Return the path of the pidfile for the specified profile."""
         return os.path.join(self.sessions_path, "{}.pid".format(name))
+
+    def _get_executable(self):
+        """Return the shuttle executable from the config."""
+        return self._config.config.get("executable", "sshuttle")

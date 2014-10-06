@@ -125,11 +125,6 @@ class ConfigTests(TestWithFixtures):
             for name, config in profiles.iteritems()}
         self.assertEqual(self.config.profiles, expected)
 
-    def test_empty_profiles_config_not_saved(self):
-        """Empty profile configuration is not saved to file."""
-        self.config.save()
-        self.assertFalse(os.path.exists(self.profiles_path))
-
     def test_save_profiles(self):
         """Profiles are saved to file."""
         profiles = {

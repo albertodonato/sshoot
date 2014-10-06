@@ -44,10 +44,9 @@ class Config(object):
             self._profiles[name] = Profile.from_dict(self._from_config(conf))
 
     def save(self):
-        """Save profiles configuration to file, if profiles are defined."""
-        if self._profiles:
-            with open(self._profiles_file, "w") as fh:
-                yaml_dump(self._build_profiles_config(), fh)
+        """Save profiles configuration to file."""
+        with open(self._profiles_file, "w") as fh:
+            yaml_dump(self._build_profiles_config(), fh)
 
     def add_profile(self, name, profile):
         """Add a profile to the configuration."""
