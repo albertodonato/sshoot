@@ -104,13 +104,14 @@ class ConfigTests(TestWithFixtures):
         self.assertEqual(self.config.profiles, {})
         self.assertEqual(self.config.config, {})
 
-    def test_load_config_option(self):
-        """If the config files contains values, they are loaded."""
-        config = {"key1": "value1", "key2": 3}
+    def test_load_config_options(self):
+        """Only known config options are loaded from config file."""
+        config = {"executable": "/usr/bin/shuttle", "other-conf": "no"}
         with open(self.config_path, "w") as fh:
             yaml.dump(config, stream=fh)
         self.config.load()
-        self.assertEqual(self.config.config, config)
+        self.assertEqual(
+            self.config.config, {"executable": "/usr/bin/shuttle"})
 
     def test_load_profiles(self):
         """The "profiles" config field is loaded from the config file."""

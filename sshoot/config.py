@@ -30,6 +30,8 @@ def yaml_dump(data, fh=None):
 class Config(object):
     """Handle configuration file loading/saving."""
 
+    CONFIG_KEYS = frozenset(["executable"])
+
     def __init__(self, path):
         self._config_file = os.path.join(path, "config.yaml")
         self._profiles_file = os.path.join(path, "profiles.yaml")
@@ -66,7 +68,9 @@ class Config(object):
     @property
     def config(self):
         """Return a dict with the configuration."""
-        return self._config.copy()
+        return {
+            key: value for key, value in self._config.iteritems()
+            if key in self.CONFIG_KEYS}
 
     def _reset(self):
         """Reset default empty config."""
