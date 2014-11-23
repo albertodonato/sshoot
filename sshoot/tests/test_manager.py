@@ -237,6 +237,24 @@ class ManagerTests(TestWithFixtures):
         # The stale pidfile is deleted.
         self.assertFalse(os.path.exists(self.pid_path))
 
+    def test_get_cmdline(self):
+        """Manager.get_cmdline returns the command line for the profile."""
+        self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
+        pidfile = os.path.join(self.sessions_path, "profile.pid")
+        self.assertEqual(
+            self.manager.get_cmdline("profile"),
+            ["sshuttle", "10.0.0.0/24", "--daemon", "--pidfile", pidfile])
+
+    def test_get_cmdline_executable(self):
+        """Manager.get_cmdline uses the configured executable."""
+        self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
+        self.manager._get_executable = lambda: "/foo/sshuttle"
+
+        pidfile = os.path.join(self.sessions_path, "profile.pid")
+        self.assertEqual(
+            self.manager.get_cmdline("profile"),
+            ["/foo/sshuttle", "10.0.0.0/24", "--daemon", "--pidfile", pidfile])
+
 
 class GetRundirTests(TestCase):
 
