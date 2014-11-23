@@ -93,17 +93,10 @@ class Manager(object):
 
     def start_profile(self, name):
         """Start profile with given name."""
-        try:
-            profile = self._config.profiles[name]
-        except KeyError:
-            raise ManagerProfileError("Unknown profile: {}".format(name))
+        cmdline = self.get_cmdline(name)
 
         if self.is_running(name):
             raise ManagerProfileError("Profile is already running")
-
-        executable = self._get_executable()
-        extra_opts = ("--daemon", "--pidfile", self._get_pidfile(name))
-        cmdline = profile.cmdline(executable=executable, extra_opts=extra_opts)
 
         message = "Profile failed to start: {}"
         try:
@@ -122,10 +115,8 @@ class Manager(object):
 
     def stop_profile(self, name):
         """Stop profile with given name."""
-        try:
-            self._config.profiles[name]
-        except KeyError:
-            raise ManagerProfileError("Unknown profile: {}".format(name))
+        self.get_profile(name)
+
         if not self.is_running(name):
             raise ManagerProfileError("Profile is not running")
 
@@ -153,6 +144,14 @@ class Manager(object):
             os.unlink(pidfile)
             return False
         return True
+
+    def get_cmdline(self, name):
+        """Return the command line for the specified profile."""
+        profile = self.get_profile(name)
+
+        executable = self._get_executable()
+        extra_opts = ("--daemon", "--pidfile", self._get_pidfile(name))
+        return profile.cmdline(executable=executable, extra_opts=extra_opts)
 
     def _get_pidfile(self, name):
         """Return the path of the pidfile for the specified profile."""

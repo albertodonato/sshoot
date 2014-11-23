@@ -99,6 +99,11 @@ class Sshoot(Script):
             "stop", help="stop a running VPN session for a profile")
         stop_parser.add_argument(
             "name", help="name of the profile to stop")
+        # Get profile command
+        get_command_parser = subparsers.add_parser(
+            "get-command", help="return the sshuttle command for a profile")
+        get_command_parser.add_argument(
+            "name", help="name of the profile")
         return parser
 
     def main(self, args):
@@ -107,7 +112,8 @@ class Sshoot(Script):
             manager.load_config()
         except IOError as e:
             raise ErrorExitMessage(str(e))
-        method = getattr(self, "action_" + args.action)
+        action = args.action.replace("-", "_")
+        method = getattr(self, "action_" + action)
         return method(manager, args)
 
     def action_list(self, manager, args):
@@ -185,6 +191,15 @@ class Sshoot(Script):
             raise ErrorExitMessage(str(e))
 
         print("Profile stopped.")
+
+    def action_get_command(self, manager, args):
+        """Print the sshuttle command for the specified profile."""
+        try:
+            cmdline = manager.get_cmdline(args.name)
+        except ManagerProfileError as e:
+            raise ErrorExitMessage(str(e))
+
+        print(" ".join(cmdline))
 
     def _format(self, value):
         if isinstance(value, (list, tuple)):
