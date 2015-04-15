@@ -94,6 +94,9 @@ class Sshoot(Script):
             "start", help="start a VPN session for a profile")
         start_parser.add_argument(
             "name", help="name of the profile to start")
+        start_parser.add_argument(
+            "args", nargs="*",
+            help="Additional arguments passed to sshuttle command line.")
         # Stop profile
         stop_parser = subparsers.add_parser(
             "stop", help="stop a running VPN session for a profile")
@@ -177,7 +180,7 @@ class Sshoot(Script):
     def action_start(self, manager, args):
         """Start sshuttle for the specified profile."""
         try:
-            manager.start_profile(args.name)
+            manager.start_profile(args.name, extra_args=args.args)
         except ManagerProfileError as e:
             raise ErrorExitMessage(str(e))
 
