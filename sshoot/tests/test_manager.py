@@ -149,6 +149,22 @@ class ManagerTests(TestWithFixtures):
                 self.sessions_path))
         self.assertEqual(cmdline, expected_cmdline)
 
+    def test_start_profile_extra_args(self):
+        """Manager.start_profile can add extra arguments to command line."""
+        self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
+        executable = self.make_fake_executable()
+        self.manager._get_executable = lambda: executable
+
+        self.manager.start_profile(
+            "profile", extra_args=["--extra1", "--extra2"])
+        output_file = os.path.join(os.path.dirname(executable), "cmdline")
+        with open(output_file) as fh:
+            cmdline = fh.read()
+        expected_cmdline = (
+            "10.0.0.0/24 --daemon --pidfile {}/profile.pid --extra1 --extra2\n"
+            .format(self.sessions_path))
+        self.assertEqual(cmdline, expected_cmdline)
+
     def test_start_profile_fail(self):
         """An error if starting a profile fails."""
         self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
@@ -244,6 +260,18 @@ class ManagerTests(TestWithFixtures):
         self.assertEqual(
             self.manager.get_cmdline("profile"),
             ["sshuttle", "10.0.0.0/24", "--daemon", "--pidfile", pidfile])
+
+    def test_get_cmdline_extra_args(self):
+        """Manager.get_cmdline adds passed extra arguments to command line."""
+        self.manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
+        pidfile = os.path.join(self.sessions_path, "profile.pid")
+        expected_cmdline = [
+            "sshuttle", "10.0.0.0/24", "--daemon", "--pidfile", pidfile,
+            "--extra1", "--extra2"]
+        self.assertEqual(
+            self.manager.get_cmdline(
+                "profile", extra_args=["--extra1", "--extra2"]),
+            expected_cmdline)
 
     def test_get_cmdline_executable(self):
         """Manager.get_cmdline uses the configured executable."""

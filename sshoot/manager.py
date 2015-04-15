@@ -91,13 +91,12 @@ class Manager(object):
         except KeyError:
             raise ManagerProfileError("Unknown profile: {}".format(name))
 
-    def start_profile(self, name):
+    def start_profile(self, name, extra_args=None):
         """Start profile with given name."""
-        cmdline = self.get_cmdline(name)
-
         if self.is_running(name):
             raise ManagerProfileError("Profile is already running")
 
+        cmdline = self.get_cmdline(name, extra_args=extra_args)
         message = "Profile failed to start: {}"
         try:
             process = Popen(cmdline, stdout=PIPE, stderr=PIPE)
@@ -145,12 +144,14 @@ class Manager(object):
             return False
         return True
 
-    def get_cmdline(self, name):
+    def get_cmdline(self, name, extra_args=None):
         """Return the command line for the specified profile."""
         profile = self.get_profile(name)
 
         executable = self._get_executable()
-        extra_opts = ("--daemon", "--pidfile", self._get_pidfile(name))
+        extra_opts = ["--daemon", "--pidfile", self._get_pidfile(name)]
+        if extra_args:
+            extra_opts.extend(extra_args)
         return profile.cmdline(executable=executable, extra_opts=extra_opts)
 
     def _get_pidfile(self, name):
