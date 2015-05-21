@@ -78,7 +78,7 @@ class ProfileTests(TestCase):
 
     def test_cmdline_with_executable(self):
         """Profile.cmdline() uses the specified executable."""
-        self.assertEqual(
+        self.assertCountEqual(
             self.profile.cmdline(executable="/bin/foo"),
             ["/bin/foo", "1.1.1.0/24", "10.10.0.0/16"])
 

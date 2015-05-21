@@ -137,7 +137,7 @@ class Sshoot(Script):
         table.right_padding_width = 1
         table.hrules = HEADER
 
-        for name, profile in manager.get_profiles().iteritems():
+        for name, profile in manager.get_profiles().items():
             row = ["*" if manager.is_running(name) else "", name]
             for _, field in fields:
                 row.append(self._format(getattr(profile, field)))

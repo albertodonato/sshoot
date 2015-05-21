@@ -52,7 +52,7 @@ class ManagerTests(TestWithFixtures):
             "exit {}\n").format(temp_dir, exit_code)
         with open(executable, "w") as fh:
             fh.write(script)
-        os.chmod(executable, 0755)
+        os.chmod(executable, 0o755)
         return executable
 
     def test_default_paths(self):
@@ -77,7 +77,7 @@ class ManagerTests(TestWithFixtures):
         with open(self.profiles_file_path, "w") as fh:
             yaml.dump(profiles, stream=fh)
         self.manager.load_config()
-        self.assertEqual(self.manager.get_profiles().keys(), ["profile"])
+        self.assertCountEqual(self.manager.get_profiles().keys(), ["profile"])
 
     def test_create_profile(self):
         """Manager.create_profile adds a profile with specified details."""

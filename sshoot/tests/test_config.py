@@ -14,7 +14,7 @@
 # along with sshoot.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from StringIO import StringIO
+from io import StringIO
 import yaml
 from textwrap import dedent
 
@@ -60,7 +60,7 @@ class ConfigTests(TestWithFixtures):
         profiles = {
             "profile1": Profile(["10.0.0.0/24"]),
             "profile2": Profile(["192.168.0.0/16"])}
-        for name, profile in profiles.iteritems():
+        for name, profile in profiles.items():
             self.config.add_profile(name, profile)
         self.assertEqual(self.config.profiles, profiles)
 
@@ -76,10 +76,10 @@ class ConfigTests(TestWithFixtures):
         profiles = {
             "profile1": Profile(["10.0.0.0/24"]),
             "profile2": Profile(["192.168.0.0/16"])}
-        for name, profile in profiles.iteritems():
+        for name, profile in profiles.items():
             self.config.add_profile(name, profile)
         self.config.remove_profile("profile1")
-        self.assertEqual(["profile2"], self.config.profiles.keys())
+        self.assertCountEqual(["profile2"], self.config.profiles.keys())
 
     def test_remove_profile_not_present(self):
         """An exception is raised if the profile name is not known."""
@@ -123,7 +123,7 @@ class ConfigTests(TestWithFixtures):
         self.config.load()
         expected = {
             name: Profile.from_dict(config)
-            for name, config in profiles.iteritems()}
+            for name, config in profiles.items()}
         self.assertEqual(self.config.profiles, expected)
 
     def test_save_profiles(self):
@@ -132,7 +132,7 @@ class ConfigTests(TestWithFixtures):
             "profile1": {"subnets": ["10.0.0.0/24"], "remote": "hostname1"},
             "profile2": {"subnets": ["192.168.0.0/16"], "remote": "hostname2"}}
         self.config.load()
-        for name, conf in profiles.iteritems():
+        for name, conf in profiles.items():
             self.config.add_profile(name, Profile.from_dict(conf))
         self.config.save()
         with open(self.profiles_path) as fh:

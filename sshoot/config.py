@@ -42,7 +42,7 @@ class Config(object):
         self._reset()
         self._config = self._load_yaml_file(self._config_file)
         profiles = self._load_yaml_file(self._profiles_file)
-        for name, conf in profiles.iteritems():
+        for name, conf in profiles.items():
             self._profiles[name] = Profile.from_dict(self._from_config(conf))
 
     def save(self):
@@ -69,7 +69,7 @@ class Config(object):
     def config(self):
         """Return a dict with the configuration."""
         return {
-            key: value for key, value in self._config.iteritems()
+            key: value for key, value in self._config.items()
             if key in self.CONFIG_KEYS}
 
     def _reset(self):
@@ -90,16 +90,16 @@ class Config(object):
         """Return the profiles config dict to be saved to file."""
         return {
             name: self._to_config(profile.config())
-            for name, profile in self._profiles.iteritems()}
+            for name, profile in self._profiles.items()}
 
     def _from_config(self, config):
         """Convert a config to a params dict."""
         return {
             key.replace("-", "_"): value
-            for key, value in config.iteritems()}
+            for key, value in config.items()}
 
     def _to_config(self, params):
         """Convert a params dict to a config."""
         return {
             key.replace("_", "-"): value
-            for key, value in params.iteritems()}
+            for key, value in params.items()}
