@@ -19,36 +19,36 @@ from sshoot import __version__
 
 
 config = {
-    "name": "sshoot",
-    "version": __version__,
-    "license": "GPLv3+",
-    "description": "Manage multiple sshuttle VPN sessions.",
-    "long_description": open("README.rst").read(),
-    "author": "Alberto Donato",
-    "author_email": "<alberto.donato@gmail.com>",
-    "maintainer": "Alberto Donato",
-    "maintainer_email": "<alberto.donato@gmail.com>",
-    "url": "https://launchpad.net/sshoot",
-    "download_url": "https://launchpad.net/sshoot/+download",
-    "packages": find_packages(exclude=["*.test.*", "*.test", "test.*"]),
-    "include_package_data": True,
-    "entry_points": {
-        "console_scripts": [
-            "sshoot = sshoot.scripts.main:sshoot"]},
-    "test_suite": "sshoot.tests",
-    "install_requires": ["PyYAML", "prettytable"],
-    "tests_require": ["fixtures"],
-    "keywords": "ssh sshuttle vpn",
-    "classifiers": [
-        "Development Status :: 4 - Beta",
-        "Environment :: Console",
-        "Intended Audience :: Developers",
-        "Intended Audience :: System Administrators",
-        ("License :: OSI Approved :: "
-         "GNU General Public License v3 or later (GPLv3+)"),
-        "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Topic :: System :: Networking",
-        "Topic :: Utilities"]}
+    'name': 'sshoot',
+    'version': __version__,
+    'license': 'GPLv3+',
+    'description': 'Manage multiple sshuttle VPN sessions.',
+    'long_description': open('README.rst').read(),
+    'author': 'Alberto Donato',
+    'author_email': '<alberto.donato@gmail.com>',
+    'maintainer': 'Alberto Donato',
+    'maintainer_email': '<alberto.donato@gmail.com>',
+    'url': 'https://launchpad.net/sshoot',
+    'download_url': 'https://launchpad.net/sshoot/+download',
+    'packages': find_packages(exclude=['*.test.*', '*.test', 'test.*']),
+    'include_package_data': True,
+    'entry_points': {
+        'console_scripts': [
+            'sshoot = sshoot.scripts.main:sshoot']},
+    'test_suite': 'sshoot.tests',
+    'install_requires': ['PyYAML', 'prettytable'],
+    'tests_require': ['fixtures'],
+    'keywords': 'ssh sshuttle vpn',
+    'classifiers': [
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        ('License :: OSI Approved :: '
+         'GNU General Public License v3 or later (GPLv3+)'),
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: System :: Networking',
+        'Topic :: Utilities']}
 
 setup(**config)
