@@ -36,7 +36,7 @@ config = {
         'console_scripts': [
             'sshoot = sshoot.scripts.main:sshoot']},
     'test_suite': 'sshoot',
-    'install_requires': ['PyYAML', 'prettytable'],
+    'install_requires': ['PyYAML', 'prettytable', 'toolrack'],
     'tests_require': ['fixtures'],
     'keywords': 'ssh sshuttle vpn',
     'classifiers': [

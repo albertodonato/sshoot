@@ -19,7 +19,8 @@ from argparse import ArgumentParser
 
 from prettytable import PrettyTable, HEADER
 
-from sshoot.script import Script, ErrorExitMessage
+from toolrack.script import Script, ErrorExitMessage
+
 from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
 from sshoot import __version__
 

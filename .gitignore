@@ -3,3 +3,4 @@
 /build
 /html
 *.egg-info
+.eggs
