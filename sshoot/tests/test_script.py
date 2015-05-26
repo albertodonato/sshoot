@@ -67,7 +67,7 @@ class ScriptTests(TestCase):
         self.script = DummyScript(stderr=self.stderr)
 
     def test_call_runs_main(self):
-        '''When a Script is called, the L{main} method is executed.'''
+        '''When a Script is called, the main method is executed.'''
         self.script([])
         self.assertTrue(self.script.called)
         self.assertIsNone(self.script.code)
