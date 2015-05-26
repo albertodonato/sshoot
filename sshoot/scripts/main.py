@@ -48,6 +48,7 @@ class Sshoot(Script):
             help="configuration directory (default: %(default)s)")
         subparsers = parser.add_subparsers(
             metavar="ACTION", dest="action", help="action to perform")
+        subparsers.required = True
         # List profiles
         list_parser = subparsers.add_parser(
             "list", help="list defined profiles")
