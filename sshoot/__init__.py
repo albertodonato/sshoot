@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with sshoot.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Tool for handling ssshuttle VPN sessions.'''
+'''Manage multiple sshuttle VPN sessions.'''
 
 
 __version__ = '1.0.3'

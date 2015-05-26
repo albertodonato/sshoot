@@ -1,41 +1,41 @@
 #
 # This file is part of sshoot.
-
+#
 # sshoot is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
-
+#
 # sshoot is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
+#
 # You should have received a copy of the GNU General Public License
 # along with sshoot.  If not, see <http://www.gnu.org/licenses/>.
 
 from setuptools import setup, find_packages
 
-from sshoot import __version__
+from sshoot import __version__, __doc__ as description
 
 
 config = {
     'name': 'sshoot',
     'version': __version__,
     'license': 'GPLv3+',
-    'description': 'Manage multiple sshuttle VPN sessions.',
+    'description': description,
     'long_description': open('README.rst').read(),
     'author': 'Alberto Donato',
-    'author_email': '<alberto.donato@gmail.com>',
+    'author_email': 'alberto.donato@gmail.com',
     'maintainer': 'Alberto Donato',
-    'maintainer_email': '<alberto.donato@gmail.com>',
+    'maintainer_email': 'alberto.donato@gmail.com',
     'url': 'https://launchpad.net/sshoot',
     'download_url': 'https://launchpad.net/sshoot/+download',
-    'packages': find_packages(exclude=['*.test.*', '*.test', 'test.*']),
+    'packages': find_packages(),
     'include_package_data': True,
     'entry_points': {
         'console_scripts': [
             'sshoot = sshoot.scripts.main:sshoot']},
-    'test_suite': 'sshoot.tests',
+    'test_suite': 'sshoot',
     'install_requires': ['PyYAML', 'prettytable'],
     'tests_require': ['fixtures'],
     'keywords': 'ssh sshuttle vpn',
