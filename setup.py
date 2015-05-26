@@ -28,8 +28,8 @@ config = {
     'author_email': 'alberto.donato@gmail.com',
     'maintainer': 'Alberto Donato',
     'maintainer_email': 'alberto.donato@gmail.com',
-    'url': 'https://launchpad.net/sshoot',
-    'download_url': 'https://launchpad.net/sshoot/+download',
+    'url': 'https://bitbucket.org/ack/sshoot',
+    'download_url': 'https://bitbucket.org/ack/sshoot/downloads',
     'packages': find_packages(),
     'include_package_data': True,
     'entry_points': {
