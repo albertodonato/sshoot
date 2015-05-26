@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with sshoot.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Handle sshuttle sessions."""
+'''Handle sshuttle sessions.'''
 
 import os
 from signal import SIGTERM
@@ -25,18 +25,18 @@ from sshoot.profile import Profile, ProfileError
 from sshoot.config import Config
 
 
-DEFAULT_CONFIG_PATH = os.path.expanduser(os.path.join("~", ".sshoot"))
+DEFAULT_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.sshoot'))
 
 
 def get_rundir(prefix):
-    """Return the directory holding runtime data."""
+    '''Return the directory holding runtime data.'''
     return os.path.join(
-        gettempdir(), "{prefix}-{username}".format(
+        gettempdir(), '{prefix}-{username}'.format(
             prefix=prefix, username=getuser()))
 
 
 class ManagerProfileError(Exception):
-    """Profile management failed."""
+    '''Profile management failed.'''
 
 
 class Manager(object):
@@ -45,12 +45,12 @@ class Manager(object):
 
     def __init__(self, config_path=None, rundir=None):
         self.config_path = config_path or DEFAULT_CONFIG_PATH
-        self.rundir = rundir or get_rundir("sshoot")
-        self.sessions_path = os.path.join(self.rundir, "sessions")
+        self.rundir = rundir or get_rundir('sshoot')
+        self.sessions_path = os.path.join(self.rundir, 'sessions')
         self._config = Config(self.config_path)
 
     def load_config(self):
-        """Load configuration from file."""
+        '''Load configuration from file.'''
         if not os.path.exists(self.config_path):
             os.makedirs(self.config_path)
         if not os.path.exists(self.sessions_path):
@@ -59,45 +59,45 @@ class Manager(object):
         self._config.load()
 
     def create_profile(self, name, details):
-        """Create a profile with provided details."""
+        '''Create a profile with provided details.'''
         try:
             profile = Profile.from_dict(details)
             self._config.add_profile(name, profile)
         except KeyError:
             raise ManagerProfileError(
-                "Profile name already in use: {}".format(name))
+                'Profile name already in use: {}'.format(name))
         except ProfileError as e:
             raise ManagerProfileError(str(e))
 
         self._config.save()
 
     def remove_profile(self, name):
-        """Remove profile with given name."""
+        '''Remove profile with given name.'''
         try:
             self._config.remove_profile(name)
         except KeyError:
-            raise ManagerProfileError("Unknown profile: {}".format(name))
+            raise ManagerProfileError('Unknown profile: {}'.format(name))
 
         self._config.save()
 
     def get_profiles(self):
-        """Return profiles defined in config."""
+        '''Return profiles defined in config.'''
         return self._config.profiles
 
     def get_profile(self, name):
-        """Return profile with given name."""
+        '''Return profile with given name.'''
         try:
             return self._config.profiles[name]
         except KeyError:
-            raise ManagerProfileError("Unknown profile: {}".format(name))
+            raise ManagerProfileError('Unknown profile: {}'.format(name))
 
     def start_profile(self, name, extra_args=None):
-        """Start profile with given name."""
+        '''Start profile with given name.'''
         if self.is_running(name):
-            raise ManagerProfileError("Profile is already running")
+            raise ManagerProfileError('Profile is already running')
 
         cmdline = self.get_cmdline(name, extra_args=extra_args)
-        message = "Profile failed to start: {}"
+        message = 'Profile failed to start: {}'
         try:
             process = Popen(cmdline, stdout=PIPE, stderr=PIPE)
             # Wait until process is started (it daemonizes)
@@ -113,20 +113,20 @@ class Manager(object):
             raise ManagerProfileError(message.format(error))
 
     def stop_profile(self, name):
-        """Stop profile with given name."""
+        '''Stop profile with given name.'''
         self.get_profile(name)
 
         if not self.is_running(name):
-            raise ManagerProfileError("Profile is not running")
+            raise ManagerProfileError('Profile is not running')
 
         try:
             with open(self._get_pidfile(name)) as fh:
                 self.kill(int(fh.read()), SIGTERM)
         except (IOError, OSError) as e:
-            raise ManagerProfileError("Failed to stop profile: {}".format(e))
+            raise ManagerProfileError('Failed to stop profile: {}'.format(e))
 
     def is_running(self, name):
-        """Return whether the specified profile is running."""
+        '''Return whether the specified profile is running.'''
         pidfile = self._get_pidfile(name)
         try:
             with open(pidfile) as fh:
@@ -145,19 +145,19 @@ class Manager(object):
         return True
 
     def get_cmdline(self, name, extra_args=None):
-        """Return the command line for the specified profile."""
+        '''Return the command line for the specified profile.'''
         profile = self.get_profile(name)
 
         executable = self._get_executable()
-        extra_opts = ["--daemon", "--pidfile", self._get_pidfile(name)]
+        extra_opts = ['--daemon', '--pidfile', self._get_pidfile(name)]
         if extra_args:
             extra_opts.extend(extra_args)
         return profile.cmdline(executable=executable, extra_opts=extra_opts)
 
     def _get_pidfile(self, name):
-        """Return the path of the pidfile for the specified profile."""
-        return os.path.join(self.sessions_path, "{}.pid".format(name))
+        '''Return the path of the pidfile for the specified profile.'''
+        return os.path.join(self.sessions_path, '{}.pid'.format(name))
 
     def _get_executable(self):
-        """Return the shuttle executable from the config."""
-        return self._config.config.get("executable", "sshuttle")
+        '''Return the shuttle executable from the config.'''
+        return self._config.config.get('executable', 'sshuttle')

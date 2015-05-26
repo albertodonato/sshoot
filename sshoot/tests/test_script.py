@@ -30,7 +30,7 @@ class DummyScript(Script):
 
     def get_parser(self):
         parser = ArgumentParser()
-        parser.add_argument("--foo", type=int)
+        parser.add_argument('--foo', type=int)
         return parser
 
     def main(self, args):
@@ -46,16 +46,16 @@ class DummyScript(Script):
 class ErrorExitMessageTests(TestCase):
 
     def test_message(self):
-        """L{ErrorExitMessage} provides a message and a default code."""
-        message = "Something went wrong!"
+        '''ErrorExitMessage provides a message and a default code.'''
+        message = 'Something went wrong!'
         error = ErrorExitMessage(message)
         self.assertEqual(error.message, message)
         self.assertEqual(str(error), message)
         self.assertEqual(error.code, 1)
 
     def test_code(self):
-        """L{ErrorExitMessage} can provide a different error code."""
-        error = ErrorExitMessage("Something went wrong!", code=3)
+        '''ErrorExitMessage can provide a different error code.'''
+        error = ErrorExitMessage('Something went wrong!', code=3)
         self.assertEqual(error.code, 3)
 
 
@@ -67,20 +67,20 @@ class ScriptTests(TestCase):
         self.script = DummyScript(stderr=self.stderr)
 
     def test_call_runs_main(self):
-        """When a L{Script} is called, the L{main} method is executed."""
+        '''When a Script is called, the L{main} method is executed.'''
         self.script([])
         self.assertTrue(self.script.called)
         self.assertIsNone(self.script.code)
 
     def test_call_parse_args(self):
-        """When a L{Script} is called, L{get_parser} parses the arguments."""
-        self.script(["--foo", "3"])
+        '''When a Script is called, get_parser parses the arguments.'''
+        self.script(['--foo', '3'])
         self.assertEqual(self.script.args.foo, 3)
-        self.assertEqual(self.stderr.getvalue(), "")
+        self.assertEqual(self.stderr.getvalue(), '')
 
     def test_failure(self):
-        """If L{ErrorExitMessage} is raised, the script is terminated."""
-        self.script.failure = ErrorExitMessage("Fail!", code=3)
+        '''If ErrorExitMessage is raised, the script is terminated.'''
+        self.script.failure = ErrorExitMessage('Fail!', code=3)
         self.script([])
-        self.assertEqual(self.stderr.getvalue(), "Fail!\n")
+        self.assertEqual(self.stderr.getvalue(), 'Fail!\n')
         self.assertEqual(self.script.code, 3)

@@ -13,16 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with sshoot.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Base class for scripts."""
+'''Base class for scripts.'''
 
 import sys
 
 
 class ErrorExitMessage(Exception):
-    """
-    Exception raised to exit the process with the specified message and exit
-    code.
-    """
+    '''Raised to exit the process with the specified message and exit code.'''
 
     def __init__(self, message, code=1):
         self.message = message
@@ -38,15 +35,16 @@ class Script(object):
         self._stderr = stderr
 
     def get_parser(self):
-        """Return a configured L{argparse.ArgumentParser} instance."""
+        '''Return a configured argparse.ArgumentParser instance.'''
         raise NotImplementedError()
 
     def main(self, args):
-        """Body of the script.
+        '''Body of the script.
 
-        @args: the L{argparse.Namespace} instance returned by C{get_parser}.
+        Params:
+          args: the argparse.Namespace instance returned by get_parser.
 
-        """
+        '''
         raise NotImplementedError()
 
     def __call__(self, args=None):
@@ -58,6 +56,6 @@ class Script(object):
             self._error_exit(error)
 
     def _error_exit(self, error):
-        """Terminate with the specified L{ErrorExitMessage}."""
-        self._stderr.write(error.message + "\n")
+        '''Terminate with the specified ErrorExitMessage.'''
+        self._stderr.write(error.message + '\n')
         self.exit(error.code)
