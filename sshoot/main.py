@@ -15,17 +15,16 @@
 
 '''Command-line interface to handle sshuttle VPN sessions.'''
 
+import sys
 from argparse import ArgumentParser
 
 from prettytable import PrettyTable, HEADER
-
-from toolrack.script import Script, ErrorExitMessage
 
 from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
 from sshoot import __version__
 
 
-class Sshoot(Script):
+class Sshoot:
     '''Manage multiple sshuttle VPN sessions.'''
 
     # Map names to profile fileds
@@ -39,7 +38,105 @@ class Sshoot(Script):
         ('Seed hosts', 'seed_hosts'),
         ('Extra options', 'extra_opts'))
 
-    def get_parser(self):
+    def __call__(self):
+        args = self._get_parser().parse_args()
+
+        try:
+            manager = Manager(config_path=args.config)
+            manager.load_config()
+        except IOError as e:
+            self._exit(str(e))
+        action = args.action.replace('-', '_')
+        method = getattr(self, 'action_' + action)
+        return method(manager, args)
+
+    def action_list(self, manager, args):
+        '''Print out the list of profiles as a table.'''
+        fields = tuple(self._fields_map)
+        if not args.verbose:
+            # Only most basic info
+            fields = fields[:2]
+        columns = [name for name, _ in fields]
+        columns = ['', 'Profile'] + columns
+
+        table = PrettyTable(columns)
+        table.align = 'l'
+        table.vertical_char = ' '
+        table.junction_char = table.horizontal_char
+        table.padding_width = 0
+        table.left_padding_width = 0
+        table.right_padding_width = 1
+        table.hrules = HEADER
+
+        for name, profile in manager.get_profiles().items():
+            row = ['*' if manager.is_running(name) else '', name]
+            for _, field in fields:
+                row.append(self._format(getattr(profile, field)))
+            table.add_row(row)
+        print(table.get_string(sortby='Profile'))
+
+    def action_show(self, manager, args):
+        '''Show details on a profile.'''
+        name = args.name
+        try:
+            profile = manager.get_profile(name)
+        except ManagerProfileError as e:
+            self._exit(str(e))
+
+        table = PrettyTable(
+            field_names=['key', 'value'], header=False, border=False)
+        table.align['key'] = table.align['value'] = 'l'
+        table.add_row(('Name:', name))
+        status = 'ACTIVE' if manager.is_running(name) else 'STOPPED'
+        table.add_row(('Status', status))
+        for name, field in self._fields_map:
+            table.add_row(
+                ('{}:'.format(name), self._format(getattr(profile, field))))
+        print(table.get_string())
+
+    def action_create(self, manager, args):
+        '''Create a new profile.'''
+        try:
+            manager.create_profile(args.name, args.__dict__)
+        except ManagerProfileError as e:
+            self._exit(str(e))
+
+    def action_delete(self, manager, args):
+        '''Delete profile with the given name.'''
+        try:
+            manager.remove_profile(args.name)
+        except ManagerProfileError as e:
+            self._exit(str(e))
+
+    def action_start(self, manager, args):
+        '''Start sshuttle for the specified profile.'''
+        try:
+            manager.start_profile(args.name, extra_args=args.args)
+        except ManagerProfileError as e:
+            self._exit(str(e))
+
+        print('Profile started.')
+
+    def action_stop(self, manager, args):
+        '''Stop sshuttle for the specified profile.'''
+        try:
+            manager.stop_profile(args.name)
+        except ManagerProfileError as e:
+            self._exit(str(e))
+
+        print('Profile stopped.')
+
+    def action_get_command(self, manager, args):
+        '''Print the sshuttle command for the specified profile.'''
+        try:
+            cmdline = manager.get_cmdline(args.name)
+        except ManagerProfileError as e:
+            self._exit(str(e))
+
+        print(' '.join(cmdline))
+
+    def _get_parser(self):
+        '''Return a configured argparse.ArgumentParse instance.'''
         parser = ArgumentParser(description=self.__doc__)
         parser.add_argument(
             '-V', '--version', action='version',
@@ -111,101 +208,6 @@ class Sshoot(Script):
             'name', help='name of the profile')
         return parser
 
-    def main(self, args):
-        try:
-            manager = Manager(config_path=args.config)
-            manager.load_config()
-        except IOError as e:
-            raise ErrorExitMessage(str(e))
-        action = args.action.replace('-', '_')
-        method = getattr(self, 'action_' + action)
-        return method(manager, args)
-
-    def action_list(self, manager, args):
-        '''Print out the list of profiles as a table.'''
-        fields = tuple(self._fields_map)
-        if not args.verbose:
-            # Only most basic info
-            fields = fields[:2]
-        columns = [name for name, _ in fields]
-        columns = ['', 'Profile'] + columns
-
-        table = PrettyTable(columns)
-        table.align = 'l'
-        table.vertical_char = ' '
-        table.junction_char = table.horizontal_char
-        table.padding_width = 0
-        table.left_padding_width = 0
-        table.right_padding_width = 1
-        table.hrules = HEADER
-
-        for name, profile in manager.get_profiles().items():
-            row = ['*' if manager.is_running(name) else '', name]
-            for _, field in fields:
-                row.append(self._format(getattr(profile, field)))
-            table.add_row(row)
-        print(table.get_string(sortby='Profile'))
-
-    def action_show(self, manager, args):
-        '''Show details on a profile.'''
-        name = args.name
-        try:
-            profile = manager.get_profile(name)
-        except ManagerProfileError as e:
-            raise ErrorExitMessage(str(e))
-
-        table = PrettyTable(
-            field_names=['key', 'value'], header=False, border=False)
-        table.align['key'] = table.align['value'] = 'l'
-        table.add_row(('Name:', name))
-        status = 'ACTIVE' if manager.is_running(name) else 'STOPPED'
-        table.add_row(('Status', status))
-        for name, field in self._fields_map:
-            table.add_row(
-                ('{}:'.format(name), self._format(getattr(profile, field))))
-        print(table.get_string())
-
-    def action_create(self, manager, args):
-        '''Create a new profile.'''
-        try:
-            manager.create_profile(args.name, args.__dict__)
-        except ManagerProfileError as e:
-            raise ErrorExitMessage(str(e))
-
-    def action_delete(self, manager, args):
-        '''Delete profile with the given name.'''
-        try:
-            manager.remove_profile(args.name)
-        except ManagerProfileError as e:
-            raise ErrorExitMessage(str(e))
-
-    def action_start(self, manager, args):
-        '''Start sshuttle for the specified profile.'''
-        try:
-            manager.start_profile(args.name, extra_args=args.args)
-        except ManagerProfileError as e:
-            raise ErrorExitMessage(str(e))
-
-        print('Profile started.')
-
-    def action_stop(self, manager, args):
-        '''Stop sshuttle for the specified profile.'''
-        try:
-            manager.stop_profile(args.name)
-        except ManagerProfileError as e:
-            raise ErrorExitMessage(str(e))
-
-        print('Profile stopped.')
-
-    def action_get_command(self, manager, args):
-        '''Print the sshuttle command for the specified profile.'''
-        try:
-            cmdline = manager.get_cmdline(args.name)
-        except ManagerProfileError as e:
-            raise ErrorExitMessage(str(e))
-
-        print(' '.join(cmdline))
-
     def _format(self, value):
         if isinstance(value, (list, tuple)):
             return ' '.join(value)
@@ -213,5 +215,9 @@ class Sshoot(Script):
             return ''
         return value
 
+    def _exit(self, message, code=1):
+        '''Terminate with the specified error and code .'''
+        sys.stderr.write('{}\n'.format(message))
+        sys.exit(code)
 
 sshoot = Sshoot()

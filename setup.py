@@ -32,11 +32,9 @@ config = {
     'download_url': 'https://bitbucket.org/ack/sshoot/downloads',
     'packages': find_packages(),
     'include_package_data': True,
-    'entry_points': {
-        'console_scripts': [
-            'sshoot = sshoot.scripts.main:sshoot']},
+    'entry_points': {'console_scripts': ['sshoot = sshoot.main:sshoot']},
     'test_suite': 'sshoot',
-    'install_requires': ['PyYAML', 'prettytable', 'toolrack'],
+    'install_requires': ['PyYAML', 'prettytable'],
     'tests_require': ['fixtures'],
     'keywords': 'ssh sshuttle vpn',
     'classifiers': [
