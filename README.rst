@@ -16,17 +16,17 @@ providing flexible configuration for profiles.
 Typical usage
 -------------
 
-Create a profile:: 
+Create a profile::
 
   $ sshoot create -r host1.remote -HNd vpn1 10.0.0.0/24
 
 Start the profile::
-          
+
   $ sshoot start vpn1
   Profile started.
 
 List existing profiles (active ones are marked)::
-  
+
   $ sshoot list
        Profile  Remote host   Subnets
   --------------------------------------------
