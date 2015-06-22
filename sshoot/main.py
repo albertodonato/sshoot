@@ -115,7 +115,7 @@ class Sshoot:
         except ManagerProfileError as e:
             self._exit(str(e))
 
-        print('Profile started.')
+        print('Profile started')
 
     def action_stop(self, manager, args):
         '''Stop sshuttle for the specified profile.'''
@@ -124,7 +124,7 @@ class Sshoot:
         except ManagerProfileError as e:
             self._exit(str(e))
 
-        print('Profile stopped.')
+        print('Profile stopped')
 
     def action_get_command(self, manager, args):
         '''Print the sshuttle command for the specified profile.'''
