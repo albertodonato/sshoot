@@ -147,16 +147,19 @@ class Sshoot:
         subparsers = parser.add_subparsers(
             metavar='ACTION', dest='action', help='action to perform')
         subparsers.required = True
+
         # List profiles
         list_parser = subparsers.add_parser(
             'list', help='list defined profiles')
         list_parser.add_argument(
             '-v', '--verbose', action='store_true',
             help='show verbose listing')
+
         # Show profile
         show_parser = subparsers.add_parser(
             'show', help='show profile configuration')
         show_parser.add_argument('name', help='profile name')
+
         # Add profile
         create_parser = subparsers.add_parser(
             'create', help='define a new profile')
@@ -183,11 +186,13 @@ class Sshoot:
         create_parser.add_argument(
             '--extra-opts',
             help='extra options to pass to sshuttle command line')
+
         # Remove profile
         delete_parser = subparsers.add_parser(
             'delete', help='delete an existing profile')
         delete_parser.add_argument(
             'name', help='name of the profile to remove')
+
         # Start profile
         start_parser = subparsers.add_parser(
             'start', help='start a VPN session for a profile')
@@ -196,11 +201,13 @@ class Sshoot:
         start_parser.add_argument(
             'args', nargs='*',
             help='Additional arguments passed to sshuttle command line.')
+
         # Stop profile
         stop_parser = subparsers.add_parser(
             'stop', help='stop a running VPN session for a profile')
         stop_parser.add_argument(
             'name', help='name of the profile to stop')
+
         # Get profile command
         get_command_parser = subparsers.add_parser(
             'get-command', help='return the sshuttle command for a profile')
