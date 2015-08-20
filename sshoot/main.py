@@ -184,7 +184,7 @@ class Sshoot:
             '-S', '--seed-hosts', nargs='+',
             help='comma-separated list of hosts to seed to auto-hosts')
         create_parser.add_argument(
-            '--extra-opts',
+            '--extra-opts', type=str.split,
             help='extra options to pass to sshuttle command line')
 
         # Remove profile
