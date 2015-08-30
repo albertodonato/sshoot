@@ -45,7 +45,7 @@ class Sshoot:
             manager = Manager(config_path=args.config)
             manager.load_config()
         except IOError as e:
-            self._exit(str(e))
+            self._exit(message=str(e), code=3)
         action = args.action.replace('-', '_')
         method = getattr(self, 'action_' + action)
         return method(manager, args)
@@ -81,7 +81,7 @@ class Sshoot:
         try:
             profile = manager.get_profile(name)
         except ManagerProfileError as e:
-            self._exit(str(e))
+            self._exit(message=str(e), code=2)
 
         table = PrettyTable(
             field_names=['key', 'value'], header=False, border=False)
@@ -99,21 +99,21 @@ class Sshoot:
         try:
             manager.create_profile(args.name, args.__dict__)
         except ManagerProfileError as e:
-            self._exit(str(e))
+            self._exit(message=str(e), code=2)
 
     def action_delete(self, manager, args):
         '''Delete profile with the given name.'''
         try:
             manager.remove_profile(args.name)
         except ManagerProfileError as e:
-            self._exit(str(e))
+            self._exit(message=str(e), code=2)
 
     def action_start(self, manager, args):
         '''Start sshuttle for the specified profile.'''
         try:
             manager.start_profile(args.name, extra_args=args.args)
         except ManagerProfileError as e:
-            self._exit(str(e))
+            self._exit(message=str(e), code=2)
 
         print('Profile started')
 
@@ -122,16 +122,26 @@ class Sshoot:
         try:
             manager.stop_profile(args.name)
         except ManagerProfileError as e:
-            self._exit(str(e))
+            self._exit(message=str(e), code=2)
 
         print('Profile stopped')
+
+    def action_is_running(self, manager, args):
+        '''Return whether the specified profile is running.'''
+        try:
+            # raise an error if profile is unknown
+            manager.get_profile(args.name)
+        except ManagerProfileError as e:
+            self._exit(message=str(e), code=2)
+        retval = 0 if manager.is_running(args.name) else 1
+        self._exit(code=retval)
 
     def action_get_command(self, manager, args):
         '''Print the sshuttle command for the specified profile.'''
         try:
             cmdline = manager.get_cmdline(args.name)
         except ManagerProfileError as e:
-            self._exit(str(e))
+            self._exit(message=str(e), code=2)
 
         print(' '.join(cmdline))
 
@@ -208,6 +218,12 @@ class Sshoot:
         stop_parser.add_argument(
             'name', help='name of the profile to stop')
 
+        # Return whether profile is running
+        is_running_parser = subparsers.add_parser(
+            'is-running', help='return whether a profile is running')
+        is_running_parser.add_argument(
+            'name', help='name of the profile to query')
+
         # Get profile command
         get_command_parser = subparsers.add_parser(
             'get-command', help='return the sshuttle command for a profile')
@@ -222,9 +238,10 @@ class Sshoot:
             return ''
         return value
 
-    def _exit(self, message, code=1):
+    def _exit(self, message=None, code=1):
         '''Terminate with the specified error and code .'''
-        sys.stderr.write('{}\n'.format(message))
+        if message:
+            sys.stderr.write('{}\n'.format(message))
         sys.exit(code)
 
 sshoot = Sshoot()
