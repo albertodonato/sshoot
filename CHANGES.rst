@@ -1,3 +1,9 @@
+v1.2.0 - 2015-09-04
+===================
+
+- Add is-running command to check whether a profile is running.
+
+
 v1.1.0 - 2015-05-27
 ===================
 
