@@ -49,6 +49,7 @@ class ManagerTests(TestWithFixtures):
         script = (
             '#!/bin/sh\n'
             'echo $@ > {}/cmdline\n'
+            'echo -n stderr message >&2\n'
             'exit {}\n').format(temp_dir, exit_code)
         with open(executable, 'w') as fh:
             fh.write(script)
@@ -170,8 +171,11 @@ class ManagerTests(TestWithFixtures):
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
         executable = self.make_fake_executable(exit_code=1)
         self.manager._get_executable = lambda: executable
-        self.assertRaises(
-            ManagerProfileError, self.manager.start_profile, 'profile')
+        with self.assertRaises(ManagerProfileError) as context:
+            self.manager.start_profile('profile')
+        self.assertEqual(
+            str(context.exception),
+            'Profile failed to start: stderr message')
 
     def test_start_profile_executable_not_found(self):
         '''Profile start raises an error if executable is not found.'''

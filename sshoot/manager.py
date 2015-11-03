@@ -109,7 +109,7 @@ class Manager(object):
             pass  # The return code is checked anyway
 
         if process.returncode != 0:
-            error = process.stderr.read()
+            error = process.stderr.read().decode()
             raise ManagerProfileError(message.format(error))
 
     def stop_profile(self, name):
