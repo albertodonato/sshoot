@@ -1,3 +1,9 @@
+v1.2.1 - 2015-11-04
+===================
+
+- Fix error message decoding when profile fails to start.
+
+
 v1.2.0 - 2015-09-04
 ===================
 
