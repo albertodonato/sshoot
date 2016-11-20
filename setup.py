@@ -34,8 +34,8 @@ config = {
     'include_package_data': True,
     'entry_points': {'console_scripts': ['sshoot = sshoot.main:sshoot']},
     'test_suite': 'sshoot',
-    'install_requires': ['PyYAML', 'prettytable'],
-    'tests_require': ['fixtures', 'argcomplete'],
+    'install_requires': ['PyYAML', 'prettytable', 'argcomplete'],
+    'tests_require': ['fixtures'],
     'keywords': 'ssh sshuttle vpn',
     'classifiers': [
         'Development Status :: 4 - Beta',
