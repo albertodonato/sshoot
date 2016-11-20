@@ -1,1 +1,2 @@
 include LICENSE.txt README.rst CHANGES.rst
+recursive-include shell-completion *
