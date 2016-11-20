@@ -1,1 +1,6 @@
+# -*- mode: sh -*-
+#
+# Bash-completion for sshoot
+#
+
 eval "$(register-python-argcomplete3 sshoot)"
