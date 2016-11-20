@@ -18,6 +18,7 @@
 import sys
 from argparse import ArgumentParser
 
+from argcomplete import autocomplete
 from prettytable import PrettyTable, HEADER
 
 from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
@@ -44,14 +45,14 @@ class Sshoot:
         try:
             manager = Manager(config_path=args.config)
             manager.load_config()
-        except IOError as e:
-            self._exit(message=str(e), code=3)
+        except IOError as error:
+            self._exit(message=str(error), code=3)
         action = args.action.replace('-', '_')
         method = getattr(self, 'action_' + action)
         try:
             return method(manager, args)
-        except ManagerProfileError as e:
-            self._exit(message=str(e), code=2)
+        except ManagerProfileError as error:
+            self._exit(message=str(error), code=2)
 
     def action_list(self, manager, args):
         '''Print out the list of profiles as a table.'''
@@ -147,7 +148,9 @@ class Sshoot:
         # Show profile
         show_parser = subparsers.add_parser(
             'show', help='show profile configuration')
-        show_parser.add_argument('name', help='profile name')
+        _arg_complete(
+            show_parser.add_argument('name', help='profile name'),
+            _profile_completer)
 
         # Add profile
         create_parser = subparsers.add_parser(
@@ -179,14 +182,18 @@ class Sshoot:
         # Remove profile
         delete_parser = subparsers.add_parser(
             'delete', help='delete an existing profile')
-        delete_parser.add_argument(
-            'name', help='name of the profile to remove')
+        _arg_complete(
+            delete_parser.add_argument(
+                'name', help='name of the profile to remove'),
+            _profile_completer)
 
         # Start profile
         start_parser = subparsers.add_parser(
             'start', help='start a VPN session for a profile')
-        start_parser.add_argument(
-            'name', help='name of the profile to start')
+        _arg_complete(
+            start_parser.add_argument(
+                'name', help='name of the profile to start'),
+            _profile_completer)
         start_parser.add_argument(
             'args', nargs='*',
             help='Additional arguments passed to sshuttle command line.')
@@ -194,23 +201,33 @@ class Sshoot:
         # Stop profile
         stop_parser = subparsers.add_parser(
             'stop', help='stop a running VPN session for a profile')
-        stop_parser.add_argument(
-            'name', help='name of the profile to stop')
+        _arg_complete(
+            stop_parser.add_argument(
+                'name', help='name of the profile to stop'),
+            _profile_completer)
 
         # Return whether profile is running
         is_running_parser = subparsers.add_parser(
             'is-running', help='return whether a profile is running')
-        is_running_parser.add_argument(
-            'name', help='name of the profile to query')
+        _arg_complete(
+            is_running_parser.add_argument(
+                'name', help='name of the profile to query'),
+            _profile_completer)
 
         # Get profile command
         get_command_parser = subparsers.add_parser(
             'get-command', help='return the sshuttle command for a profile')
-        get_command_parser.add_argument(
-            'name', help='name of the profile')
+        _arg_complete(
+            get_command_parser.add_argument(
+                'name', help='name of the profile'),
+            _profile_completer)
+
+        # Setup autocompletion
+        autocomplete(parser)
         return parser
 
     def _format(self, value):
+        '''Convert value to string, handling special cases.'''
         if isinstance(value, (list, tuple)):
             return ' '.join(value)
         if value is None:
@@ -223,4 +240,20 @@ class Sshoot:
             sys.stderr.write('{}\n'.format(message))
         sys.exit(code)
 
+
 sshoot = Sshoot()
+
+
+def _arg_complete(argument, completer):
+    '''wrapper for setting up argument completer.'''
+    argument.completer = completer
+    return argument
+
+
+def _profile_completer(prefix, parsed_args, **kwargs):
+    '''Autocomplete helper for profile names.'''
+    manager = Manager(config_path=parsed_args.config)
+    manager.load_config()
+    return (
+        name for name in manager.get_profiles().keys()
+        if name.startswith(prefix))

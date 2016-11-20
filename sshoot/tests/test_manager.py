@@ -167,7 +167,7 @@ class ManagerTests(TestWithFixtures):
         self.assertEqual(cmdline, expected_cmdline)
 
     def test_start_profile_fail(self):
-        '''An error if starting a profile fails.'''
+        '''An error is raised if starting a profile fails.'''
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
         executable = self.make_fake_executable(exit_code=1)
         self.manager._get_executable = lambda: executable

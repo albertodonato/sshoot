@@ -66,8 +66,8 @@ class Manager(object):
         except KeyError:
             raise ManagerProfileError(
                 'Profile name already in use: {}'.format(name))
-        except ProfileError as e:
-            raise ManagerProfileError(str(e))
+        except ProfileError as error:
+            raise ManagerProfileError(str(error))
 
         self._config.save()
 
@@ -102,9 +102,9 @@ class Manager(object):
             process = Popen(cmdline, stdout=PIPE, stderr=PIPE)
             # Wait until process is started (it daemonizes)
             process.wait()
-        except OSError as e:
+        except OSError as error:
             # To catch file not found errors
-            raise ManagerProfileError(message.format(e))
+            raise ManagerProfileError(message.format(error))
         except CalledProcessError:
             pass  # The return code is checked anyway
 
@@ -122,8 +122,9 @@ class Manager(object):
         try:
             with open(self._get_pidfile(name)) as fh:
                 self.kill(int(fh.read()), SIGTERM)
-        except (IOError, OSError) as e:
-            raise ManagerProfileError('Failed to stop profile: {}'.format(e))
+        except (IOError, OSError) as error:
+            raise ManagerProfileError(
+                'Failed to stop profile: {}'.format(error))
 
     def is_running(self, name):
         '''Return whether the specified profile is running.'''
