@@ -21,8 +21,9 @@ from argparse import ArgumentParser
 from argcomplete import autocomplete
 from prettytable import PrettyTable, HEADER
 
-from sshoot.manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
-from sshoot import __version__
+from . import __version__
+from .manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
+from .autocomplete import complete_argument, profile_completer
 
 
 class Sshoot:
@@ -148,9 +149,9 @@ class Sshoot:
         # Show profile
         show_parser = subparsers.add_parser(
             'show', help='show profile configuration')
-        _arg_complete(
+        complete_argument(
             show_parser.add_argument('name', help='profile name'),
-            _profile_completer)
+            profile_completer)
 
         # Add profile
         create_parser = subparsers.add_parser(
@@ -182,18 +183,18 @@ class Sshoot:
         # Remove profile
         delete_parser = subparsers.add_parser(
             'delete', help='delete an existing profile')
-        _arg_complete(
+        complete_argument(
             delete_parser.add_argument(
                 'name', help='name of the profile to remove'),
-            _profile_completer)
+            profile_completer)
 
         # Start profile
         start_parser = subparsers.add_parser(
             'start', help='start a VPN session for a profile')
-        _arg_complete(
+        complete_argument(
             start_parser.add_argument(
                 'name', help='name of the profile to start'),
-            _profile_completer)
+            profile_completer)
         start_parser.add_argument(
             'args', nargs='*',
             help='Additional arguments passed to sshuttle command line.')
@@ -201,26 +202,26 @@ class Sshoot:
         # Stop profile
         stop_parser = subparsers.add_parser(
             'stop', help='stop a running VPN session for a profile')
-        _arg_complete(
+        complete_argument(
             stop_parser.add_argument(
                 'name', help='name of the profile to stop'),
-            _profile_completer)
+            profile_completer)
 
         # Return whether profile is running
         is_running_parser = subparsers.add_parser(
             'is-running', help='return whether a profile is running')
-        _arg_complete(
+        complete_argument(
             is_running_parser.add_argument(
                 'name', help='name of the profile to query'),
-            _profile_completer)
+            profile_completer)
 
         # Get profile command
         get_command_parser = subparsers.add_parser(
             'get-command', help='return the sshuttle command for a profile')
-        _arg_complete(
+        complete_argument(
             get_command_parser.add_argument(
                 'name', help='name of the profile'),
-            _profile_completer)
+            profile_completer)
 
         # Setup autocompletion
         autocomplete(parser)
@@ -242,18 +243,3 @@ class Sshoot:
 
 
 sshoot = Sshoot()
-
-
-def _arg_complete(argument, completer):
-    '''wrapper for setting up argument completer.'''
-    argument.completer = completer
-    return argument
-
-
-def _profile_completer(prefix, parsed_args, **kwargs):
-    '''Autocomplete helper for profile names.'''
-    manager = Manager(config_path=parsed_args.config)
-    manager.load_config()
-    return (
-        name for name in manager.get_profiles().keys()
-        if name.startswith(prefix))
