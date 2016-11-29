@@ -21,8 +21,8 @@ from tempfile import gettempdir
 from getpass import getuser
 from subprocess import Popen, PIPE, CalledProcessError
 
-from sshoot.profile import Profile, ProfileError
-from sshoot.config import Config
+from .profile import Profile, ProfileError
+from .config import Config
 
 
 DEFAULT_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.sshoot'))

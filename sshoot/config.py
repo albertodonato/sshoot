@@ -18,7 +18,7 @@
 import yaml
 import os
 
-from sshoot.profile import Profile
+from .profile import Profile
 
 
 def yaml_dump(data, fh=None):

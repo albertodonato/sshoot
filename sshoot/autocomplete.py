@@ -15,7 +15,7 @@
 
 '''Shell completion helpers.'''
 
-from sshoot.manager import Manager
+from .manager import Manager
 
 
 def complete_argument(argument, completer):

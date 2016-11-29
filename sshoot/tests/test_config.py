@@ -22,8 +22,8 @@ from unittest import TestCase
 
 from fixtures import TempDir, TestWithFixtures
 
-from sshoot.profile import Profile
-from sshoot.config import yaml_dump, Config
+from ..profile import Profile
+from ..config import yaml_dump, Config
 
 
 class YamlDumpTests(TestCase):
