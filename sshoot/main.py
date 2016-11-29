@@ -16,6 +16,7 @@
 '''Command-line interface to handle sshuttle VPN sessions.'''
 
 import sys
+from functools import partial
 from argparse import ArgumentParser
 
 from argcomplete import autocomplete
@@ -194,7 +195,7 @@ class Sshoot:
         complete_argument(
             start_parser.add_argument(
                 'name', help='name of the profile to start'),
-            profile_completer)
+            partial(profile_completer, running=False))
         start_parser.add_argument(
             'args', nargs='*',
             help='Additional arguments passed to sshuttle command line.')
@@ -205,7 +206,7 @@ class Sshoot:
         complete_argument(
             stop_parser.add_argument(
                 'name', help='name of the profile to stop'),
-            profile_completer)
+            partial(profile_completer, running=True))
 
         # Return whether profile is running
         is_running_parser = subparsers.add_parser(

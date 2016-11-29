@@ -24,10 +24,18 @@ def complete_argument(argument, completer):
     return argument
 
 
-def profile_completer(prefix, parsed_args, **kwargs):
-    '''Autocomplete helper for profile names.'''
+def profile_completer(prefix, parsed_args, running=None, **kwargs):
+    '''Autocomplete helper for profile names.
+
+    Parameters:
+        - running: filter profiles that are running or not (by default no
+          filter is applied).
+    '''
     manager = Manager(config_path=parsed_args.config)
     manager.load_config()
-    return (
-        name for name in manager.get_profiles().keys()
-        if name.startswith(prefix))
+    for name in manager.get_profiles().keys():
+        if not name.startswith(prefix):
+            continue
+        if running is None or manager.is_running(name) == running:
+            # Either no filter is set or it matches the profile status
+            yield name

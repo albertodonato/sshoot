@@ -21,7 +21,7 @@ from ..profile import Profile, ProfileError
 class ProfileTests(TestCase):
 
     def setUp(self):
-        super(ProfileTests, self).setUp()
+        super().setUp()
         self.profile = Profile(['1.1.1.0/24', '10.10.0.0/16'])
 
     def test_from_dict(self):

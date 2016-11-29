@@ -29,7 +29,7 @@ from ..config import yaml_dump, Config
 class YamlDumpTests(TestCase):
 
     def setUp(self):
-        super(YamlDumpTests, self).setUp()
+        super().setUp()
         self.data = {'foo': 'bar', 'baz': [1, 2]}
 
     def test_dump_to_string(self):
@@ -49,7 +49,7 @@ class YamlDumpTests(TestCase):
 class ConfigTests(TestWithFixtures):
 
     def setUp(self):
-        super(ConfigTests, self).setUp()
+        super().setUp()
         self.tempdir = self.useFixture(TempDir()).path
         self.config_path = os.path.join(self.tempdir, 'config.yaml')
         self.profiles_path = os.path.join(self.tempdir, 'profiles.yaml')

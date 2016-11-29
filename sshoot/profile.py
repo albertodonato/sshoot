@@ -20,7 +20,7 @@ class ProfileError(Exception):
     '''Profile configuration is not correct.'''
 
     def __init__(self):
-        super(ProfileError, self).__init__('Subnets must be specified')
+        super().__init__('Subnets must be specified')
 
 
 class Profile(object):

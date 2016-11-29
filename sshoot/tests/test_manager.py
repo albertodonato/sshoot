@@ -29,7 +29,7 @@ from ..manager import (
 class ManagerTests(TestWithFixtures):
 
     def setUp(self):
-        super(ManagerTests, self).setUp()
+        super().setUp()
         self.config_path = self.useFixture(TempDir()).path
         self.rundir = self.useFixture(TempDir()).path
         self.sessions_path = os.path.join(self.rundir, 'sessions')
