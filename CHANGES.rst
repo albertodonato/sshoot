@@ -1,3 +1,9 @@
+v1.2.5 - 2016-11-29
+===================
+
+- Filter running sessions for start/stop commands autocompletion.
+
+
 v1.2.4 - 2016-11-20
 ===================
 
