@@ -13,16 +13,31 @@
 # You should have received a copy of the GNU General Public License
 # along with sshoot.  If not, see <http://www.gnu.org/licenses/>.
 
+from unittest import TestCase
 from unittest.mock import patch
 from collections import namedtuple
 
 from fixtures import TestWithFixtures, TempDir
 
 from ..manager import Manager
-from ..autocomplete import profile_completer
+from ..autocomplete import complete_argument, profile_completer
 
 
 FakeParsedArgs = namedtuple('FakeParsedArgs', ['config'])
+
+
+class CompleteArgumentTests(TestCase):
+
+    def test_complete_arguments(self):
+        '''complete_arguments attaches a completer to the argument.'''
+
+        class FakeArgument:
+            completer = None
+
+        fake_argument = FakeArgument()
+        fake_completer = object()
+        complete_argument(fake_argument, fake_completer)
+        self.assertIs(fake_argument.completer, fake_completer)
 
 
 class ProfileCompleterTests(TestWithFixtures):

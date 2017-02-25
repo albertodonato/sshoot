@@ -99,17 +99,16 @@ class Manager(object):
         cmdline = self.get_cmdline(name, extra_args=extra_args)
         message = 'Profile failed to start: {}'
         try:
-            process = Popen(cmdline, stdout=PIPE, stderr=PIPE)
+            process = Popen(cmdline, stderr=PIPE)
             # Wait until process is started (it daemonizes)
             process.wait()
         except OSError as error:
             # To catch file not found errors
             raise ManagerProfileError(message.format(error))
-        except CalledProcessError:
-            pass  # The return code is checked anyway
 
+        error = process.stderr.read().decode()
+        process.stderr.close()
         if process.returncode != 0:
-            error = process.stderr.read().decode()
             raise ManagerProfileError(message.format(error))
 
     def stop_profile(self, name):

@@ -54,12 +54,29 @@ class ProfileTests(TestCase):
     def test_cmdline_with_options(self):
         '''Profile.cmdline() return the sshuttle cmdline for the config.'''
         self.profile.remote = '1.2.3.4'
+        self.profile.auto_hosts = True
+        self.profile.auto_nets = True
         self.profile.dns = True
-        self.profile.exclude_subnets = ['10.20.0.0/16', '10.30.0.0/16']
         self.assertEqual(
             self.profile.cmdline(),
             ['sshuttle', '1.1.1.0/24', '10.10.0.0/16', '--remote=1.2.3.4',
-             '--dns', '--exclude=10.20.0.0/16', '--exclude=10.30.0.0/16'])
+             '--auto-hosts', '--auto-nets', '--dns'])
+
+    def test_cmdline_exclude_subnets(self):
+        '''Profile.cmdline() includes excluded subnets in the cmdline.'''
+        self.profile.exclude_subnets = ['10.20.0.0/16', '10.30.0.0/16']
+        self.assertEqual(
+            self.profile.cmdline(),
+            ['sshuttle', '1.1.1.0/24', '10.10.0.0/16',
+             '--exclude=10.20.0.0/16', '--exclude=10.30.0.0/16'])
+
+    def test_cmdline_seed_hosts(self):
+        '''Profile.cmdline() includes seeded hosts in the cmdline.'''
+        self.profile.seed_hosts = ['10.1.2.3', '10.4.5.6']
+        self.assertEqual(
+            self.profile.cmdline(),
+            ['sshuttle', '1.1.1.0/24', '10.10.0.0/16',
+             '--seed-hosts=10.1.2.3,10.4.5.6'])
 
     def test_cmdline_with_profile_extra_opts(self):
         '''Profile.cmdline() return the sshuttle cmdline with extra options.'''

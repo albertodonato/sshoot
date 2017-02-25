@@ -68,6 +68,8 @@ class ManagerTests(TestWithFixtures):
 
     def test_load_config_create_dirs(self):
         '''Manager.load_config creates config directories.'''
+        os.rmdir(self.config_path)
+        os.rmdir(self.sessions_path)
         self.manager.load_config()
         self.assertTrue(os.path.isdir(self.config_path))
         self.assertTrue(os.path.isdir(self.sessions_path))
@@ -219,11 +221,25 @@ class ManagerTests(TestWithFixtures):
         '''If pidfile contains invalid data, stopping raises an error.'''
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
         with open(self.pid_path, 'w') as fh:
-            fh.write('garbage\n')
+            fh.write('garbage')
         self.assertRaises(
             ManagerProfileError, self.manager.stop_profile, 'profile')
 
-    def test_wb_get_pidfile(self):
+    def test_stop_profile_process_not_found(self):
+        '''If the process fails to stop an error is raised.'''
+        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
+
+        def kill(pid, signal):
+            raise IOError()
+
+        # Mock manager calls
+        self.manager.kill = kill
+        self.manager.is_running = lambda name: True
+        with self.assertRaises(ManagerProfileError) as cm:
+            self.manager.stop_profile('profile')
+        self.assertIn('Failed to stop profile', str(cm.exception))
+
+    def test_get_pidfile(self):
         '''Manager._get_pidfile returns the pidfile path for a session.'''
         self.assertEqual(self.manager._get_pidfile('profile'), self.pid_path)
 
