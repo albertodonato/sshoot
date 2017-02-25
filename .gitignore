@@ -1,7 +1,6 @@
 *.pyc
 *.pyo
 /build
-/html
 *.egg-info
 .eggs
 .pybuild
