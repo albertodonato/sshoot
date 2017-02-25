@@ -18,8 +18,6 @@ SETUP = $(PYTHON) setup.py
 LINT = flake8
 
 
-all: build
-
 build:
 	$(SETUP) build
 
@@ -31,12 +29,17 @@ clean:
 	find . -type d -name __pycache__ | xargs rm -rf
 
 test:
-	@$(SETUP) test
+	@$(SETUP) -m unittest
+
+coverage:
+	@coverage run -m unittest
+	@coverage report --show-missing --skip-covered --fail-under=100 \
+		--include=sshoot/* --omit=**/test_\*.py
 
 lint:
-	@$(LINT) .
+	@flake8 setup.py sshoot
 
 html:
 	sphinx-build -b html docs html
 
-.PHONY: build html
+.PHONY: build devel clean test coverage lint html
