@@ -29,7 +29,7 @@ clean:
 	find . -type d -name __pycache__ | xargs rm -rf
 
 test:
-	@$(SETUP) -m unittest
+	@$(PYTHON) -m unittest
 
 coverage:
 	@coverage run -m unittest
