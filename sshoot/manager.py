@@ -91,10 +91,11 @@ class Manager(object):
             # To catch file not found errors
             raise ManagerProfileError(message.format(error))
 
-        error = process.stderr.read().decode()
-        process.stderr.close()
         if process.returncode != 0:
+            error = process.stderr.read().decode()
+            process.stderr.close()
             raise ManagerProfileError(message.format(error))
+        process.stderr.close()
 
     def stop_profile(self, name):
         '''Stop profile with given name.'''
