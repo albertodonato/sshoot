@@ -1,4 +1,4 @@
-'''Command-line interface to handle sshuttle VPN sessions.'''
+"""Command-line interface to handle sshuttle VPN sessions."""
 
 import sys
 from functools import partial
@@ -13,7 +13,7 @@ from .autocomplete import complete_argument, profile_completer
 
 
 class Sshoot:
-    '''Manage multiple sshuttle VPN sessions.'''
+    """Manage multiple sshuttle VPN sessions."""
 
     # Map names to profile fileds
     _fields_map = (
@@ -42,7 +42,7 @@ class Sshoot:
             self._exit(message=str(error), code=2)
 
     def action_list(self, manager, args):
-        '''Print out the list of profiles as a table.'''
+        """Print out the list of profiles as a table."""
         fields = tuple(self._fields_map)
         if not args.verbose:
             # Only most basic info
@@ -67,7 +67,7 @@ class Sshoot:
         print(table.get_string(sortby='Profile'))
 
     def action_show(self, manager, args):
-        '''Show details on a profile.'''
+        """Show details on a profile."""
         name = args.name
         profile = manager.get_profile(name)
 
@@ -83,37 +83,37 @@ class Sshoot:
         print(table.get_string())
 
     def action_create(self, manager, args):
-        '''Create a new profile.'''
+        """Create a new profile."""
         manager.create_profile(args.name, args.__dict__)
 
     def action_delete(self, manager, args):
-        '''Delete profile with the given name.'''
+        """Delete profile with the given name."""
         manager.remove_profile(args.name)
 
     def action_start(self, manager, args):
-        '''Start sshuttle for the specified profile.'''
+        """Start sshuttle for the specified profile."""
         manager.start_profile(args.name, extra_args=args.args)
         print('Profile started')
 
     def action_stop(self, manager, args):
-        '''Stop sshuttle for the specified profile.'''
+        """Stop sshuttle for the specified profile."""
         manager.stop_profile(args.name)
         print('Profile stopped')
 
     def action_is_running(self, manager, args):
-        '''Return whether the specified profile is running.'''
+        """Return whether the specified profile is running."""
         # raise an error if profile is unknown
         manager.get_profile(args.name)
         retval = 0 if manager.is_running(args.name) else 1
         self._exit(code=retval)
 
     def action_get_command(self, manager, args):
-        '''Print the sshuttle command for the specified profile.'''
+        """Print the sshuttle command for the specified profile."""
         cmdline = manager.get_cmdline(args.name)
         print(' '.join(cmdline))
 
     def _get_parser(self):
-        '''Return a configured argparse.ArgumentParse instance.'''
+        """Return a configured argparse.ArgumentParse instance."""
         parser = ArgumentParser(description=self.__doc__)
         parser.add_argument(
             '-V', '--version', action='version',
@@ -214,7 +214,7 @@ class Sshoot:
         return parser
 
     def _format(self, value):
-        '''Convert value to string, handling special cases.'''
+        """Convert value to string, handling special cases."""
         if isinstance(value, (list, tuple)):
             return ' '.join(value)
         if value is None:
@@ -222,7 +222,7 @@ class Sshoot:
         return value
 
     def _exit(self, message=None, code=1):
-        '''Terminate with the specified error and code .'''
+        """Terminate with the specified error and code ."""
         if message:
             sys.stderr.write('{}\n'.format(message))
         sys.exit(code)

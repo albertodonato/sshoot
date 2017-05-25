@@ -1,2 +1,2 @@
-include LICENSE.txt README.rst CHANGES.rst
+include LICENSE.txt README.md CHANGES.md
 recursive-include shell-completion *

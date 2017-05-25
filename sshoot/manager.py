@@ -1,4 +1,4 @@
-'''Handle sshuttle sessions.'''
+"""Handle sshuttle sessions."""
 
 import os
 from signal import SIGTERM
@@ -14,14 +14,14 @@ DEFAULT_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.sshoot'))
 
 
 def get_rundir(prefix):
-    '''Return the directory holding runtime data.'''
+    """Return the directory holding runtime data."""
     return os.path.join(
         gettempdir(), '{prefix}-{username}'.format(
             prefix=prefix, username=getuser()))
 
 
 class ManagerProfileError(Exception):
-    '''Profile management failed.'''
+    """Profile management failed."""
 
 
 class Manager(object):
@@ -35,7 +35,7 @@ class Manager(object):
         self._config = Config(self.config_path)
 
     def load_config(self):
-        '''Load configuration from file.'''
+        """Load configuration from file."""
         if not os.path.exists(self.config_path):
             os.makedirs(self.config_path)
         if not os.path.exists(self.sessions_path):
@@ -44,7 +44,7 @@ class Manager(object):
         self._config.load()
 
     def create_profile(self, name, details):
-        '''Create a profile with provided details.'''
+        """Create a profile with provided details."""
         try:
             profile = Profile.from_dict(details)
             self._config.add_profile(name, profile)
@@ -57,7 +57,7 @@ class Manager(object):
         self._config.save()
 
     def remove_profile(self, name):
-        '''Remove profile with given name.'''
+        """Remove profile with given name."""
         try:
             self._config.remove_profile(name)
         except KeyError:
@@ -66,18 +66,18 @@ class Manager(object):
         self._config.save()
 
     def get_profiles(self):
-        '''Return profiles defined in config.'''
+        """Return profiles defined in config."""
         return self._config.profiles
 
     def get_profile(self, name):
-        '''Return profile with given name.'''
+        """Return profile with given name."""
         try:
             return self._config.profiles[name]
         except KeyError:
             raise ManagerProfileError('Unknown profile: {}'.format(name))
 
     def start_profile(self, name, extra_args=None):
-        '''Start profile with given name.'''
+        """Start profile with given name."""
         if self.is_running(name):
             raise ManagerProfileError('Profile is already running')
 
@@ -98,7 +98,7 @@ class Manager(object):
         process.stderr.close()
 
     def stop_profile(self, name):
-        '''Stop profile with given name.'''
+        """Stop profile with given name."""
         self.get_profile(name)
 
         if not self.is_running(name):
@@ -112,13 +112,13 @@ class Manager(object):
                 'Failed to stop profile: {}'.format(error))
 
     def is_running(self, name):
-        '''Return whether the specified profile is running.'''
+        """Return whether the specified profile is running."""
         pidfile = self._get_pidfile(name)
         try:
             with open(pidfile) as fh:
                 pid = int(fh.read())
         except Exception:
-            # If anything fails, a valid pid can't be found, so the profile is
+            # If anything fails, a valid PID can't be found, so the profile is
             # not running
             return False
 
@@ -131,7 +131,7 @@ class Manager(object):
         return True
 
     def get_cmdline(self, name, extra_args=None):
-        '''Return the command line for the specified profile.'''
+        """Return the command line for the specified profile."""
         profile = self.get_profile(name)
 
         executable = self._get_executable()
@@ -141,9 +141,9 @@ class Manager(object):
         return profile.cmdline(executable=executable, extra_opts=extra_opts)
 
     def _get_pidfile(self, name):
-        '''Return the path of the pidfile for the specified profile.'''
+        """Return the path of the pidfile for the specified profile."""
         return os.path.join(self.sessions_path, '{}.pid'.format(name))
 
     def _get_executable(self):
-        '''Return the shuttle executable from the config.'''
+        """Return the shuttle executable from the config."""
         return self._config.config.get('executable', 'sshuttle')

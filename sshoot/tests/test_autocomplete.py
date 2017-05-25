@@ -14,7 +14,7 @@ FakeParsedArgs = namedtuple('FakeParsedArgs', ['config'])
 class CompleteArgumentTests(TestCase):
 
     def test_complete_arguments(self):
-        '''complete_arguments attaches a completer to the argument.'''
+        """complete_arguments attaches a completer to the argument."""
 
         class FakeArgument:
             completer = None
@@ -38,13 +38,13 @@ class ProfileCompleterTests(TestWithFixtures):
         self.fake_args = FakeParsedArgs(self.config_path)
 
     def test_complete_filter_prefix(self):
-        '''The autocomplete function returns names that match the prefix.'''
+        """The autocomplete function returns names that match the prefix."""
         self.assertCountEqual(
             ['bar', 'baz'], profile_completer('b', self.fake_args))
 
     @patch('sshoot.autocomplete.Manager')
     def test_complete_filter_running(self, mock_manager):
-        '''The autocomplete function returns names that match the prefix.'''
+        """The autocomplete function returns names that match the prefix."""
         mock_manager.return_value = self.manager
         self.manager.is_running = lambda name: name != 'bar'
         self.assertCountEqual(
@@ -53,7 +53,7 @@ class ProfileCompleterTests(TestWithFixtures):
 
     @patch('sshoot.autocomplete.Manager')
     def test_complete_filter_not_running(self, mock_manager):
-        '''The autocomplete function returns names that match the prefix.'''
+        """The autocomplete function returns names that match the prefix."""
         mock_manager.return_value = self.manager
         self.manager.is_running = lambda name: name != 'bar'
         self.assertCountEqual(

@@ -1,0 +1,5 @@
+[run]
+source =
+  sshoot
+omit =
+  sshoot/main.py

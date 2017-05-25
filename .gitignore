@@ -5,3 +5,5 @@
 .eggs
 .pybuild
 .coverage
+.tox
+.cache

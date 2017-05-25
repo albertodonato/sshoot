@@ -1,15 +1,15 @@
-'''A sshuttle VPN profile.'''
+"""A sshuttle VPN profile."""
 
 
 class ProfileError(Exception):
-    '''Profile configuration is not correct.'''
+    """Profile configuration is not correct."""
 
     def __init__(self):
         super().__init__('Subnets must be specified')
 
 
 class Profile(object):
-    '''Hold information about a sshuttle profile.'''
+    """Hold information about a sshuttle profile."""
 
     _config_attrs = (
         'remote', 'subnets', 'auto_hosts', 'auto_nets', 'dns',
@@ -29,7 +29,7 @@ class Profile(object):
 
     @classmethod
     def from_dict(cls, config):
-        '''Create a profile from a dict holding config attributes.'''
+        """Create a profile from a dict holding config attributes."""
         config = config.copy()  # shallow, only first-level keys are changed
         try:
             subnets = config.pop('subnets')
@@ -44,7 +44,7 @@ class Profile(object):
         return profile
 
     def cmdline(self, executable='sshuttle', extra_opts=None):
-        '''Return a sshuttle cmdline based on the profile.'''
+        """Return a sshuttle cmdline based on the profile."""
         cmd = [executable] + self.subnets
         if self.remote:
             cmd.append('--remote={}'.format(self.remote))
@@ -66,7 +66,7 @@ class Profile(object):
         return cmd
 
     def config(self):
-        '''Return profile configuration as a dict.'''
+        """Return profile configuration as a dict."""
         conf = {}
         for attr in self._config_attrs:
             value = getattr(self, attr)
