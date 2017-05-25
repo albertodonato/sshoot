@@ -1,5 +1,9 @@
 # sshoot - Manage sshoot VPN sessions
 
+[![Latest Version](https://img.shields.io/pypi/v/sshoot.svg)](https://pypi.python.org/pypi/sshoot)
+[![Build Status](https://travis-ci.org/albertodonato/sshoot.svg?branch=master)](https://travis-ci.org/albertodonato/sshoot)
+[![Coverage Status](https://codecov.io/gh/albertodonato/sshoot/branch/master/graph/badge.svg)](https://codecov.io/gh/albertodonato/sshoot)
+
 Command-line interface to manage multiple `sshuttle` VPN sessions.
 
 [sshuttle](https://github.com/apenwarr/sshuttle) creates a VPN connection from
