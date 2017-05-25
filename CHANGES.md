@@ -1,3 +1,8 @@
+# v1.2.6 - 2017-05-25
+
+- Move project to GitHub, small test cleanups.
+
+
 # v1.2.5 - 2016-11-29
 
 - Filter running sessions for start/stop commands autocompletion.
