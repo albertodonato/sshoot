@@ -8,20 +8,15 @@ from subprocess import (
     Popen,
     PIPE)
 
+from xdg import XDG_CONFIG_HOME
+
 from .profile import (
     Profile,
     ProfileError)
 from .config import Config
 
 
-DEFAULT_CONFIG_PATH = os.path.expanduser(os.path.join('~', '.sshoot'))
-
-
-def get_rundir(prefix):
-    """Return the directory holding runtime data."""
-    return os.path.join(
-        gettempdir(), '{prefix}-{username}'.format(
-            prefix=prefix, username=getuser()))
+DEFAULT_CONFIG_PATH = os.path.join(XDG_CONFIG_HOME, 'sshoot')
 
 
 class ManagerProfileError(Exception):
@@ -152,3 +147,10 @@ class Manager:
     def _get_executable(self):
         """Return the shuttle executable from the config."""
         return self._config.config.get('executable', 'sshuttle')
+
+
+def get_rundir(prefix):
+    """Return the directory holding runtime data."""
+    return os.path.join(
+        gettempdir(), '{prefix}-{username}'.format(
+            prefix=prefix, username=getuser()))

@@ -1,6 +1,8 @@
 """Command-line interface to handle sshuttle VPN sessions."""
 
 import sys
+import os
+import shutil
 from functools import partial
 from argparse import ArgumentParser
 
@@ -24,6 +26,8 @@ class Sshoot:
 
     def __call__(self):
         args = self._get_parser().parse_args()
+        # backwards-compatible config lookup
+        self._check_update_config_path(args.config)
 
         try:
             manager = Manager(config_path=args.config)
@@ -180,6 +184,21 @@ class Sshoot:
         # Setup autocompletion
         autocomplete(parser)
         return parser
+
+    def _check_update_config_path(self, config):
+        """Move config to the new path if the old one is found."""
+        old_config_path = os.path.expanduser(os.path.join('~', '.sshoot'))
+        if config != DEFAULT_CONFIG_PATH:
+            return
+
+        need_config_path_update = (
+            os.path.exists(old_config_path) and
+            not os.path.exists(DEFAULT_CONFIG_PATH))
+        if need_config_path_update:
+            shutil.move(old_config_path, DEFAULT_CONFIG_PATH)
+            sys.stderr.write(
+                'NOTICE: configuration tree moved from {} to {}\n'.format(
+                    old_config_path, DEFAULT_CONFIG_PATH))
 
     def _exit(self, message=None, code=1):
         """Terminate with the specified error and code ."""

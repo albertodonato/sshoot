@@ -22,7 +22,7 @@ config = {
     'include_package_data': True,
     'entry_points': {'console_scripts': ['sshoot = sshoot.main:sshoot']},
     'test_suite': 'sshoot',
-    'install_requires': ['PyYAML', 'prettytable', 'argcomplete'],
+    'install_requires': ['PyYAML', 'prettytable', 'argcomplete', 'xdg'],
     'tests_require': tests_require,
     'extras_require': {'testing': tests_require},
     'keywords': 'ssh sshuttle vpn',
