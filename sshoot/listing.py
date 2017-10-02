@@ -4,11 +4,12 @@ from collections import OrderedDict
 from io import StringIO
 from csv import DictWriter
 import json
-import yaml
 
 from prettytable import (
     PrettyTable,
     HEADER)
+
+from .config import yaml_dump
 
 
 # Map names to profile fileds
@@ -110,7 +111,7 @@ class ProfileListing:
     def _format_yaml(self, profiles_iter, verbose=False):
         """Format profiles data as YAML."""
         data = {name: profile.config() for name, profile in profiles_iter}
-        return yaml.dump(data)
+        return yaml_dump(data)
 
 
 def profile_details(manager, name):
