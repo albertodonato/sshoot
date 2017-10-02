@@ -40,7 +40,7 @@ class Sshoot:
     def action_list(self, manager, args):
         """Print out the list of profiles as a table."""
         listing = ProfileListing(manager)
-        print(listing.get_output(args.format, verbose=args.verbose))
+        print(listing.get_output(args.format, verbose=args.verbose), end='')
 
     def action_show(self, manager, args):
         """Show details on a profile."""

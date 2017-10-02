@@ -77,7 +77,7 @@ class ProfileListing:
                 _format_value(getattr(profile, column))
                 for column in columns)
             table.add_row(row)
-        return table.get_string(sortby=NAME_FIELD)
+        return table.get_string(sortby=NAME_FIELD) + '\n'
 
     def _format_csv(self, profiles_iter, verbose=False):
         """Format profiles data as CSV."""
