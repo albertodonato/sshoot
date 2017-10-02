@@ -1,3 +1,9 @@
+# v1.2.7 - 2017-10-02
+
+- Support profiles listing in different formats (table, CSV, YAML, JSON) (Fixes: #3)
+- Move configuration path to XDG conventions (Fixes: #1)
+
+
 # v1.2.6 - 2017-05-25
 
 - Move project to GitHub, small test cleanups.
