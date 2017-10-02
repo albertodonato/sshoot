@@ -4,9 +4,13 @@ import os
 from signal import SIGTERM
 from tempfile import gettempdir
 from getpass import getuser
-from subprocess import Popen, PIPE
+from subprocess import (
+    Popen,
+    PIPE)
 
-from .profile import Profile, ProfileError
+from .profile import (
+    Profile,
+    ProfileError)
 from .config import Config
 
 

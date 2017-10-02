@@ -4,10 +4,14 @@ import yaml
 from textwrap import dedent
 from unittest import TestCase
 
-from fixtures import TempDir, TestWithFixtures
+from fixtures import (
+    TempDir,
+    TestWithFixtures)
 
 from ..profile import Profile
-from ..config import yaml_dump, Config
+from ..config import (
+    yaml_dump,
+    Config)
 
 
 class YamlDumpTests(TestCase):

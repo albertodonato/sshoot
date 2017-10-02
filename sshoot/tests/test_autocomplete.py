@@ -2,10 +2,14 @@ from unittest import TestCase
 from unittest.mock import patch
 from collections import namedtuple
 
-from fixtures import TestWithFixtures, TempDir
+from fixtures import (
+    TestWithFixtures,
+    TempDir)
 
 from ..manager import Manager
-from ..autocomplete import complete_argument, profile_completer
+from ..autocomplete import (
+    complete_argument,
+    profile_completer)
 
 
 FakeParsedArgs = namedtuple('FakeParsedArgs', ['config'])

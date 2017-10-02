@@ -1,6 +1,8 @@
 from setuptools import setup, find_packages
 
-from sshoot import __version__, __doc__ as description
+from sshoot import (
+    __version__,
+    __doc__ as description)
 
 tests_require = ['fixtures']
 

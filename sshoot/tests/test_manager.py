@@ -4,11 +4,16 @@ from unittest import TestCase
 from tempfile import gettempdir
 from getpass import getuser
 
-from fixtures import TestWithFixtures, TempDir
+from fixtures import (
+    TestWithFixtures,
+    TempDir)
 
 from ..profile import Profile
 from ..manager import (
-    DEFAULT_CONFIG_PATH, get_rundir, Manager, ManagerProfileError)
+    DEFAULT_CONFIG_PATH,
+    get_rundir,
+    Manager,
+    ManagerProfileError)
 
 
 class ManagerTests(TestWithFixtures):

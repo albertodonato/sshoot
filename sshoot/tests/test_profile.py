@@ -1,6 +1,8 @@
 from unittest import TestCase
 
-from ..profile import Profile, ProfileError
+from ..profile import (
+    Profile,
+    ProfileError)
 
 
 class ProfileTests(TestCase):
