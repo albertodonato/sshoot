@@ -21,10 +21,11 @@ def get_rundir(prefix):
 
 
 class ManagerProfileError(Exception):
-    """Profile management failed."""
+    """Profile operation failed."""
 
 
-class Manager(object):
+class Manager:
+    """Profile manager."""
 
     kill = os.kill  # for testing
 

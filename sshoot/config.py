@@ -12,7 +12,7 @@ def yaml_dump(data, fh=None):
         data, fh, default_flow_style=False, allow_unicode=True)
 
 
-class Config(object):
+class Config:
     """Handle configuration file loading/saving."""
 
     CONFIG_KEYS = frozenset(['executable'])

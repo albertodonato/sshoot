@@ -8,7 +8,7 @@ class ProfileError(Exception):
         super().__init__('Subnets must be specified')
 
 
-class Profile(object):
+class Profile:
     """Hold information about a sshuttle profile."""
 
     _config_attrs = (

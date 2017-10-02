@@ -5,26 +5,22 @@ from functools import partial
 from argparse import ArgumentParser
 
 from argcomplete import autocomplete
-from prettytable import PrettyTable, HEADER
 
 from . import __version__
-from .manager import Manager, ManagerProfileError, DEFAULT_CONFIG_PATH
-from .autocomplete import complete_argument, profile_completer
+from .manager import (
+    Manager,
+    ManagerProfileError,
+    DEFAULT_CONFIG_PATH)
+from .listing import (
+    ProfileListing,
+    profile_details)
+from .autocomplete import (
+    complete_argument,
+    profile_completer)
 
 
 class Sshoot:
     """Manage multiple sshuttle VPN sessions."""
-
-    # Map names to profile fileds
-    _fields_map = (
-        ('Remote host', 'remote'),
-        ('Subnets', 'subnets'),
-        ('Auto hosts', 'auto_hosts'),
-        ('Auto nets', 'auto_nets'),
-        ('DNS forward', 'dns'),
-        ('Exclude subnets', 'exclude_subnets'),
-        ('Seed hosts', 'seed_hosts'),
-        ('Extra options', 'extra_opts'))
 
     def __call__(self):
         args = self._get_parser().parse_args()
@@ -43,44 +39,12 @@ class Sshoot:
 
     def action_list(self, manager, args):
         """Print out the list of profiles as a table."""
-        fields = tuple(self._fields_map)
-        if not args.verbose:
-            # Only most basic info
-            fields = fields[:2]
-        columns = [name for name, _ in fields]
-        columns = ['', 'Profile'] + columns
-
-        table = PrettyTable(columns)
-        table.align = 'l'
-        table.vertical_char = ' '
-        table.junction_char = table.horizontal_char
-        table.padding_width = 0
-        table.left_padding_width = 0
-        table.right_padding_width = 1
-        table.hrules = HEADER
-
-        for name, profile in manager.get_profiles().items():
-            row = ['*' if manager.is_running(name) else '', name]
-            for _, field in fields:
-                row.append(self._format(getattr(profile, field)))
-            table.add_row(row)
-        print(table.get_string(sortby='Profile'))
+        listing = ProfileListing(manager)
+        print(listing.get_output(args.format, verbose=args.verbose))
 
     def action_show(self, manager, args):
         """Show details on a profile."""
-        name = args.name
-        profile = manager.get_profile(name)
-
-        table = PrettyTable(
-            field_names=['key', 'value'], header=False, border=False)
-        table.align['key'] = table.align['value'] = 'l'
-        table.add_row(('Name:', name))
-        status = 'ACTIVE' if manager.is_running(name) else 'STOPPED'
-        table.add_row(('Status', status))
-        for name, field in self._fields_map:
-            table.add_row(
-                ('{}:'.format(name), self._format(getattr(profile, field))))
-        print(table.get_string())
+        print(profile_details(manager, args.name))
 
     def action_create(self, manager, args):
         """Create a new profile."""
@@ -130,7 +94,11 @@ class Sshoot:
             'list', help='list defined profiles')
         list_parser.add_argument(
             '-v', '--verbose', action='store_true',
-            help='show verbose listing')
+            help='verbose listing')
+        list_parser.add_argument(
+            '-f', '--format', choices=ProfileListing.supported_formats(),
+            default='table',
+            help='listing format (default %(default)s)')
 
         # Show profile
         show_parser = subparsers.add_parser(
@@ -212,14 +180,6 @@ class Sshoot:
         # Setup autocompletion
         autocomplete(parser)
         return parser
-
-    def _format(self, value):
-        """Convert value to string, handling special cases."""
-        if isinstance(value, (list, tuple)):
-            return ' '.join(value)
-        if value is None:
-            return ''
-        return value
 
     def _exit(self, message=None, code=1):
         """Terminate with the specified error and code ."""
