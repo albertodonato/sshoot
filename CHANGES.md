@@ -1,4 +1,9 @@
-# v1.2.7 - 2017-10-02
+# v1.3.1 - 2017-10-10
+
+- Specify long description content-type.
+
+
+# v1.3.0 - 2017-10-02
 
 - Support profiles listing in different formats (table, CSV, YAML, JSON) (Fixes: #3)
 - Move configuration path to XDG conventions (Fixes: #1)
