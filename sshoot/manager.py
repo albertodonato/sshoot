@@ -8,7 +8,7 @@ from subprocess import (
     Popen,
     PIPE)
 
-from xdg import XDG_CONFIG_HOME
+from xdg.BaseDirectory import xdg_config_home
 
 from .profile import (
     Profile,
@@ -16,7 +16,7 @@ from .profile import (
 from .config import Config
 
 
-DEFAULT_CONFIG_PATH = os.path.join(XDG_CONFIG_HOME, 'sshoot')
+DEFAULT_CONFIG_PATH = os.path.join(xdg_config_home, 'sshoot')
 
 
 class ManagerProfileError(Exception):
