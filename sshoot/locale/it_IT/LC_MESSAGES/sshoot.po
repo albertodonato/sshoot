@@ -1,0 +1,210 @@
+# Italian (Italy) translations for sshoot.
+# Copyright (C) 2017 ORGANIZATION
+# This file is distributed under the same license as the sshoot project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sshoot 1.3.2\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2017-10-15 13:42+0200\n"
+"PO-Revision-Date: 2017-10-15 13:53+0200\n"
+"Last-Translator: Alberto Donato <alberto.donato@gmail.com>\n"
+"Language: it_IT\n"
+"Language-Team: it_IT <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: sshoot/listing.py:18
+msgid "Remote host"
+msgstr "Host remoto"
+
+#: sshoot/listing.py:19
+msgid "Subnets"
+msgstr "Sottoreti"
+
+#: sshoot/listing.py:20
+msgid "Auto hosts"
+msgstr "Auto hosts"
+
+#: sshoot/listing.py:21
+msgid "Auto nets"
+msgstr "Auto nets"
+
+#: sshoot/listing.py:22
+msgid "DNS forward"
+msgstr "Invia req. DNS"
+
+#: sshoot/listing.py:23
+msgid "Exclude subnets"
+msgstr "Sottoreti escluse"
+
+#: sshoot/listing.py:24
+msgid "Seed hosts"
+msgstr "Specifica host"
+
+#: sshoot/listing.py:25
+msgid "Extra options"
+msgstr "Opzioni aggiuntive"
+
+#: sshoot/listing.py:27
+msgid "Name"
+msgstr "Nome"
+
+#: sshoot/listing.py:28
+msgid "Status"
+msgstr "Stato"
+
+#: sshoot/listing.py:34
+msgid "Invalid output format: {name}"
+msgstr "Formato di output invalido: {name}"
+
+#: sshoot/listing.py:134
+msgid "ACTIVE"
+msgstr "ATTIVO"
+
+#: sshoot/listing.py:134
+msgid "STOPPED"
+msgstr "INATTIVO"
+
+#: sshoot/main.py:65
+msgid "Profile started"
+msgstr "Profilo avviato"
+
+#: sshoot/main.py:70
+msgid "Profile stopped"
+msgstr "Profilo disattivato"
+
+#: sshoot/main.py:92
+#, python-format
+msgid "configuration directory (default: %(default)s)"
+msgstr "directory di configurazione (predefinita: %(default)s)"
+
+#: sshoot/main.py:94
+msgid "action to perform"
+msgstr "azione da effettuare"
+
+#: sshoot/main.py:99
+msgid "list defined profiles"
+msgstr "lista profili definiti"
+
+#: sshoot/main.py:102
+msgid "verbose listing"
+msgstr "visualizza maggiori dettagli"
+
+#: sshoot/main.py:106
+#, python-format
+msgid "listing format (default %(default)s)"
+msgstr "formato lista (predefinito: %(default)s)"
+
+#: sshoot/main.py:110
+msgid "show profile configuration"
+msgstr "visualizza configurazione profilo"
+
+#: sshoot/main.py:112 sshoot/main.py:118
+msgid "profile name"
+msgstr "nome profilo"
+
+#: sshoot/main.py:120
+msgid "subnets to route over the VPN"
+msgstr "sottoreti da ruotare tramite VPN"
+
+#: sshoot/main.py:122
+msgid "remote host to connect to"
+msgstr "host remoto a cui connettersi"
+
+#: sshoot/main.py:125
+msgid "automatically update /etc/hosts with hosts from VPN"
+msgstr "aggiorna automaticamente /etc/hosts con hosts dalla VPN"
+
+#: sshoot/main.py:128
+msgid "automatically route additional nets from server"
+msgstr "ruota automaticamente le reti dal server"
+
+#: sshoot/main.py:131
+msgid "forward DNS queries through the VPN"
+msgstr "invia le richieste DNS attraverso la VPN"
+
+#: sshoot/main.py:134
+msgid "exclude subnets from VPN forward"
+msgstr "escludi sottoreti dall'invio tramite VPN"
+
+#: sshoot/main.py:137
+msgid "comma-separated list of hosts to seed to auto-hosts"
+msgstr "lista (separata da virgole) degli host da specificare ad auto-hosts"
+
+#: sshoot/main.py:140
+msgid "extra options to pass to sshuttle command line"
+msgstr "opzioni aggiuntive da passare alla linea di comando di sshuttle"
+
+#: sshoot/main.py:144
+msgid "delete an existing profile"
+msgstr "cancella un profilo esistente"
+
+#: sshoot/main.py:147
+msgid "name of the profile to remove"
+msgstr "nome del profilo da rimuovere"
+
+#: sshoot/main.py:152
+msgid "start a VPN session for a profile"
+msgstr "avvia la sessione VPN per un profilo"
+
+#: sshoot/main.py:155
+msgid "name of the profile to start"
+msgstr "nome del profilo da attivare"
+
+#: sshoot/main.py:163
+msgid "stop a running VPN session for a profile"
+msgstr "disattiva una sessione VPN attiva per un profilo"
+
+#: sshoot/main.py:166
+msgid "name of the profile to stop"
+msgstr "nome del profilo da disattivare"
+
+#: sshoot/main.py:171
+msgid "return whether a profile is running"
+msgstr "ritorna se un profilo è attivo"
+
+#: sshoot/main.py:174
+msgid "name of the profile to query"
+msgstr "nome del profilo da interrogare"
+
+#: sshoot/main.py:179
+msgid "return the sshuttle command for a profile"
+msgstr "ritorna il comando sshuttle per un profilo"
+
+#: sshoot/main.py:182
+msgid "name of the profile"
+msgstr "nomde del profilo"
+
+#: sshoot/main.py:201
+msgid "NOTICE: configuration tree moved from {old_path} to {new_path}\n"
+msgstr "NOTA: la configurazione è stata spostata da {old_path} a {new_path}\n"
+
+#: sshoot/manager.py:54
+msgid "Profile name already in use: {name}"
+msgstr "Nome di profilo già in uso: {name}"
+
+#: sshoot/manager.py:66 sshoot/manager.py:80
+msgid "Unknown profile: {name}"
+msgstr "Profilo sconosciuto: {name}"
+
+#: sshoot/manager.py:85
+msgid "Profile is already running"
+msgstr "Il profilo è già attivo"
+
+#: sshoot/manager.py:88
+msgid "Profile failed to start: {error}"
+msgstr "Attivazione del profilo fallita: {error}"
+
+#: sshoot/manager.py:108
+msgid "Profile is not running"
+msgstr "Il profilo non è attivo"
+
+#: sshoot/manager.py:115
+msgid "Failed to stop profile: {error}"
+msgstr "Disattivazione del profilo fallita {error}"
+
