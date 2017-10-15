@@ -10,27 +10,28 @@ from prettytable import (
     HEADER)
 
 from .config import yaml_dump
+from .i18n import _
 
 
 # Map names to profile fileds
 _FIELDS_MAP = OrderedDict([
-    ('Remote host', 'remote'),
-    ('Subnets', 'subnets'),
-    ('Auto hosts', 'auto_hosts'),
-    ('Auto nets', 'auto_nets'),
-    ('DNS forward', 'dns'),
-    ('Exclude subnets', 'exclude_subnets'),
-    ('Seed hosts', 'seed_hosts'),
-    ('Extra options', 'extra_opts')])
+    (_('Remote host'), 'remote'),
+    (_('Subnets'), 'subnets'),
+    (_('Auto hosts'), 'auto_hosts'),
+    (_('Auto nets'), 'auto_nets'),
+    (_('DNS forward'), 'dns'),
+    (_('Exclude subnets'), 'exclude_subnets'),
+    (_('Seed hosts'), 'seed_hosts'),
+    (_('Extra options'), 'extra_opts')])
 
-NAME_FIELD = 'Name'
-STATUS_FIELD = 'Status'
+NAME_FIELD = _('Name')
+STATUS_FIELD = _('Status')
 
 
 class InvalidFormat(Exception):
 
     def __init__(self, name):
-        super().__init__('Invalid output format: {}'.format(name))
+        super().__init__(_('Invalid output format: {name}').format(name=name))
 
 
 class ProfileListing:
@@ -130,7 +131,7 @@ def profile_details(manager, name):
 
 def _profile_status(manager, name):
     """Return a string with the status of a profile."""
-    return 'ACTIVE' if manager.is_running(name) else 'STOPPED'
+    return _('ACTIVE') if manager.is_running(name) else _('STOPPED')
 
 
 def _format_value(value):

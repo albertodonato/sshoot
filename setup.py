@@ -6,6 +6,7 @@ from sshoot import (
 
 tests_require = ['fixtures']
 
+
 config = {
     'name': 'sshoot',
     'version': __version__,
@@ -23,6 +24,7 @@ config = {
     'include_package_data': True,
     'entry_points': {'console_scripts': ['sshoot = sshoot.main:sshoot']},
     'test_suite': 'sshoot',
+    'setup_requires': ['Babel'],
     'install_requires': ['PyYAML', 'prettytable', 'argcomplete', 'pyxdg'],
     'tests_require': tests_require,
     'extras_require': {'testing': tests_require},

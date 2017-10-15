@@ -14,6 +14,7 @@ from .profile import (
     Profile,
     ProfileError)
 from .config import Config
+from .i18n import _
 
 
 DEFAULT_CONFIG_PATH = os.path.join(xdg_config_home, 'sshoot')
@@ -50,7 +51,7 @@ class Manager:
             self._config.add_profile(name, profile)
         except KeyError:
             raise ManagerProfileError(
-                'Profile name already in use: {}'.format(name))
+                _('Profile name already in use: {name}').format(name=name))
         except ProfileError as error:
             raise ManagerProfileError(str(error))
 
@@ -61,7 +62,8 @@ class Manager:
         try:
             self._config.remove_profile(name)
         except KeyError:
-            raise ManagerProfileError('Unknown profile: {}'.format(name))
+            raise ManagerProfileError(
+                _('Unknown profile: {name}').format(name=name))
 
         self._config.save()
 
@@ -74,27 +76,28 @@ class Manager:
         try:
             return self._config.profiles[name]
         except KeyError:
-            raise ManagerProfileError('Unknown profile: {}'.format(name))
+            raise ManagerProfileError(
+                _('Unknown profile: {name}').format(name=name))
 
     def start_profile(self, name, extra_args=None):
         """Start profile with given name."""
         if self.is_running(name):
-            raise ManagerProfileError('Profile is already running')
+            raise ManagerProfileError(_('Profile is already running'))
 
         cmdline = self.get_cmdline(name, extra_args=extra_args)
-        message = 'Profile failed to start: {}'
+        message = _('Profile failed to start: {error}')
         try:
             process = Popen(cmdline, stderr=PIPE)
             # Wait until process is started (it daemonizes)
             process.wait()
         except OSError as error:
             # To catch file not found errors
-            raise ManagerProfileError(message.format(error))
+            raise ManagerProfileError(message.format(error=error))
 
         if process.returncode != 0:
             error = process.stderr.read().decode()
             process.stderr.close()
-            raise ManagerProfileError(message.format(error))
+            raise ManagerProfileError(message.format(error=error))
         process.stderr.close()
 
     def stop_profile(self, name):
@@ -102,14 +105,14 @@ class Manager:
         self.get_profile(name)
 
         if not self.is_running(name):
-            raise ManagerProfileError('Profile is not running')
+            raise ManagerProfileError(_('Profile is not running'))
 
         try:
             with open(self._get_pidfile(name)) as fh:
                 self.kill(int(fh.read()), SIGTERM)
         except (IOError, OSError) as error:
             raise ManagerProfileError(
-                'Failed to stop profile: {}'.format(error))
+                _('Failed to stop profile: {error}').format(error=error))
 
     def is_running(self, name):
         """Return whether the specified profile is running."""

@@ -1,2 +1,3 @@
 include LICENSE.txt README.md CHANGES.md
 recursive-include shell-completion *
+recursive-include sshoot/locale *
