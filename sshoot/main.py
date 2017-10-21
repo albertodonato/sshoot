@@ -114,7 +114,7 @@ class Sshoot:
 
         # Add profile
         create_parser = subparsers.add_parser(
-            'create', help='define a new profile')
+            'create', help=_('define a new profile'))
         create_parser.add_argument('name', help=_('profile name'))
         create_parser.add_argument(
             'subnets', nargs='+', help=_('subnets to route over the VPN'))
