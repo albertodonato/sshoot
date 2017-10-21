@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from argcomplete import autocomplete
 
 from . import __version__
-from .i18n import _
+from .i18n import gettext as _
 from .manager import (
     Manager,
     ManagerProfileError,
@@ -83,7 +83,8 @@ class Sshoot:
 
     def _get_parser(self):
         """Return a configured argparse.ArgumentParse instance."""
-        parser = ArgumentParser(description=_(self.__doc__))
+        parser = ArgumentParser(
+            description=_('Manage multiple sshuttle VPN sessions'))
         parser.add_argument(
             '-V', '--version', action='version',
             version='%(prog)s {}'.format(__version__))

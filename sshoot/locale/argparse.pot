@@ -1,0 +1,134 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2017-10-21 14:56+CEST\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: /usr/lib/python3.6/argparse.py:304
+msgid "usage: "
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:835
+msgid ".__call__() not defined"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1132
+msgid "unknown parser %(parser_name)r (choices: %(choices)s)"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1186
+msgid "argument \"-\" with mode %r"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1194
+msgid "can't open '%s': %s"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1398
+msgid "cannot merge actions - two groups are named %r"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1436
+msgid "'required' is an invalid argument for positionals"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1458
+msgid "invalid option string %(option)r: must start with a character %(prefix_chars)r"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1478
+msgid "dest= is required for options like %r"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1495
+msgid "invalid conflict_resolution value: %r"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1579
+msgid "mutually exclusive arguments must be optional"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1642
+msgid "positional arguments"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1643
+msgid "optional arguments"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1658
+msgid "show this help message and exit"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1689
+msgid "cannot have multiple subparser arguments"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1741
+msgid "unrecognized arguments: %s"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1838
+msgid "not allowed with argument %s"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:1884 /usr/lib/python3.6/argparse.py:1898
+msgid "ignored explicit argument %r"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2005
+msgid "the following arguments are required: %s"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2020
+msgid "one of the arguments %s is required"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2063
+msgid "expected one argument"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2064
+msgid "expected at most one argument"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2065
+msgid "expected at least one argument"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2127
+msgid "ambiguous option: %(option)s could match %(matches)s"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2190
+msgid "unexpected option string: %s"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2294
+msgid "%r is not callable"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2311
+msgid "invalid %(type)s value: %(value)r"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2322
+msgid "invalid choice: %(value)r (choose from %(choices)s)"
+msgstr ""
+
+#: /usr/lib/python3.6/argparse.py:2398
+msgid ""
+"%(prog)s: error: %(message)s\n"
+msgstr ""
+

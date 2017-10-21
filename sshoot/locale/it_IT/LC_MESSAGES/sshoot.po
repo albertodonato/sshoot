@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sshoot 1.3.2\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-10-21 14:43+0200\n"
-"PO-Revision-Date: 2017-10-21 15:05+0200\n"
+"POT-Creation-Date: 2017-10-22 11:55+0200\n"
+"PO-Revision-Date: 2017-10-22 11:56+0200\n"
 "Last-Translator: Alberto Donato <alberto.donato@gmail.com>\n"
 "Language: it_IT\n"
 "Language-Team: it_IT <LL@li.org>\n"
@@ -78,113 +78,117 @@ msgstr "Profilo avviato"
 msgid "Profile stopped"
 msgstr "Profilo disattivato"
 
-#: sshoot/main.py:92
+#: sshoot/main.py:87
+msgid "Manage multiple sshuttle VPN sessions"
+msgstr "Gestisci sessioni VPN sshuttle multiple"
+
+#: sshoot/main.py:93
 #, python-format
 msgid "configuration directory (default: %(default)s)"
 msgstr "directory di configurazione (predefinita: %(default)s)"
 
-#: sshoot/main.py:94
+#: sshoot/main.py:95
 msgid "action to perform"
 msgstr "azione da effettuare"
 
-#: sshoot/main.py:99
+#: sshoot/main.py:100
 msgid "list defined profiles"
 msgstr "lista profili definiti"
 
-#: sshoot/main.py:102
+#: sshoot/main.py:103
 msgid "verbose listing"
 msgstr "visualizza maggiori dettagli"
 
-#: sshoot/main.py:106
+#: sshoot/main.py:107
 #, python-format
 msgid "listing format (default %(default)s)"
 msgstr "formato lista (predefinito: %(default)s)"
 
-#: sshoot/main.py:110
+#: sshoot/main.py:111
 msgid "show profile configuration"
 msgstr "visualizza configurazione profilo"
 
-#: sshoot/main.py:112 sshoot/main.py:118
+#: sshoot/main.py:113 sshoot/main.py:119
 msgid "profile name"
 msgstr "nome profilo"
 
-#: sshoot/main.py:117
+#: sshoot/main.py:118
 msgid "define a new profile"
 msgstr "definisci un nuovo profilo"
 
-#: sshoot/main.py:120
+#: sshoot/main.py:121
 msgid "subnets to route over the VPN"
 msgstr "sottoreti da ruotare tramite VPN"
 
-#: sshoot/main.py:122
+#: sshoot/main.py:123
 msgid "remote host to connect to"
 msgstr "host remoto a cui connettersi"
 
-#: sshoot/main.py:125
+#: sshoot/main.py:126
 msgid "automatically update /etc/hosts with hosts from VPN"
 msgstr "aggiorna automaticamente /etc/hosts con hosts dalla VPN"
 
-#: sshoot/main.py:128
+#: sshoot/main.py:129
 msgid "automatically route additional nets from server"
 msgstr "ruota automaticamente le reti dal server"
 
-#: sshoot/main.py:131
+#: sshoot/main.py:132
 msgid "forward DNS queries through the VPN"
 msgstr "invia le richieste DNS attraverso la VPN"
 
-#: sshoot/main.py:134
+#: sshoot/main.py:135
 msgid "exclude subnets from VPN forward"
 msgstr "escludi sottoreti dall'invio tramite VPN"
 
-#: sshoot/main.py:137
+#: sshoot/main.py:138
 msgid "comma-separated list of hosts to seed to auto-hosts"
 msgstr "lista (separata da virgole) degli host da specificare ad auto-hosts"
 
-#: sshoot/main.py:140
+#: sshoot/main.py:141
 msgid "extra options to pass to sshuttle command line"
 msgstr "opzioni aggiuntive da passare alla linea di comando di sshuttle"
 
-#: sshoot/main.py:144
+#: sshoot/main.py:145
 msgid "delete an existing profile"
 msgstr "cancella un profilo esistente"
 
-#: sshoot/main.py:147
+#: sshoot/main.py:148
 msgid "name of the profile to remove"
 msgstr "nome del profilo da rimuovere"
 
-#: sshoot/main.py:152
+#: sshoot/main.py:153
 msgid "start a VPN session for a profile"
 msgstr "avvia la sessione VPN per un profilo"
 
-#: sshoot/main.py:155
+#: sshoot/main.py:156
 msgid "name of the profile to start"
 msgstr "nome del profilo da attivare"
 
-#: sshoot/main.py:163
+#: sshoot/main.py:164
 msgid "stop a running VPN session for a profile"
 msgstr "disattiva una sessione VPN attiva per un profilo"
 
-#: sshoot/main.py:166
+#: sshoot/main.py:167
 msgid "name of the profile to stop"
 msgstr "nome del profilo da disattivare"
 
-#: sshoot/main.py:171
+#: sshoot/main.py:172
 msgid "return whether a profile is running"
 msgstr "ritorna se un profilo è attivo"
 
-#: sshoot/main.py:174
+#: sshoot/main.py:175
 msgid "name of the profile to query"
 msgstr "nome del profilo da interrogare"
 
-#: sshoot/main.py:179
+#: sshoot/main.py:180
 msgid "return the sshuttle command for a profile"
 msgstr "ritorna il comando sshuttle per un profilo"
 
-#: sshoot/main.py:182
+#: sshoot/main.py:183
 msgid "name of the profile"
 msgstr "nomde del profilo"
 
-#: sshoot/main.py:201
+#: sshoot/main.py:202
 msgid "NOTICE: configuration tree moved from {old_path} to {new_path}\n"
 msgstr "NOTA: la configurazione è stata spostata da {old_path} a {new_path}\n"
 
