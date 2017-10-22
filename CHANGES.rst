@@ -1,7 +1,13 @@
+| v1.4.0 - 2017-10-22
+| ===================
+
+| -  Add i18n support and it_IT translation.
+
+
 v1.3.2 - 2017-10-15
 ===================
 
--  Use ``pyxdg`` isntead of ``xdg``.
+-  Use ``pyxdg`` instead of ``xdg``.
 
 
 v1.3.1 - 2017-10-10
