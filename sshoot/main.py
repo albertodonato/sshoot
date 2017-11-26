@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 from argcomplete import autocomplete
 
 from . import __version__
-from .i18n import gettext as _
+from .i18n import _
 from .manager import (
     Manager,
     ManagerProfileError,

@@ -10,7 +10,7 @@ from prettytable import (
     HEADER)
 
 from .config import yaml_dump
-from .i18n import gettext as _
+from .i18n import _
 
 
 # Map names to profile fileds

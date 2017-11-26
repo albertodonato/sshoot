@@ -1,8 +1,8 @@
 """Internationalization setup."""
 
 import os
-import gettext
 import argparse
+import gettext
 
 
 def _setup_i18n():
@@ -18,4 +18,4 @@ def _get_i18n_func(domain):
     return g.gettext
 
 
-gettext = _setup_i18n()
+_ = _setup_i18n()

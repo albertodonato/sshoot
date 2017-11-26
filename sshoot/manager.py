@@ -14,7 +14,7 @@ from .profile import (
     Profile,
     ProfileError)
 from .config import Config
-from .i18n import gettext as _
+from .i18n import _
 
 
 DEFAULT_CONFIG_PATH = os.path.join(xdg_config_home, 'sshoot')
