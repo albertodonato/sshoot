@@ -1,23 +1,26 @@
 """Handle sshuttle sessions."""
 
-import os
-from signal import SIGTERM
-from tempfile import gettempdir
 from getpass import getuser
+import os
+from pathlib import Path
+from signal import SIGTERM
 from subprocess import (
+    PIPE,
     Popen,
-    PIPE)
+)
+from tempfile import gettempdir
 
 from xdg.BaseDirectory import xdg_config_home
 
-from .profile import (
-    Profile,
-    ProfileError)
 from .config import Config
 from .i18n import _
+from .profile import (
+    Profile,
+    ProfileError,
+)
 
 
-DEFAULT_CONFIG_PATH = os.path.join(xdg_config_home, 'sshoot')
+DEFAULT_CONFIG_PATH = Path(xdg_config_home) / 'sshoot'
 
 
 class ManagerProfileError(Exception):
@@ -30,18 +33,16 @@ class Manager:
     kill = os.kill  # for testing
 
     def __init__(self, config_path=None, rundir=None):
-        self.config_path = config_path or DEFAULT_CONFIG_PATH
-        self.rundir = rundir or get_rundir('sshoot')
-        self.sessions_path = os.path.join(self.rundir, 'sessions')
+        self.config_path = (
+            Path(config_path) if config_path else DEFAULT_CONFIG_PATH)
+        self.rundir = Path(rundir) if rundir else get_rundir('sshoot')
+        self.sessions_path = self.rundir / 'sessions'
         self._config = Config(self.config_path)
 
     def load_config(self):
         """Load configuration from file."""
-        if not os.path.exists(self.config_path):
-            os.makedirs(self.config_path)
-        if not os.path.exists(self.sessions_path):
-            os.makedirs(self.sessions_path)
-
+        self.config_path.mkdir(parents=True, exist_ok=True)
+        self.sessions_path.mkdir(parents=True, exist_ok=True)
         self._config.load()
 
     def create_profile(self, name, details):
@@ -108,8 +109,8 @@ class Manager:
             raise ManagerProfileError(_('Profile is not running'))
 
         try:
-            with open(self._get_pidfile(name)) as fh:
-                self.kill(int(fh.read()), SIGTERM)
+            pid = int(self._get_pidfile(name).read_text())
+            self.kill(pid, SIGTERM)
         except (IOError, OSError) as error:
             raise ManagerProfileError(
                 _('Failed to stop profile: {error}').format(error=error))
@@ -118,8 +119,7 @@ class Manager:
         """Return whether the specified profile is running."""
         pidfile = self._get_pidfile(name)
         try:
-            with open(pidfile) as fh:
-                pid = int(fh.read())
+            pid = int(pidfile.read_text())
         except Exception:
             # If anything fails, a valid PID can't be found, so the profile is
             # not running
@@ -129,7 +129,7 @@ class Manager:
             self.kill(pid, 0)
         except OSError:
             # Delete stale pidfile
-            os.unlink(pidfile)
+            pidfile.unlink()
             return False
         return True
 
@@ -138,14 +138,14 @@ class Manager:
         profile = self.get_profile(name)
 
         executable = self._get_executable()
-        extra_opts = ['--daemon', '--pidfile', self._get_pidfile(name)]
+        extra_opts = ['--daemon', '--pidfile', str(self._get_pidfile(name))]
         if extra_args:
             extra_opts.extend(extra_args)
         return profile.cmdline(executable=executable, extra_opts=extra_opts)
 
     def _get_pidfile(self, name):
         """Return the path of the pidfile for the specified profile."""
-        return os.path.join(self.sessions_path, '{}.pid'.format(name))
+        return self.sessions_path / '{}.pid'.format(name)
 
     def _get_executable(self):
         """Return the shuttle executable from the config."""
@@ -154,6 +154,5 @@ class Manager:
 
 def get_rundir(prefix):
     """Return the directory holding runtime data."""
-    return os.path.join(
-        gettempdir(), '{prefix}-{username}'.format(
-            prefix=prefix, username=getuser()))
+    return Path(gettempdir()) / '{prefix}-{username}'.format(
+        prefix=prefix, username=getuser())

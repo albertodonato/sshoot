@@ -1,49 +1,49 @@
 import os
-import yaml
-from unittest import TestCase
-from tempfile import gettempdir
 from getpass import getuser
+from pathlib import Path
+from tempfile import gettempdir
+from unittest import TestCase
 
 from fixtures import (
+    TempDir,
     TestWithFixtures,
-    TempDir)
+)
+import yaml
 
 from ..profile import Profile
 from ..manager import (
     DEFAULT_CONFIG_PATH,
     get_rundir,
     Manager,
-    ManagerProfileError)
+    ManagerProfileError,
+)
 
 
 class ManagerTests(TestWithFixtures):
 
     def setUp(self):
         super().setUp()
-        self.config_path = self.useFixture(TempDir()).path
-        self.rundir = self.useFixture(TempDir()).path
-        self.sessions_path = os.path.join(self.rundir, 'sessions')
-        self.pid_path = os.path.join(self.sessions_path, 'profile.pid')
-        self.profiles_file_path = os.path.join(
-            self.config_path, 'profiles.yaml')
-        self.config_file_path = os.path.join(self.config_path, 'config.yaml')
-        os.mkdir(self.sessions_path)
+        self.config_path = Path(self.useFixture(TempDir()).path)
+        self.rundir = Path(self.useFixture(TempDir()).path)
+        self.sessions_path = self.rundir / 'sessions'
+        self.pid_path = self.sessions_path / 'profile.pid'
+        self.profiles_file_path = self.config_path / 'profiles.yaml'
+        self.config_file_path = self.config_path / 'config.yaml'
+        self.sessions_path.mkdir()
         self.manager = Manager(
             config_path=self.config_path, rundir=self.rundir)
         self.manager.sessions_path = self.sessions_path
 
     def make_fake_executable(self, exit_code=0):
         """Create a fake executable logging command line parameters."""
-        temp_dir = self.useFixture(TempDir()).path
-        executable = os.path.join(temp_dir, 'executable')
-        script = (
+        temp_dir = Path(self.useFixture(TempDir()).path)
+        executable = temp_dir / 'executable'
+        executable.write_text((
             '#!/bin/sh\n'
             'echo $@ > {}/cmdline\n'
             'echo -n stderr message >&2\n'
-            'exit {}\n').format(temp_dir, exit_code)
-        with open(executable, 'w') as fh:
-            fh.write(script)
-        os.chmod(executable, 0o755)
+            'exit {}\n').format(str(temp_dir), exit_code))
+        executable.chmod(0o755)
         return executable
 
     def test_default_paths(self):
@@ -58,25 +58,23 @@ class ManagerTests(TestWithFixtures):
 
     def test_load_config_create_dirs(self):
         """Manager.load_config creates config directories."""
-        os.rmdir(self.config_path)
-        os.rmdir(self.sessions_path)
+        self.config_path.rmdir()
+        self.sessions_path.rmdir()
         self.manager.load_config()
-        self.assertTrue(os.path.isdir(self.config_path))
-        self.assertTrue(os.path.isdir(self.sessions_path))
+        self.assertTrue(self.config_path.is_dir())
+        self.assertTrue(self.sessions_path.is_dir())
 
     def test_load_profiles(self):
         """Manager.load_config loads the profiles."""
         profiles = {'profile': {'subnets': ['10.0.0.0/16']}}
-        with open(self.profiles_file_path, 'w') as fh:
-            yaml.dump(profiles, stream=fh)
+        self.profiles_file_path.write_text(yaml.dump(profiles))
         self.manager.load_config()
         self.assertCountEqual(self.manager.get_profiles().keys(), ['profile'])
 
     def test_create_profile(self):
         """Manager.create_profile adds a profile with specified details."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        with open(self.profiles_file_path) as fh:
-            profiles = yaml.load(fh)
+        profiles = yaml.load(self.profiles_file_path.read_text())
         self.assertEqual(profiles, {'profile': {'subnets': ['10.0.0.0/24']}})
 
     def test_create_profile_in_use(self):
@@ -96,8 +94,7 @@ class ManagerTests(TestWithFixtures):
         """Manager.remove_profile removes the specified profile."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
         self.manager.remove_profile('profile')
-        with open(self.profiles_file_path) as fh:
-            config = yaml.load(fh)
+        config = yaml.load(self.profiles_file_path.read_text())
         self.assertEqual(config, {})
 
     def test_remove_profile_unknown(self):
@@ -131,12 +128,10 @@ class ManagerTests(TestWithFixtures):
         """Manager.start_profile starts a profile."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
         executable = self.make_fake_executable()
-        self.manager._get_executable = lambda: executable
+        self.manager._get_executable = lambda: str(executable)
 
         self.manager.start_profile('profile')
-        output_file = os.path.join(os.path.dirname(executable), 'cmdline')
-        with open(output_file) as fh:
-            cmdline = fh.read()
+        cmdline = (executable.parent / 'cmdline').read_text()
         expected_cmdline = (
             '10.0.0.0/24 --daemon --pidfile {}/profile.pid\n'.format(
                 self.sessions_path))
@@ -146,13 +141,11 @@ class ManagerTests(TestWithFixtures):
         """Manager.start_profile can add extra arguments to command line."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
         executable = self.make_fake_executable()
-        self.manager._get_executable = lambda: executable
+        self.manager._get_executable = lambda: str(executable)
 
         self.manager.start_profile(
             'profile', extra_args=['--extra1', '--extra2'])
-        output_file = os.path.join(os.path.dirname(executable), 'cmdline')
-        with open(output_file) as fh:
-            cmdline = fh.read()
+        cmdline = (executable.parent / 'cmdline').read_text()
         expected_cmdline = (
             '10.0.0.0/24 --daemon --pidfile {}/profile.pid --extra1 --extra2\n'
             .format(self.sessions_path))
@@ -162,7 +155,7 @@ class ManagerTests(TestWithFixtures):
         """An error is raised if starting a profile fails."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
         executable = self.make_fake_executable(exit_code=1)
-        self.manager._get_executable = lambda: executable
+        self.manager._get_executable = lambda: str(executable)
         with self.assertRaises(ManagerProfileError) as context:
             self.manager.start_profile('profile')
         self.assertEqual(
@@ -192,8 +185,7 @@ class ManagerTests(TestWithFixtures):
     def test_stop_profile(self):
         """Manager.stop_profile stops a running profile."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        with open(self.pid_path, 'w') as fh:
-            fh.write('100\n')
+        self.pid_path.write_text('100\n')
         # Mock manager calls
         self.manager.is_running = lambda name: True
         calls = []
@@ -210,15 +202,13 @@ class ManagerTests(TestWithFixtures):
     def test_stop_profile_invalid_pidfile(self):
         """If pidfile contains invalid data, stopping raises an error."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        with open(self.pid_path, 'w') as fh:
-            fh.write('garbage')
+        self.pid_path.write_text('garbage')
         self.assertRaises(
             ManagerProfileError, self.manager.stop_profile, 'profile')
 
     def test_stop_profile_process_not_found(self):
         """If the process fails to stop an error is raised."""
-        with open(self.pid_path, 'w') as fh:
-            fh.write('100\n')
+        self.pid_path.write_text('100\n')
 
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
 
@@ -238,8 +228,7 @@ class ManagerTests(TestWithFixtures):
 
     def test_is_running(self):
         """If the process is present, the profile is running."""
-        with open(self.pid_path, 'w') as fh:
-            fh.write('{}\n'.format(os.getpid()))
+        self.pid_path.write_text('{}\n'.format(os.getpid()))
         self.assertTrue(self.manager.is_running('profile'))
 
     def test_is_running_no_pidfile(self):
@@ -248,28 +237,25 @@ class ManagerTests(TestWithFixtures):
 
     def test_is_running_pidfile_empty(self):
         """If the pidfile is empty, the profile is not running."""
-        fh = open(os.path.join(self.sessions_path, 'profile.pid'), 'w')
-        fh.close()
+        (self.sessions_path / 'profile.pid').write_text('')
         self.assertFalse(self.manager.is_running('profile'))
 
     def test_is_running_pidfile_no_integer(self):
         """If the pid is not an integer, the profile is not running."""
-        with open(self.pid_path, 'w') as fh:
-            fh.write('foo\n')
+        self.pid_path.write_text('foo\n')
         self.assertFalse(self.manager.is_running('profile'))
 
     def test_is_running_pidfile_no_process(self):
         """If no process is present, the profile is not running."""
-        with open(self.pid_path, 'w') as fh:
-            fh.write('-100\n')
+        self.pid_path.write_text('-100\n')
         self.assertFalse(self.manager.is_running('profile'))
         # The stale pidfile is deleted.
-        self.assertFalse(os.path.exists(self.pid_path))
+        self.assertFalse(self.pid_path.exists())
 
     def test_get_cmdline(self):
         """Manager.get_cmdline returns the command line for the profile."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        pidfile = os.path.join(self.sessions_path, 'profile.pid')
+        pidfile = str(self.sessions_path / 'profile.pid')
         self.assertEqual(
             self.manager.get_cmdline('profile'),
             ['sshuttle', '10.0.0.0/24', '--daemon', '--pidfile', pidfile])
@@ -277,7 +263,7 @@ class ManagerTests(TestWithFixtures):
     def test_get_cmdline_extra_args(self):
         """Manager.get_cmdline adds passed extra arguments to command line."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        pidfile = os.path.join(self.sessions_path, 'profile.pid')
+        pidfile = str(self.sessions_path / 'profile.pid')
         expected_cmdline = [
             'sshuttle', '10.0.0.0/24', '--daemon', '--pidfile', pidfile,
             '--extra1', '--extra2']
@@ -290,8 +276,7 @@ class ManagerTests(TestWithFixtures):
         """Manager.get_cmdline uses the configured executable."""
         self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
         self.manager._get_executable = lambda: '/foo/sshuttle'
-
-        pidfile = os.path.join(self.sessions_path, 'profile.pid')
+        pidfile = str(self.sessions_path / 'profile.pid')
         self.assertEqual(
             self.manager.get_cmdline('profile'),
             ['/foo/sshuttle', '10.0.0.0/24', '--daemon', '--pidfile', pidfile])
@@ -301,5 +286,5 @@ class GetRundirTests(TestCase):
 
     def test_rundir_path(self):
         """get_rundir returns a user-specific tempdir path."""
-        rundir_path = os.path.join(gettempdir(), 'foo-{}'.format(getuser()))
+        rundir_path = Path(gettempdir()) / 'foo-{}'.format(getuser())
         self.assertEqual(get_rundir('foo'), rundir_path)

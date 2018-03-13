@@ -1,7 +1,6 @@
 """Handle configuration files."""
 
 import yaml
-import os
 
 from .profile import Profile
 
@@ -18,8 +17,8 @@ class Config:
     CONFIG_KEYS = frozenset(['executable'])
 
     def __init__(self, path):
-        self._config_file = os.path.join(path, 'config.yaml')
-        self._profiles_file = os.path.join(path, 'profiles.yaml')
+        self._config_file = path / 'config.yaml'
+        self._profiles_file = path / 'profiles.yaml'
         self._reset()
 
     def load(self):
@@ -32,8 +31,8 @@ class Config:
 
     def save(self):
         """Save profiles configuration to file."""
-        with open(self._profiles_file, 'w') as fh:
-            yaml_dump(self._build_profiles_config(), fh)
+        self._profiles_file.write_text(
+            yaml_dump(self._build_profiles_config()))
 
     def add_profile(self, name, profile):
         """Add a profile to the configuration."""
@@ -64,12 +63,10 @@ class Config:
 
     def _load_yaml_file(self, path):
         """Load the specified YAML file."""
-        if not os.path.exists(path):
+        if not path.exists():
             return {}
 
-        with open(path) as fh:
-            # None is returned for empty config file
-            return yaml.load(fh) or {}
+        return yaml.load(path.read_text()) or {}
 
     def _build_profiles_config(self):
         """Return the profiles config dict to be saved to file."""

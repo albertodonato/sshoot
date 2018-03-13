@@ -1,32 +1,33 @@
-import os
-import json
-import yaml
 import csv
 from io import StringIO
+from pathlib import Path
+import json
 
 from fixtures import (
+    TempDir,
     TestWithFixtures,
-    TempDir)
+)
+import yaml
 
-from ..manager import Manager
 from ..listing import (
     InvalidFormat,
     ProfileListing,
-    profile_details)
+    profile_details,
+)
+from ..manager import Manager
 
 
 class ProfileListingTests(TestWithFixtures):
 
     def setUp(self):
         super().setUp()
-        self.config_path = self.useFixture(TempDir()).path
-        self.rundir = self.useFixture(TempDir()).path
-        self.sessions_path = os.path.join(self.rundir, 'sessions')
-        self.pid_path = os.path.join(self.sessions_path, 'profile.pid')
-        self.profiles_file_path = os.path.join(
-            self.config_path, 'profiles.yaml')
-        self.config_file_path = os.path.join(self.config_path, 'config.yaml')
-        os.mkdir(self.sessions_path)
+        self.config_path = Path(self.useFixture(TempDir()).path)
+        self.rundir = Path(self.useFixture(TempDir()).path)
+        self.sessions_path = self.rundir / 'sessions'
+        self.pid_path = self.sessions_path / 'profile.pid'
+        self.profiles_file_path = self.config_path / 'profiles.yaml'
+        self.config_file_path = self.config_path / 'config.yaml'
+        self.sessions_path.mkdir()
 
         self.active_profiles = []
         self.manager = Manager(
@@ -120,14 +121,13 @@ class ProfileDetailsTests(TestWithFixtures):
 
     def setUp(self):
         super().setUp()
-        self.config_path = self.useFixture(TempDir()).path
-        self.rundir = self.useFixture(TempDir()).path
-        self.sessions_path = os.path.join(self.rundir, 'sessions')
-        self.pid_path = os.path.join(self.sessions_path, 'profile.pid')
-        self.profiles_file_path = os.path.join(
-            self.config_path, 'profiles.yaml')
-        self.config_file_path = os.path.join(self.config_path, 'config.yaml')
-        os.mkdir(self.sessions_path)
+        self.config_path = Path(self.useFixture(TempDir()).path)
+        self.rundir = Path(self.useFixture(TempDir()).path)
+        self.sessions_path = self.rundir / 'sessions'
+        self.pid_path = self.sessions_path / 'profile.pid'
+        self.profiles_file_path = self.config_path / 'profiles.yaml'
+        self.config_file_path = self.config_path / 'config.yaml'
+        self.sessions_path.mkdir()
 
         self.active_profiles = []
         self.manager = Manager(

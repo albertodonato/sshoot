@@ -1,17 +1,19 @@
-import os
+from pathlib import Path
 from io import StringIO
-import yaml
 from textwrap import dedent
 from unittest import TestCase
 
 from fixtures import (
     TempDir,
-    TestWithFixtures)
+    TestWithFixtures,
+)
+import yaml
 
-from ..profile import Profile
 from ..config import (
+    Config,
     yaml_dump,
-    Config)
+)
+from ..profile import Profile
 
 
 class YamlDumpTests(TestCase):
@@ -38,9 +40,9 @@ class ConfigTests(TestWithFixtures):
 
     def setUp(self):
         super().setUp()
-        self.tempdir = self.useFixture(TempDir()).path
-        self.config_path = os.path.join(self.tempdir, 'config.yaml')
-        self.profiles_path = os.path.join(self.tempdir, 'profiles.yaml')
+        self.tempdir = Path(self.useFixture(TempDir()).path)
+        self.config_path = self.tempdir / 'config.yaml'
+        self.profiles_path = self.tempdir / 'profiles.yaml'
         self.config = Config(self.tempdir)
 
     def test_add_profile(self):
@@ -79,8 +81,7 @@ class ConfigTests(TestWithFixtures):
             'profile': {
                 'subnets': ['10.0.0.0/24'],
                 'auto-nets': True}}
-        with open(self.profiles_path, 'w') as fh:
-            yaml.dump(profiles, stream=fh)
+        self.profiles_path.write_text(yaml.dump(profiles))
         self.config.load()
         profile = self.config.profiles['profile']
         self.assertEqual(profile.subnets, ['10.0.0.0/24'])
@@ -95,8 +96,7 @@ class ConfigTests(TestWithFixtures):
     def test_load_config_options(self):
         """Only known config options are loaded from config file."""
         config = {'executable': '/usr/bin/shuttle', 'other-conf': 'no'}
-        with open(self.config_path, 'w') as fh:
-            yaml.dump(config, stream=fh)
+        self.config_path.write_text(yaml.dump(config))
         self.config.load()
         self.assertEqual(
             self.config.config, {'executable': '/usr/bin/shuttle'})
@@ -106,8 +106,7 @@ class ConfigTests(TestWithFixtures):
         profiles = {
             'profile1': {'subnets': ['10.0.0.0/24']},
             'profile2': {'subnets': ['192.168.0.0/16']}}
-        with open(self.profiles_path, 'w') as fh:
-            yaml.dump(profiles, stream=fh)
+        self.profiles_path.write_text(yaml.dump(profiles))
         self.config.load()
         expected = {
             name: Profile.from_dict(config)
@@ -123,8 +122,7 @@ class ConfigTests(TestWithFixtures):
         for name, conf in profiles.items():
             self.config.add_profile(name, Profile.from_dict(conf))
         self.config.save()
-        with open(self.profiles_path) as fh:
-            config = yaml.load(fh)
+        config = yaml.load(self.profiles_path.read_text())
         self.assertEqual(config, profiles)
 
     def test_save_from_file(self):
@@ -140,6 +138,5 @@ class ConfigTests(TestWithFixtures):
               subnets:
               - 10.0.0.0/24
             ''')
-        with open(self.profiles_path) as fh:
-            content = fh.read()
+        content = self.profiles_path.read_text()
         self.assertEqual(content, config)
