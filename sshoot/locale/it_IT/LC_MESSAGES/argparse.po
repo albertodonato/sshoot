@@ -134,4 +134,4 @@ msgstr "scelta invalida: %(value)r (scelta tra %(choices)s)"
 #: /usr/lib/python3.6/argparse.py:2398
 msgid ""
 "%(prog)s: error: %(message)s\n"
-msgstr "%(prog)s: erorre: %(message)s\n"
+msgstr "%(prog)s: errore: %(message)s\n"
