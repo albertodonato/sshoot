@@ -1,7 +1,14 @@
-| v1.4.0 - 2017-10-22
-| ===================
+v1.4.1 - 2018-06-30
+===================
 
-| -  Add i18n support and it_IT translation.
+-  Use pathlib.Path instead of strings.
+-  I8n-related cleanups.
+
+
+v1.4.0 - 2017-10-22
+===================
+
+-  Add i18n support and it_IT translation.
 
 
 v1.3.2 - 2017-10-15
