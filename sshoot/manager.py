@@ -19,7 +19,6 @@ from .profile import (
     ProfileError,
 )
 
-
 DEFAULT_CONFIG_PATH = Path(xdg_config_home) / 'sshoot'
 
 
@@ -29,8 +28,6 @@ class ManagerProfileError(Exception):
 
 class Manager:
     """Profile manager."""
-
-    kill = os.kill  # for testing
 
     def __init__(self, config_path=None, rundir=None):
         self.config_path = (
@@ -91,9 +88,9 @@ class Manager:
             process = Popen(cmdline, stderr=PIPE)
             # Wait until process is started (it daemonizes)
             process.wait()
-        except OSError as error:
+        except OSError as err:
             # To catch file not found errors
-            raise ManagerProfileError(message.format(error=error))
+            raise ManagerProfileError(message.format(error=str(err)))
 
         if process.returncode != 0:
             error = process.stderr.read().decode()
@@ -110,7 +107,7 @@ class Manager:
 
         try:
             pid = int(self._get_pidfile(name).read_text())
-            self.kill(pid, SIGTERM)
+            os.kill(pid, SIGTERM)
         except (IOError, OSError) as error:
             raise ManagerProfileError(
                 _('Failed to stop profile: {error}').format(error=error))
@@ -126,7 +123,7 @@ class Manager:
             return False
 
         try:
-            self.kill(pid, 0)
+            os.kill(pid, 0)
         except OSError:
             # Delete stale pidfile
             pidfile.unlink()

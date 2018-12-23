@@ -53,8 +53,9 @@ class Config:
     def config(self):
         """Return a dict with the configuration."""
         return {
-            key: value for key, value in self._config.items()
-            if key in self.CONFIG_KEYS}
+            key: value
+            for key, value in self._config.items() if key in self.CONFIG_KEYS
+        }
 
     def _reset(self):
         """Reset default empty config."""
@@ -66,22 +67,19 @@ class Config:
         if not path.exists():
             return {}
 
-        return yaml.load(path.read_text()) or {}
+        return yaml.safe_load(path.read_text()) or {}
 
     def _build_profiles_config(self):
         """Return the profiles config dict to be saved to file."""
         return {
             name: self._to_config(profile.config())
-            for name, profile in self._profiles.items()}
+            for name, profile in self._profiles.items()
+        }
 
     def _from_config(self, config):
         """Convert a config to a params dict."""
-        return {
-            key.replace('-', '_'): value
-            for key, value in config.items()}
+        return {key.replace('-', '_'): value for key, value in config.items()}
 
     def _to_config(self, params):
         """Convert a params dict to a config."""
-        return {
-            key.replace('_', '-'): value
-            for key, value in params.items()}
+        return {key.replace('_', '-'): value for key, value in params.items()}

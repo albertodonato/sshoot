@@ -19,7 +19,7 @@ def profile_completer(prefix, parsed_args, running=None, **kwargs):
     """
     manager = Manager(config_path=parsed_args.config)
     manager.load_config()
-    for name in manager.get_profiles().keys():
+    for name in manager.get_profiles():
         if not name.startswith(prefix):
             continue
         if running is None or manager.is_running(name) == running:

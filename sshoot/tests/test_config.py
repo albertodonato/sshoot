@@ -1,135 +1,129 @@
-from pathlib import Path
 from io import StringIO
 from textwrap import dedent
-from unittest import TestCase
 
-from fixtures import (
-    TempDir,
-    TestWithFixtures,
-)
+import pytest
 import yaml
 
-from ..config import (
-    Config,
-    yaml_dump,
-)
+from ..config import yaml_dump
 from ..profile import Profile
 
 
-class YamlDumpTests(TestCase):
-
-    def setUp(self):
-        super().setUp()
-        self.data = {'foo': 'bar', 'baz': [1, 2]}
+class TestYamlDump:
 
     def test_dump_to_string(self):
         """The method returns YAML data as a string by default."""
-        result = yaml_dump(self.data)
-        self.assertEqual(yaml.load(stream=StringIO(result)), self.data)
+        data = {'foo': 'bar', 'baz': [1, 2]}
+        result = yaml_dump(data)
+        assert yaml.safe_load(stream=StringIO(result)) == data
 
     def test_dump_to_file(self):
         """The method dumps YAML data to the specified file."""
+        data = {'foo': 'bar', 'baz': [1, 2]}
         fh = StringIO()
-        result = yaml_dump(self.data, fh=fh)
+        result = yaml_dump(data, fh=fh)
         fh.seek(0)
-        self.assertIsNone(result)
-        self.assertEqual(yaml.load(stream=fh), self.data)
+        assert result is None
+        assert yaml.safe_load(stream=fh) == data
 
 
-class ConfigTests(TestWithFixtures):
+class TestConfig:
 
-    def setUp(self):
-        super().setUp()
-        self.tempdir = Path(self.useFixture(TempDir()).path)
-        self.config_path = self.tempdir / 'config.yaml'
-        self.profiles_path = self.tempdir / 'profiles.yaml'
-        self.config = Config(self.tempdir)
-
-    def test_add_profile(self):
+    def test_add_profile(self, config):
         """Profiles can be added to the config."""
         profiles = {
             'profile1': Profile(['10.0.0.0/24']),
-            'profile2': Profile(['192.168.0.0/16'])}
+            'profile2': Profile(['192.168.0.0/16'])
+        }
         for name, profile in profiles.items():
-            self.config.add_profile(name, profile)
-        self.assertEqual(self.config.profiles, profiles)
+            config.add_profile(name, profile)
+        assert config.profiles == profiles
 
-    def test_add_profile_name_present(self):
+    def test_add_profile_name_present(self, config):
         """An exception is raised if the profile name is already used."""
-        self.config.add_profile('profile', Profile(['10.0.0.0/24']))
-        self.assertRaises(
-            KeyError, self.config.add_profile, 'profile',
-            Profile(['192.168.0.0/16']))
+        config.add_profile('profile', Profile(['10.0.0.0/24']))
+        with pytest.raises(KeyError):
+            config.add_profile('profile', Profile(['192.168.0.0/16']))
 
-    def test_remove_profile(self):
+    def test_remove_profile(self, config):
         """Profiles can be removed to the config."""
         profiles = {
             'profile1': Profile(['10.0.0.0/24']),
-            'profile2': Profile(['192.168.0.0/16'])}
+            'profile2': Profile(['192.168.0.0/16'])
+        }
         for name, profile in profiles.items():
-            self.config.add_profile(name, profile)
-        self.config.remove_profile('profile1')
-        self.assertCountEqual(self.config.profiles.keys(), ['profile2'])
+            config.add_profile(name, profile)
+        config.remove_profile('profile1')
+        assert list(config.profiles), ['profile2']
 
-    def test_remove_profile_not_present(self):
+    def test_remove_profile_not_present(self, config):
         """An exception is raised if the profile name is not known."""
-        self.assertRaises(KeyError, self.config.remove_profile, 'profile')
+        with pytest.raises(KeyError):
+            config.remove_profile('profile')
 
-    def test_load_from_file(self):
+    def test_load_from_file(self, config, profiles_file):
         """The config is loaded from file."""
-        profiles = {
-            'profile': {
-                'subnets': ['10.0.0.0/24'],
-                'auto-nets': True}}
-        self.profiles_path.write_text(yaml.dump(profiles))
-        self.config.load()
-        profile = self.config.profiles['profile']
-        self.assertEqual(profile.subnets, ['10.0.0.0/24'])
-        self.assertTrue(profile.auto_nets)
+        profiles = {'profile': {'subnets': ['10.0.0.0/24'], 'auto-nets': True}}
+        profiles_file.write_text(yaml.dump(profiles))
+        config.load()
+        profile = config.profiles['profile']
+        assert profile.subnets == ['10.0.0.0/24']
+        assert profile.auto_nets
 
-    def test_load_missing(self):
+    def test_load_missing_file(self, config):
         """If no config files are found, config is empty."""
-        self.config.load()
-        self.assertEqual(self.config.profiles, {})
-        self.assertEqual(self.config.config, {})
+        config.load()
+        assert config.profiles == {}
+        assert config.config == {}
 
-    def test_load_config_options(self):
+    def test_load_config_options(self, config, config_file):
         """Only known config options are loaded from config file."""
-        config = {'executable': '/usr/bin/shuttle', 'other-conf': 'no'}
-        self.config_path.write_text(yaml.dump(config))
-        self.config.load()
-        self.assertEqual(
-            self.config.config, {'executable': '/usr/bin/shuttle'})
+        config_data = {'executable': '/usr/bin/shuttle', 'other-conf': 'no'}
+        config_file.write_text(yaml.dump(config_data))
+        config.load()
+        assert config.config == {'executable': '/usr/bin/shuttle'}
 
-    def test_load_profiles(self):
+    def test_load_profiles(self, config, profiles_file):
         """The 'profiles' config field is loaded from the config file."""
         profiles = {
-            'profile1': {'subnets': ['10.0.0.0/24']},
-            'profile2': {'subnets': ['192.168.0.0/16']}}
-        self.profiles_path.write_text(yaml.dump(profiles))
-        self.config.load()
+            'profile1': {
+                'subnets': ['10.0.0.0/24']
+            },
+            'profile2': {
+                'subnets': ['192.168.0.0/16']
+            }
+        }
+        profiles_file.write_text(yaml.dump(profiles))
+        config.load()
         expected = {
             name: Profile.from_dict(config)
-            for name, config in profiles.items()}
-        self.assertEqual(self.config.profiles, expected)
+            for name, config in profiles.items()
+        }
+        assert config.profiles == expected
 
-    def test_save_profiles(self):
+    def test_save_profiles(self, config, profiles_file):
         """Profiles are saved to file."""
         profiles = {
-            'profile1': {'subnets': ['10.0.0.0/24'], 'remote': 'hostname1'},
-            'profile2': {'subnets': ['192.168.0.0/16'], 'remote': 'hostname2'}}
-        self.config.load()
+            'profile1': {
+                'subnets': ['10.0.0.0/24'],
+                'remote': 'hostname1'
+            },
+            'profile2': {
+                'subnets': ['192.168.0.0/16'],
+                'remote': 'hostname2'
+            }
+        }
+        config.load()
         for name, conf in profiles.items():
-            self.config.add_profile(name, Profile.from_dict(conf))
-        self.config.save()
-        config = yaml.load(self.profiles_path.read_text())
-        self.assertEqual(config, profiles)
+            config.add_profile(name, Profile.from_dict(conf))
+        config.save()
+        config = yaml.safe_load(profiles_file.read_text())
+        assert config == profiles
 
-    def test_save_from_file(self):
+    def test_save_from_file(self, config, profiles_file):
         """The config is saved to file."""
         conf = {'subnets': ['10.0.0.0/24'], 'auto_nets': True}
-        self.config.add_profile('profile', Profile.from_dict(conf))
-        self.config.save()
+        config.add_profile('profile', Profile.from_dict(conf))
+        config.save()
 
         config = dedent(
             '''\
@@ -138,5 +132,5 @@ class ConfigTests(TestWithFixtures):
               subnets:
               - 10.0.0.0/24
             ''')
-        content = self.profiles_path.read_text()
-        self.assertEqual(content, config)
+        content = profiles_file.read_text()
+        assert content == config

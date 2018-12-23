@@ -1,151 +1,149 @@
 import csv
 from io import StringIO
-from pathlib import Path
 import json
 
-from fixtures import (
-    TempDir,
-    TestWithFixtures,
-)
+import pytest
 import yaml
 
 from ..listing import (
     InvalidFormat,
-    ProfileListing,
     profile_details,
+    ProfileListing,
 )
-from ..manager import Manager
 
 
-class ProfileListingTests(TestWithFixtures):
+@pytest.fixture
+def active_profiles(profile_manager):
+    active_profiles = []
+    profile_manager.is_running = lambda name: name in active_profiles
+    yield active_profiles
 
-    def setUp(self):
-        super().setUp()
-        self.config_path = Path(self.useFixture(TempDir()).path)
-        self.rundir = Path(self.useFixture(TempDir()).path)
-        self.sessions_path = self.rundir / 'sessions'
-        self.pid_path = self.sessions_path / 'profile.pid'
-        self.profiles_file_path = self.config_path / 'profiles.yaml'
-        self.config_file_path = self.config_path / 'config.yaml'
-        self.sessions_path.mkdir()
 
-        self.active_profiles = []
-        self.manager = Manager(
-            config_path=self.config_path, rundir=self.rundir)
-        self.manager.sessions_path = self.sessions_path
-        self.manager.is_running = lambda name: name in self.active_profiles
-
-        self.profile_listing = ProfileListing(self.manager)
+class TestProfileListing:
 
     def test_supported_formats(self):
         """supported_formats returns a list with supported formats."""
-        self.assertEqual(
-            ProfileListing.supported_formats(),
-            ['csv', 'json', 'table', 'yaml'])
+        assert ProfileListing.supported_formats() == [
+            'csv', 'json', 'table', 'yaml'
+        ]
 
-    def test_get_output_unsupported_format(self):
+    def test_get_output_unsupported_format(self, profile_manager):
         """get_output raises an error if an unsupported format is passed."""
-        self.assertRaises(
-            InvalidFormat, self.profile_listing.get_output, 'unknown')
+        with pytest.raises(InvalidFormat):
+            ProfileListing(profile_manager).get_output('unknown')
 
-    def test_get_output_table(self):
+    def test_get_output_table(self, profile_manager, active_profiles):
         """Profiles can be listed as a table."""
-        self.manager.create_profile('profile1', {'subnets': ['10.0.0.0/24']})
-        self.manager.create_profile(
+        profile_manager.create_profile(
+            'profile1', {'subnets': ['10.0.0.0/24']})
+        profile_manager.create_profile(
             'profile2', {'subnets': ['192.168.0.0/16']})
-        self.active_profiles.append('profile2')
-        output = self.profile_listing.get_output('table')
-        self.assertIn('   profile1               10.0.0.0/24', output)
-        self.assertIn('*  profile2               192.168.0.0/16', output)
+        active_profiles.append('profile2')
+        output = ProfileListing(profile_manager).get_output('table')
+        assert '   profile1               10.0.0.0/24' in output
+        assert '*  profile2               192.168.0.0/16' in output
 
-    def test_get_output_table_verbose(self):
+    def test_get_output_table_verbose(self, profile_manager, active_profiles):
         """Tabular output can be verbose."""
-        self.manager.create_profile(
-            'profile1', {'subnets': ['10.0.0.0/24'], 'auto_hosts': True})
-        self.active_profiles.append('profile2')
-        output = self.profile_listing.get_output('table', verbose=True)
-        self.assertIn(
+        profile_manager.create_profile(
+            'profile1', {
+                'subnets': ['10.0.0.0/24'],
+                'auto_hosts': True
+            })
+        active_profiles.append('profile2')
+        output = ProfileListing(profile_manager).get_output(
+            'table', verbose=True)
+        assert (
             'Name      Remote host  Subnets      Auto hosts  Auto nets'
-            '  DNS forward  Exclude subnets  Seed hosts  Extra options',
+            '  DNS forward  Exclude subnets  Seed hosts  Extra options' in
             output)
-        self.assertIn(
-            'profile1               10.0.0.0/24  True        False      False',
-            output)
+        assert (
+            'profile1               10.0.0.0/24  True        False      False'
+            in output)
 
-    def test_get_output_csv(self):
+    def test_get_output_csv(self, profile_manager, active_profiles):
         """Profiles can be listed as CSV."""
-        self.manager.create_profile('profile1', {'subnets': ['10.0.0.0/24']})
-        self.manager.create_profile(
+        profile_manager.create_profile(
+            'profile1', {'subnets': ['10.0.0.0/24']})
+        profile_manager.create_profile(
             'profile2', {'subnets': ['192.168.0.0/16']})
-        self.active_profiles.append('profile2')
-        output = self.profile_listing.get_output('csv')
+        active_profiles.append('profile2')
+        output = ProfileListing(profile_manager).get_output('csv')
         reader = csv.reader(StringIO(output))
-        self.assertEqual(
-            sorted(reader),
-            [['Name', 'Status', 'Remote host', 'Subnets', 'Auto hosts',
-              'Auto nets', 'DNS forward', 'Exclude subnets', 'Seed hosts',
-              'Extra options'],
-             ['profile1', 'STOPPED', '', "['10.0.0.0/24']", 'False', 'False',
-              'False', '', '', ''],
-             ['profile2', 'ACTIVE', '', "['192.168.0.0/16']", 'False', 'False',
-              'False', '', '', '']])
+        assert sorted(reader) == [
+            [
+                'Name', 'Status', 'Remote host', 'Subnets', 'Auto hosts',
+                'Auto nets', 'DNS forward', 'Exclude subnets', 'Seed hosts',
+                'Extra options'
+            ],
+            [
+                'profile1', 'STOPPED', '', "['10.0.0.0/24']", 'False', 'False',
+                'False', '', '', ''
+            ],
+            [
+                'profile2', 'ACTIVE', '', "['192.168.0.0/16']", 'False',
+                'False', 'False', '', '', ''
+            ]
+        ]
 
-    def test_get_output_json(self):
+    def test_get_output_json(self, profile_manager, active_profiles):
         """Profiles can be listed as JSON."""
-        self.manager.create_profile('profile1', {'subnets': ['10.0.0.0/24']})
-        self.manager.create_profile(
-            'profile2', {'subnets': ['192.168.0.0/16'], 'auto_hosts': True})
-        self.active_profiles.append('profile2')
-        output = self.profile_listing.get_output('json')
+        profile_manager.create_profile(
+            'profile1', {'subnets': ['10.0.0.0/24']})
+        profile_manager.create_profile(
+            'profile2', {
+                'subnets': ['192.168.0.0/16'],
+                'auto_hosts': True
+            })
+        active_profiles.append('profile2')
+        output = ProfileListing(profile_manager).get_output('json')
         data = json.loads(output)
-        self.assertEqual(
-            data,
-            {'profile1': {'subnets': ['10.0.0.0/24']},
-             'profile2': {'subnets': ['192.168.0.0/16'], 'auto_hosts': True}})
+        assert data == {
+            'profile1': {
+                'subnets': ['10.0.0.0/24']
+            },
+            'profile2': {
+                'subnets': ['192.168.0.0/16'],
+                'auto_hosts': True
+            }
+        }
 
-    def test_get_output_yaml(self):
+    def test_get_output_yaml(self, profile_manager, active_profiles):
         """Profiles can be listed as YAML."""
-        self.manager.create_profile('profile1', {'subnets': ['10.0.0.0/24']})
-        self.manager.create_profile(
-            'profile2', {'subnets': ['192.168.0.0/16'], 'auto_hosts': True})
-        self.active_profiles.append('profile2')
-        output = self.profile_listing.get_output('yaml')
-        data = yaml.load(output)
-        self.assertEqual(
-            data,
-            {'profile1': {'subnets': ['10.0.0.0/24']},
-             'profile2': {'subnets': ['192.168.0.0/16'], 'auto_hosts': True}})
+        profile_manager.create_profile(
+            'profile1', {'subnets': ['10.0.0.0/24']})
+        profile_manager.create_profile(
+            'profile2', {
+                'subnets': ['192.168.0.0/16'],
+                'auto_hosts': True
+            })
+        active_profiles.append('profile2')
+        output = ProfileListing(profile_manager).get_output('yaml')
+        data = yaml.safe_load(output)
+        assert data == {
+            'profile1': {
+                'subnets': ['10.0.0.0/24']
+            },
+            'profile2': {
+                'subnets': ['192.168.0.0/16'],
+                'auto_hosts': True
+            }
+        }
 
 
-class ProfileDetailsTests(TestWithFixtures):
+class TestProfileDetails:
 
-    def setUp(self):
-        super().setUp()
-        self.config_path = Path(self.useFixture(TempDir()).path)
-        self.rundir = Path(self.useFixture(TempDir()).path)
-        self.sessions_path = self.rundir / 'sessions'
-        self.pid_path = self.sessions_path / 'profile.pid'
-        self.profiles_file_path = self.config_path / 'profiles.yaml'
-        self.config_file_path = self.config_path / 'config.yaml'
-        self.sessions_path.mkdir()
-
-        self.active_profiles = []
-        self.manager = Manager(
-            config_path=self.config_path, rundir=self.rundir)
-        self.manager.sessions_path = self.sessions_path
-        self.manager.is_running = lambda name: name in self.active_profiles
-
-    def test_details(self):
+    def test_details(self, profile_manager):
         """profile_details returns a string with profile details."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        output = profile_details(self.manager, 'profile')
-        self.assertIn('Name:             profile', output)
-        self.assertIn('Subnets:          10.0.0.0/24', output)
-        self.assertIn('Status:           STOPPED', output)
+        profile_manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
+        output = profile_details(profile_manager, 'profile')
+        assert 'Name:             profile' in output
+        assert 'Subnets:          10.0.0.0/24' in output
+        assert 'Status:           STOPPED' in output
 
-    def test_active(self):
+    def test_active(self, profile_manager, active_profiles):
         """profile_details shows if the profile is active."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        self.active_profiles.append('profile')
-        output = profile_details(self.manager, 'profile')
-        self.assertIn('Status:           ACTIVE', output)
+        profile_manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
+        active_profiles.append('profile')
+        output = profile_details(profile_manager, 'profile')
+        assert 'Status:           ACTIVE' in output

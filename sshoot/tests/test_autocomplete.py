@@ -1,23 +1,16 @@
-from unittest import TestCase
-from unittest.mock import patch
-from collections import namedtuple
+from argparse import Namespace
 
-from fixtures import (
-    TestWithFixtures,
-    TempDir)
+import pytest
 
-from ..manager import Manager
 from ..autocomplete import (
     complete_argument,
-    profile_completer)
+    profile_completer,
+)
 
 
-FakeParsedArgs = namedtuple('FakeParsedArgs', ['config'])
+class TestCompleteArgument:
 
-
-class CompleteArgumentTests(TestCase):
-
-    def test_complete_arguments(self):
+    def test_complete(self):
         """complete_arguments attaches a completer to the argument."""
 
         class FakeArgument:
@@ -26,39 +19,37 @@ class CompleteArgumentTests(TestCase):
         fake_argument = FakeArgument()
         fake_completer = object()
         complete_argument(fake_argument, fake_completer)
-        self.assertIs(fake_argument.completer, fake_completer)
+        assert fake_argument.completer is fake_completer
 
 
-class ProfileCompleterTests(TestWithFixtures):
+@pytest.fixture
+def profiles(profile_manager):
+    yield [
+        profile_manager.create_profile('foo', {'subnets': ['10.1.0.0/16']}),
+        profile_manager.create_profile('bar', {'subnets': ['10.2.0.0/16']}),
+        profile_manager.create_profile('baz', {'subnets': ['10.3.0.0/16']})
+    ]
 
-    def setUp(self):
-        super().setUp()
-        self.config_path = self.useFixture(TempDir()).path
-        self.manager = Manager(config_path=self.config_path)
-        self.manager.create_profile('foo', {'subnets': ['10.1.0.0/16']})
-        self.manager.create_profile('bar', {'subnets': ['10.2.0.0/16']})
-        self.manager.create_profile('baz', {'subnets': ['10.2.0.0/16']})
 
-        self.fake_args = FakeParsedArgs(self.config_path)
+@pytest.fixture
+def parsed_args(config_dir):
+    yield Namespace(config=config_dir)
 
-    def test_complete_filter_prefix(self):
+
+@pytest.mark.usefixtures('profiles')
+class TestProfileCompleter:
+
+    def test_complete_filter_prefix(self, parsed_args):
         """The autocomplete function returns names that match the prefix."""
-        self.assertCountEqual(
-            ['bar', 'baz'], profile_completer('b', self.fake_args))
+        assert list(profile_completer('b', parsed_args)) == ['bar', 'baz']
 
-    @patch('sshoot.autocomplete.Manager')
-    def test_complete_filter_running(self, mock_manager):
-        """The autocomplete function returns names that match the prefix."""
-        mock_manager.return_value = self.manager
-        self.manager.is_running = lambda name: name != 'bar'
-        self.assertCountEqual(
-            ['foo', 'baz'],
-            profile_completer('', self.fake_args, running=True))
-
-    @patch('sshoot.autocomplete.Manager')
-    def test_complete_filter_not_running(self, mock_manager):
-        """The autocomplete function returns names that match the prefix."""
-        mock_manager.return_value = self.manager
-        self.manager.is_running = lambda name: name != 'bar'
-        self.assertCountEqual(
-            ['bar'], profile_completer('', self.fake_args, running=False))
+    @pytest.mark.parametrize(
+        'running,completions', [(True, ['baz', 'foo']), (False, ['bar'])])
+    def test_complete_filter_running(
+            self, running, completions, mocker, profile_manager, parsed_args):
+        """The autocomplete function returns names based on running status."""
+        mock_manager = mocker.patch('sshoot.autocomplete.Manager')
+        mock_manager.return_value = profile_manager
+        profile_manager.is_running = lambda name: name != 'bar'
+        returned = list(profile_completer('', parsed_args, running=running))
+        assert returned == completions

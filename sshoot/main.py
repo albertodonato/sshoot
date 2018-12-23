@@ -1,25 +1,28 @@
 """Command-line interface to handle sshuttle VPN sessions."""
 
-import sys
+from argparse import ArgumentParser
+from functools import partial
 import os
 import shutil
-from functools import partial
-from argparse import ArgumentParser
+import sys
 
 from argcomplete import autocomplete
 
 from . import __version__
-from .i18n import _
-from .manager import (
-    Manager,
-    ManagerProfileError,
-    DEFAULT_CONFIG_PATH)
-from .listing import (
-    ProfileListing,
-    profile_details)
 from .autocomplete import (
     complete_argument,
-    profile_completer)
+    profile_completer,
+)
+from .i18n import _
+from .listing import (
+    profile_details,
+    ProfileListing,
+)
+from .manager import (
+    DEFAULT_CONFIG_PATH,
+    Manager,
+    ManagerProfileError,
+)
 
 
 class Sshoot:
@@ -86,10 +89,14 @@ class Sshoot:
         parser = ArgumentParser(
             description=_('Manage multiple sshuttle VPN sessions'))
         parser.add_argument(
-            '-V', '--version', action='version',
+            '-V',
+            '--version',
+            action='version',
             version='%(prog)s {}'.format(__version__))
         parser.add_argument(
-            '-C', '--config', default=DEFAULT_CONFIG_PATH,
+            '-C',
+            '--config',
+            default=DEFAULT_CONFIG_PATH,
             help=_('configuration directory (default: %(default)s)'))
         subparsers = parser.add_subparsers(
             metavar='ACTION', dest='action', help=_('action to perform'))
@@ -99,10 +106,11 @@ class Sshoot:
         list_parser = subparsers.add_parser(
             'list', help=_('list defined profiles'))
         list_parser.add_argument(
-            '-v', '--verbose', action='store_true',
-            help=_('verbose listing'))
+            '-v', '--verbose', action='store_true', help=_('verbose listing'))
         list_parser.add_argument(
-            '-f', '--format', choices=ProfileListing.supported_formats(),
+            '-f',
+            '--format',
+            choices=ProfileListing.supported_formats(),
             default='table',
             help=_('listing format (default %(default)s)'))
 
@@ -122,22 +130,33 @@ class Sshoot:
         create_parser.add_argument(
             '-r', '--remote', help=_('remote host to connect to'))
         create_parser.add_argument(
-            '-H', '--auto-hosts', action='store_true',
+            '-H',
+            '--auto-hosts',
+            action='store_true',
             help=_('automatically update /etc/hosts with hosts from VPN'))
         create_parser.add_argument(
-            '-N', '--auto-nets', action='store_true',
+            '-N',
+            '--auto-nets',
+            action='store_true',
             help=_('automatically route additional nets from server'))
         create_parser.add_argument(
-            '-d', '--dns', action='store_true',
+            '-d',
+            '--dns',
+            action='store_true',
             help=_('forward DNS queries through the VPN'))
         create_parser.add_argument(
-            '-x', '--exclude-subnets', nargs='+',
+            '-x',
+            '--exclude-subnets',
+            nargs='+',
             help=_('exclude subnets from VPN forward'))
         create_parser.add_argument(
-            '-S', '--seed-hosts', nargs='+',
+            '-S',
+            '--seed-hosts',
+            nargs='+',
             help=_('comma-separated list of hosts to seed to auto-hosts'))
         create_parser.add_argument(
-            '--extra-opts', type=str.split,
+            '--extra-opts',
+            type=str.split,
             help=_('extra options to pass to sshuttle command line'))
 
         # Remove profile
@@ -156,7 +175,8 @@ class Sshoot:
                 'name', help=_('name of the profile to start')),
             partial(profile_completer, running=False))
         start_parser.add_argument(
-            'args', nargs='*',
+            'args',
+            nargs='*',
             help=('additional arguments passed to sshuttle command line.'))
 
         # Stop profile
@@ -180,8 +200,7 @@ class Sshoot:
             'get-command', help=_('return the sshuttle command for a profile'))
         complete_argument(
             get_command_parser.add_argument(
-                'name', help=_('name of the profile')),
-            profile_completer)
+                'name', help=_('name of the profile')), profile_completer)
 
         # Setup autocompletion
         autocomplete(parser)
@@ -194,14 +213,16 @@ class Sshoot:
             return
 
         need_config_path_update = (
-            os.path.exists(old_config_path) and
-            not os.path.exists(DEFAULT_CONFIG_PATH))
+            os.path.exists(old_config_path)
+            and not os.path.exists(DEFAULT_CONFIG_PATH))
         if need_config_path_update:
             shutil.move(old_config_path, DEFAULT_CONFIG_PATH)
             sys.stderr.write(
-                _('NOTICE: configuration tree moved from {old_path} to '
-                  '{new_path}\n').format(
-                      old_path=old_config_path, new_path=DEFAULT_CONFIG_PATH))
+                _(
+                    'NOTICE: configuration tree moved from {old_path} to '
+                    '{new_path}\n').format(
+                        old_path=old_config_path,
+                        new_path=DEFAULT_CONFIG_PATH))
 
     def _exit(self, message=None, code=1):
         """Terminate with the specified error and code ."""

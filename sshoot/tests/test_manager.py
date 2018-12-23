@@ -1,290 +1,271 @@
-import os
 from getpass import getuser
+import os
 from pathlib import Path
 from tempfile import gettempdir
-from unittest import TestCase
 
-from fixtures import (
-    TempDir,
-    TestWithFixtures,
-)
+import pytest
 import yaml
 
-from ..profile import Profile
 from ..manager import (
     DEFAULT_CONFIG_PATH,
     get_rundir,
     Manager,
     ManagerProfileError,
 )
+from ..profile import Profile
 
 
-class ManagerTests(TestWithFixtures):
-
-    def setUp(self):
-        super().setUp()
-        self.config_path = Path(self.useFixture(TempDir()).path)
-        self.rundir = Path(self.useFixture(TempDir()).path)
-        self.sessions_path = self.rundir / 'sessions'
-        self.pid_path = self.sessions_path / 'profile.pid'
-        self.profiles_file_path = self.config_path / 'profiles.yaml'
-        self.config_file_path = self.config_path / 'config.yaml'
-        self.sessions_path.mkdir()
-        self.manager = Manager(
-            config_path=self.config_path, rundir=self.rundir)
-        self.manager.sessions_path = self.sessions_path
-
-    def make_fake_executable(self, exit_code=0):
-        """Create a fake executable logging command line parameters."""
-        temp_dir = Path(self.useFixture(TempDir()).path)
-        executable = temp_dir / 'executable'
-        executable.write_text((
+def fake_executable(base_path, exit_code):
+    """Create a fake executable logging command line parameters."""
+    executable = Path(base_path) / 'executable'
+    executable.write_text(
+        (
             '#!/bin/sh\n'
             'echo $@ > {}/cmdline\n'
             'echo -n stderr message >&2\n'
-            'exit {}\n').format(str(temp_dir), exit_code))
-        executable.chmod(0o755)
-        return executable
+            'exit {}\n').format(str(base_path), exit_code))
+    executable.chmod(0o755)
+    return executable
+
+
+@pytest.fixture
+def bin_succeed(tmpdir):
+    yield fake_executable(tmpdir, 0)
+
+
+@pytest.fixture
+def bin_fail(tmpdir):
+    yield fake_executable(tmpdir, 1)
+
+
+@pytest.fixture
+def profile(profile_manager):
+    yield profile_manager.create_profile(
+        'profile', {'subnets': ['10.0.0.0/24']})
+
+
+@pytest.fixture
+def pid_file(profile, sessions_dir):
+    yield sessions_dir / 'profile.pid'
+
+
+class TestManager:
 
     def test_default_paths(self):
         """A default config path is set if not specified."""
-        manager = Manager()
-        self.assertEqual(manager.config_path, DEFAULT_CONFIG_PATH)
+        assert Manager().config_path == DEFAULT_CONFIG_PATH
 
-    def test_paths(self):
+    def test_paths(self, profile_manager, config_dir, sessions_dir):
         """The config and sessions are set in the Manager."""
-        self.assertEqual(self.manager.config_path, self.config_path)
-        self.assertEqual(self.manager.sessions_path, self.sessions_path)
+        assert profile_manager.config_path == config_dir
+        assert profile_manager.sessions_path == sessions_dir
 
-    def test_load_config_create_dirs(self):
+    def test_load_config_create_dirs(
+            self, profile_manager, config_dir, sessions_dir):
         """Manager.load_config creates config directories."""
-        self.config_path.rmdir()
-        self.sessions_path.rmdir()
-        self.manager.load_config()
-        self.assertTrue(self.config_path.is_dir())
-        self.assertTrue(self.sessions_path.is_dir())
+        config_dir.rmdir()
+        sessions_dir.rmdir()
+        profile_manager.load_config()
+        assert config_dir.is_dir()
+        assert sessions_dir.is_dir()
 
-    def test_load_profiles(self):
+    def test_load_profiles(self, profile_manager, profiles_file):
         """Manager.load_config loads the profiles."""
         profiles = {'profile': {'subnets': ['10.0.0.0/16']}}
-        self.profiles_file_path.write_text(yaml.dump(profiles))
-        self.manager.load_config()
-        self.assertCountEqual(self.manager.get_profiles().keys(), ['profile'])
+        profiles_file.write_text(yaml.dump(profiles))
+        profile_manager.load_config()
+        assert list(profile_manager.get_profiles()) == ['profile']
 
-    def test_create_profile(self):
+    def test_create_profile(self, profile_manager, profiles_file):
         """Manager.create_profile adds a profile with specified details."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        profiles = yaml.load(self.profiles_file_path.read_text())
-        self.assertEqual(profiles, {'profile': {'subnets': ['10.0.0.0/24']}})
+        profile_manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
+        profiles = yaml.safe_load(profiles_file.read_text())
+        assert profiles == {'profile': {'subnets': ['10.0.0.0/24']}}
 
-    def test_create_profile_in_use(self):
+    def test_create_profile_in_use(self, profile_manager):
         """Manager.create_profile raises an error if profile name is in use."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        self.assertRaises(
-            ManagerProfileError, self.manager.create_profile,
-            'profile', {'subnets': ['10.0.0.0/16']})
+        profile_manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
+        with pytest.raises(ManagerProfileError):
+            profile_manager.create_profile(
+                'profile', {'subnets': ['10.0.0.0/16']})
 
-    def test_create_profile_invalid_details(self):
+    def test_create_profile_invalid_details(self, profile_manager):
         """Manager.create_profile raises an error on invalid profile info."""
-        self.assertRaises(
-            ManagerProfileError, self.manager.create_profile,
-            'profile', {'wrong': 'data'})
+        with pytest.raises(ManagerProfileError):
+            profile_manager.create_profile('profile', {'wrong': 'data'})
 
-    def test_remove_profile(self):
+    def test_remove_profile(self, profile_manager, profile, profiles_file):
         """Manager.remove_profile removes the specified profile."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        self.manager.remove_profile('profile')
-        config = yaml.load(self.profiles_file_path.read_text())
-        self.assertEqual(config, {})
+        profile_manager.remove_profile('profile')
+        config = yaml.safe_load(profiles_file.read_text())
+        assert config == {}
 
-    def test_remove_profile_unknown(self):
+    def test_remove_profile_unknown(self, profile_manager):
         """Manager.remove_profile raises an error if name is unknown."""
-        self.assertRaises(
-            ManagerProfileError, self.manager.remove_profile, 'unknown')
+        with pytest.raises(ManagerProfileError):
+            profile_manager.remove_profile('unknown')
 
-    def test_get_profiles(self):
+    def test_get_profiles(self, profile_manager):
         """Manager.get_profiles returns defined profiles."""
-        self.manager.create_profile('profile1', {'subnets': ['10.0.0.0/24']})
-        self.manager.create_profile(
+        profile_manager.create_profile(
+            'profile1', {'subnets': ['10.0.0.0/24']})
+        profile_manager.create_profile(
             'profile2', {'subnets': ['192.168.0.0/16']})
-        profiles = {
+        profile_manager.get_profiles() == {
             'profile1': Profile.from_dict({'subnets': ['10.0.0.0/24']}),
-            'profile2': Profile.from_dict({'subnets': ['192.168.0.0/16']})}
-        self.assertEqual(self.manager.get_profiles(), profiles)
+            'profile2': Profile.from_dict({'subnets': ['192.168.0.0/16']})
+        }
 
-    def test_get_profile(self):
+    def test_get_profile(self, profile_manager):
         """Manager.get_profile returns a profile."""
         config = {'subnets': ['10.0.0.0/24']}
-        self.manager.create_profile('profile', config)
-        profile = self.manager.get_profile('profile')
-        self.assertEqual(profile, Profile.from_dict(config))
+        profile_manager.create_profile('profile', config)
+        profile = profile_manager.get_profile('profile')
+        assert profile == Profile.from_dict(config)
 
-    def test_get_profile_unknown(self):
+    def test_get_profile_unknown(self, profile_manager):
         """Manager.get_profile raises an error if the name is unknown."""
-        self.assertRaises(
-            ManagerProfileError, self.manager.get_profile, 'unknown')
+        with pytest.raises(ManagerProfileError):
+            profile_manager.get_profile('unknown')
 
-    def test_start_profile(self):
+    def test_start_profile(
+            self, profile_manager, profile, sessions_dir, bin_succeed):
         """Manager.start_profile starts a profile."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        executable = self.make_fake_executable()
-        self.manager._get_executable = lambda: str(executable)
+        profile_manager._get_executable = lambda: str(bin_succeed)
 
-        self.manager.start_profile('profile')
-        cmdline = (executable.parent / 'cmdline').read_text()
-        expected_cmdline = (
+        profile_manager.start_profile('profile')
+        cmdline = (bin_succeed.parent / 'cmdline').read_text()
+        assert cmdline == (
             '10.0.0.0/24 --daemon --pidfile {}/profile.pid\n'.format(
-                self.sessions_path))
-        self.assertEqual(cmdline, expected_cmdline)
+                sessions_dir))
 
-    def test_start_profile_extra_args(self):
+    def test_start_profile_extra_args(
+            self, profile_manager, profile, sessions_dir, bin_succeed):
         """Manager.start_profile can add extra arguments to command line."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        executable = self.make_fake_executable()
-        self.manager._get_executable = lambda: str(executable)
+        profile_manager._get_executable = lambda: str(bin_succeed)
 
-        self.manager.start_profile(
+        profile_manager.start_profile(
             'profile', extra_args=['--extra1', '--extra2'])
-        cmdline = (executable.parent / 'cmdline').read_text()
-        expected_cmdline = (
+        cmdline = (bin_succeed.parent / 'cmdline').read_text()
+        assert cmdline == (
             '10.0.0.0/24 --daemon --pidfile {}/profile.pid --extra1 --extra2\n'
-            .format(self.sessions_path))
-        self.assertEqual(cmdline, expected_cmdline)
+            .format(sessions_dir))
 
-    def test_start_profile_fail(self):
+    def test_start_profile_fail(self, profile_manager, profile, bin_fail):
         """An error is raised if starting a profile fails."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        executable = self.make_fake_executable(exit_code=1)
-        self.manager._get_executable = lambda: str(executable)
-        with self.assertRaises(ManagerProfileError) as context:
-            self.manager.start_profile('profile')
-        self.assertEqual(
-            str(context.exception),
-            'Profile failed to start: stderr message')
+        profile_manager._get_executable = lambda: str(bin_fail)
+        with pytest.raises(ManagerProfileError) as err:
+            profile_manager.start_profile('profile')
+        assert str(err.value) == 'Profile failed to start: stderr message'
 
-    def test_start_profile_executable_not_found(self):
+    def test_start_profile_executable_not_found(
+            self, profile_manager, profile):
         """Profile start raises an error if executable is not found."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        self.manager._get_executable = lambda: '/not/here'
-        self.assertRaises(
-            ManagerProfileError, self.manager.start_profile, 'profile')
+        profile_manager._get_executable = lambda: '/not/here'
+        with pytest.raises(ManagerProfileError):
+            profile_manager.start_profile('profile')
 
-    def test_start_profile_unknown(self):
+    def test_start_profile_unknown(self, profile_manager):
         """Trying to start an unknown profile raises an error."""
-        self.assertRaises(
-            ManagerProfileError, self.manager.start_profile, 'unknown')
+        with pytest.raises(ManagerProfileError):
+            profile_manager.start_profile('unknown')
 
-    def test_start_profile_running(self):
+    def test_start_profile_running(self, profile_manager, profile):
         """Trying to start a running profile raises an error."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        # Fake profile as running
-        self.manager.is_running = lambda name: True
-        self.assertRaises(
-            ManagerProfileError, self.manager.start_profile, 'profile')
+        profile_manager.is_running = lambda name: True
+        with pytest.raises(ManagerProfileError):
+            profile_manager.start_profile('profile')
 
-    def test_stop_profile(self):
+    def test_stop_profile(self, mocker, profile_manager, pid_file):
         """Manager.stop_profile stops a running profile."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        self.pid_path.write_text('100\n')
-        # Mock manager calls
-        self.manager.is_running = lambda name: True
-        calls = []
-        self.manager.kill = (
-            lambda pid, signal: calls.append((pid, signal)))
-        self.manager.stop_profile('profile')
-        self.assertEqual(calls, [(100, 15)])
+        mock_kill = mocker.patch('sshoot.manager.os.kill')
+        pid_file.write_text('100\n')
+        profile_manager.is_running = lambda name: True
+        profile_manager.stop_profile('profile')
+        mock_kill.assert_called_once_with(100, 15)
 
-    def test_stop_profile_unknown(self):
+    def test_stop_profile_unknown(self, profile_manager):
         """Trying to stop an unknown profile raises an error."""
-        self.assertRaises(
-            ManagerProfileError, self.manager.stop_profile, 'unknown')
+        with pytest.raises(ManagerProfileError):
+            profile_manager.stop_profile('unknown')
 
-    def test_stop_profile_invalid_pidfile(self):
+    def test_stop_profile_invalid_pidfile(self, profile_manager, pid_file):
         """If pidfile contains invalid data, stopping raises an error."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        self.pid_path.write_text('garbage')
-        self.assertRaises(
-            ManagerProfileError, self.manager.stop_profile, 'profile')
+        pid_file.write_text('garbage')
+        with pytest.raises(ManagerProfileError):
+            profile_manager.stop_profile('profile')
 
-    def test_stop_profile_process_not_found(self):
+    def test_stop_profile_process_not_found(
+            self, mocker, profile_manager, pid_file):
         """If the process fails to stop an error is raised."""
-        self.pid_path.write_text('100\n')
+        pid_file.write_text('100\n')
 
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
+        mock_kill = mocker.patch('sshoot.manager.os.kill')
+        mock_kill.side_effect = IOError
 
-        def kill(pid, signal):
-            raise IOError()
+        profile_manager.is_running = lambda name: True
+        with pytest.raises(ManagerProfileError) as err:
+            profile_manager.stop_profile('profile')
+        assert 'Failed to stop profile' in str(err.value)
 
-        # Mock manager calls
-        self.manager.kill = kill
-        self.manager.is_running = lambda name: True
-        with self.assertRaises(ManagerProfileError) as cm:
-            self.manager.stop_profile('profile')
-        self.assertIn('Failed to stop profile', str(cm.exception))
-
-    def test_get_pidfile(self):
+    def test_get_pidfile(self, profile_manager, pid_file):
         """Manager._get_pidfile returns the pidfile path for a session."""
-        self.assertEqual(self.manager._get_pidfile('profile'), self.pid_path)
+        assert profile_manager._get_pidfile('profile') == pid_file
 
-    def test_is_running(self):
+    def test_is_running(self, profile_manager, pid_file):
         """If the process is present, the profile is running."""
-        self.pid_path.write_text('{}\n'.format(os.getpid()))
-        self.assertTrue(self.manager.is_running('profile'))
+        pid_file.write_text('{}\n'.format(os.getpid()))
+        assert profile_manager.is_running('profile')
 
-    def test_is_running_no_pidfile(self):
+    def test_is_running_no_pidfile(self, profile_manager):
         """If the pidfile is not found, the profile is not running."""
-        self.assertFalse(self.manager.is_running('not-here'))
+        assert not profile_manager.is_running('not-here')
 
-    def test_is_running_pidfile_empty(self):
+    def test_is_running_pidfile_empty(self, profile_manager, pid_file):
         """If the pidfile is empty, the profile is not running."""
-        (self.sessions_path / 'profile.pid').write_text('')
-        self.assertFalse(self.manager.is_running('profile'))
+        pid_file.write_text('')
+        assert not profile_manager.is_running('profile')
 
-    def test_is_running_pidfile_no_integer(self):
+    def test_is_running_pidfile_no_integer(self, profile_manager, pid_file):
         """If the pid is not an integer, the profile is not running."""
-        self.pid_path.write_text('foo\n')
-        self.assertFalse(self.manager.is_running('profile'))
+        pid_file.write_text('foo\n')
+        assert not profile_manager.is_running('profile')
 
-    def test_is_running_pidfile_no_process(self):
+    def test_is_running_pidfile_no_process(self, profile_manager, pid_file):
         """If no process is present, the profile is not running."""
-        self.pid_path.write_text('-100\n')
-        self.assertFalse(self.manager.is_running('profile'))
+        pid_file.write_text('-100\n')
+        assert not profile_manager.is_running('profile')
         # The stale pidfile is deleted.
-        self.assertFalse(self.pid_path.exists())
+        assert not pid_file.exists()
 
-    def test_get_cmdline(self):
+    def test_get_cmdline(self, profile_manager, pid_file):
         """Manager.get_cmdline returns the command line for the profile."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        pidfile = str(self.sessions_path / 'profile.pid')
-        self.assertEqual(
-            self.manager.get_cmdline('profile'),
-            ['sshuttle', '10.0.0.0/24', '--daemon', '--pidfile', pidfile])
+        assert profile_manager.get_cmdline('profile') == [
+            'sshuttle', '10.0.0.0/24', '--daemon', '--pidfile',
+            str(pid_file)
+        ]
 
-    def test_get_cmdline_extra_args(self):
+    def test_get_cmdline_extra_args(self, profile_manager, pid_file):
         """Manager.get_cmdline adds passed extra arguments to command line."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        pidfile = str(self.sessions_path / 'profile.pid')
-        expected_cmdline = [
-            'sshuttle', '10.0.0.0/24', '--daemon', '--pidfile', pidfile,
-            '--extra1', '--extra2']
-        self.assertEqual(
-            self.manager.get_cmdline(
-                'profile', extra_args=['--extra1', '--extra2']),
-            expected_cmdline)
+        cmdline = profile_manager.get_cmdline(
+            'profile', extra_args=['--extra1', '--extra2'])
+        assert cmdline == [
+            'sshuttle', '10.0.0.0/24', '--daemon', '--pidfile',
+            str(pid_file), '--extra1', '--extra2'
+        ]
 
-    def test_get_cmdline_executable(self):
+    def test_get_cmdline_executable(self, profile_manager, pid_file):
         """Manager.get_cmdline uses the configured executable."""
-        self.manager.create_profile('profile', {'subnets': ['10.0.0.0/24']})
-        self.manager._get_executable = lambda: '/foo/sshuttle'
-        pidfile = str(self.sessions_path / 'profile.pid')
-        self.assertEqual(
-            self.manager.get_cmdline('profile'),
-            ['/foo/sshuttle', '10.0.0.0/24', '--daemon', '--pidfile', pidfile])
+        profile_manager._get_executable = lambda: '/foo/sshuttle'
+        assert profile_manager.get_cmdline('profile') == [
+            '/foo/sshuttle', '10.0.0.0/24', '--daemon', '--pidfile',
+            str(pid_file)
+        ]
 
 
-class GetRundirTests(TestCase):
+class TestGetRundir:
 
     def test_rundir_path(self):
         """get_rundir returns a user-specific tempdir path."""
         rundir_path = Path(gettempdir()) / 'foo-{}'.format(getuser())
-        self.assertEqual(get_rundir('foo'), rundir_path)
+        assert get_rundir('foo') == rundir_path

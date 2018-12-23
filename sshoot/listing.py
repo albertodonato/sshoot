@@ -1,28 +1,26 @@
 """Helpers for listing output."""
 
 from collections import OrderedDict
-from io import StringIO
 from csv import DictWriter
+from io import StringIO
 import json
 
 from prettytable import (
+    HEADER,
     PrettyTable,
-    HEADER)
+)
 
 from .config import yaml_dump
 from .i18n import _
 
-
 # Map names to profile fileds
-_FIELDS_MAP = OrderedDict([
-    (_('Remote host'), 'remote'),
-    (_('Subnets'), 'subnets'),
-    (_('Auto hosts'), 'auto_hosts'),
-    (_('Auto nets'), 'auto_nets'),
-    (_('DNS forward'), 'dns'),
-    (_('Exclude subnets'), 'exclude_subnets'),
-    (_('Seed hosts'), 'seed_hosts'),
-    (_('Extra options'), 'extra_opts')])
+_FIELDS_MAP = OrderedDict(
+    [
+        (_('Remote host'), 'remote'), (_('Subnets'), 'subnets'),
+        (_('Auto hosts'), 'auto_hosts'), (_('Auto nets'), 'auto_nets'),
+        (_('DNS forward'), 'dns'), (_('Exclude subnets'), 'exclude_subnets'),
+        (_('Seed hosts'), 'seed_hosts'), (_('Extra options'), 'extra_opts')
+    ])
 
 NAME_FIELD = _('Name')
 STATUS_FIELD = _('Status')
@@ -76,8 +74,7 @@ class ProfileListing:
         for name, profile in profiles_iter:
             row = ['*' if self.manager.is_running(name) else '', name]
             row.extend(
-                _format_value(getattr(profile, column))
-                for column in columns)
+                _format_value(getattr(profile, column)) for column in columns)
             table.add_row(row)
         return table.get_string(sortby=NAME_FIELD) + '\n'
 
@@ -91,11 +88,15 @@ class ProfileListing:
         writer.writeheader()
 
         for name, profile in profiles_iter:
-            row = {NAME_FIELD: name,
-                   STATUS_FIELD: _profile_status(self.manager, name)}
-            row.update({
-                title: getattr(profile, _FIELDS_MAP[title])
-                for title in titles[2:]})
+            row = {
+                NAME_FIELD: name,
+                STATUS_FIELD: _profile_status(self.manager, name)
+            }
+            row.update(
+                {
+                    title: getattr(profile, _FIELDS_MAP[title])
+                    for title in titles[2:]
+                })
             writer.writerow(row)
         return buf.getvalue()
 

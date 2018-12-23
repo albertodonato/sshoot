@@ -1,8 +1,8 @@
 """Internationalization setup."""
 
-import os
 import argparse
 import gettext
+import os
 
 
 def _setup_i18n():
