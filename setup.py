@@ -9,7 +9,7 @@ tests_require = ['fixtures', 'pytest', 'pytest-mock']
 
 config = {
     'name': 'sshoot',
-    'version': '1.4.1',
+    'version': '1.4.2',
     'license': 'GPLv3+',
     'description': 'Manage multiple sshuttle VPN sessions',
     'long_description': Path('README.rst').read_text(),

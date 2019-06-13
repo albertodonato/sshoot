@@ -1,3 +1,10 @@
+v1.4.2 - 2019-06-13
+===================
+
+- Rework tests and project setup
+- Fix yaml warning (Fixes: #6)
+
+
 v1.4.1 - 2018-06-30
 ===================
 
