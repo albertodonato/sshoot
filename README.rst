@@ -74,7 +74,7 @@ are supported, via::
    :target: https://travis-ci.org/albertodonato/sshoot
 .. |Coverage Status| image:: https://img.shields.io/codecov/c/github/albertodonato/sshoot/master.svg
    :target: https://codecov.io/gh/albertodonato/sshoot
-.. |Snap Status| image:: https://build.snapcraft.io/badge/albertodonato/sonarr.svg
+.. |Snap Status| image:: https://build.snapcraft.io/badge/albertodonato/sshoot.svg
    :target: https://build.snapcraft.io/user/albertodonato/sonarr
 .. |Get it from the Snap Store| image:: https://snapcraft.io/static/images/badges/en/snap-store-black.svg
    :target: https://snapcraft.io/sonarr
