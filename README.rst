@@ -1,7 +1,7 @@
 sshoot - Manage sshuttle VPN sessions
 =====================================
 
-|Latest Version| |Build Status| |Coverage Status|
+|Latest Version| |Build Status| |Coverage Status| |Snap Status|
 
 Command-line interface to manage multiple sshuttle_ VPN sessions.
 
@@ -53,8 +53,20 @@ Remove it:
 
     $ sshoot delete vpn1
 
+    
+Install from Snap
+-----------------
 
-.. _sshuttle: https://github.com/apenwarr/sshuttle
+|Get it from the Snap Store|
+
+``sshoot`` can be installed from `Snap Store`_ on systems where classic Snaps
+are supported, via::
+
+  sudo snap install --classic sshoot
+
+
+.. _sshuttle: https://github.com/sshuttle/sshuttle
+.. _`Snap Store`: https://snapcraft.io
 
 .. |Latest Version| image:: https://img.shields.io/pypi/v/sshoot.svg
    :target: https://pypi.python.org/pypi/sshoot
@@ -62,3 +74,7 @@ Remove it:
    :target: https://travis-ci.org/albertodonato/sshoot
 .. |Coverage Status| image:: https://img.shields.io/codecov/c/github/albertodonato/sshoot/master.svg
    :target: https://codecov.io/gh/albertodonato/sshoot
+.. |Snap Status| image:: https://build.snapcraft.io/badge/albertodonato/sonarr.svg
+   :target: https://build.snapcraft.io/user/albertodonato/sonarr
+.. |Get it from the Snap Store| image:: https://snapcraft.io/static/images/badges/en/snap-store-black.svg
+   :target: https://snapcraft.io/sonarr
