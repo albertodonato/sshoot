@@ -1,0 +1,67 @@
+name: sshoot
+version: git
+version-script: git describe --tags HEAD
+summary: Manage sshuttle VPN sessions
+description: |
+  Command-line interface to manage multiple sshuttle VPN sessions.
+
+  sshoot allows to define multiple VPN sessions using sshuttle and start/stop
+  them as needed.
+
+license: GPL-3.0+
+confinement: classic
+grade: stable
+base: core18
+
+apps:
+  sshoot:
+    command: bin/sshoot
+    environment:
+      PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
+    completer: sshoot-completion
+    plugs:
+      - firewall-control
+      - home
+      - network
+      - network-control
+
+parts:
+  sshoot:
+    plugin: python
+    source: .
+    source-type: git
+    filesets:
+      bins:
+        - bin/sshoot
+        - bin/sshuttle
+        - usr/bin/python3
+        - usr/bin/python3.6
+    prime:
+      - $bins
+      - etc
+      - lib
+      - usr/lib
+      - -usr/lib/python3.7
+
+  sshuttle:
+    plugin: python
+    source: https://github.com/sshuttle/sshuttle.git
+    source-type: git
+    source-tag: v0.78.5
+    requirements:
+       - requirements.txt
+    filesets:
+      bins:
+        - bin/*
+        - usr/bin/python3
+        - usr/bin/python3.6
+    prime:
+      - $bins
+      - etc
+      - lib
+      - usr/lib
+      - -usr/lib/python3.7
+
+  completion:
+    plugin: dump
+    source: snap/local

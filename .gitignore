@@ -9,3 +9,4 @@
 .eggs
 .pybuild
 .cache
+/snap/.snapcraft
