@@ -19,11 +19,6 @@ apps:
     environment:
       PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
     completer: sshoot-completion
-    plugs:
-      - firewall-control
-      - home
-      - network
-      - network-control
 
 parts:
   sshoot:
