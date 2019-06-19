@@ -75,6 +75,6 @@ are supported, via::
 .. |Coverage Status| image:: https://img.shields.io/codecov/c/github/albertodonato/sshoot/master.svg
    :target: https://codecov.io/gh/albertodonato/sshoot
 .. |Snap Status| image:: https://build.snapcraft.io/badge/albertodonato/sshoot.svg
-   :target: https://build.snapcraft.io/user/albertodonato/sonarr
+   :target: https://build.snapcraft.io/user/albertodonato/sshoot
 .. |Get it from the Snap Store| image:: https://snapcraft.io/static/images/badges/en/snap-store-black.svg
-   :target: https://snapcraft.io/sonarr
+   :target: https://snapcraft.io/sshoot
