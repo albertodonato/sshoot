@@ -1,6 +1,5 @@
 name: sshoot
 version: git
-version-script: git describe --tags HEAD
 summary: Manage sshuttle VPN sessions
 description: |
   Command-line interface to manage multiple sshuttle VPN sessions.
