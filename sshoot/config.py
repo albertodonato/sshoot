@@ -7,18 +7,17 @@ from .profile import Profile
 
 def yaml_dump(data, fh=None):
     """Dump data in YAML format with sane defaults for readability."""
-    return yaml.safe_dump(
-        data, fh, default_flow_style=False, allow_unicode=True)
+    return yaml.safe_dump(data, fh, default_flow_style=False, allow_unicode=True)
 
 
 class Config:
     """Handle configuration file loading/saving."""
 
-    CONFIG_KEYS = frozenset(['executable'])
+    CONFIG_KEYS = frozenset(["executable"])
 
     def __init__(self, path):
-        self._config_file = path / 'config.yaml'
-        self._profiles_file = path / 'profiles.yaml'
+        self._config_file = path / "config.yaml"
+        self._profiles_file = path / "profiles.yaml"
         self._reset()
 
     def load(self):
@@ -31,8 +30,7 @@ class Config:
 
     def save(self):
         """Save profiles configuration to file."""
-        self._profiles_file.write_text(
-            yaml_dump(self._build_profiles_config()))
+        self._profiles_file.write_text(yaml_dump(self._build_profiles_config()))
 
     def add_profile(self, name, profile):
         """Add a profile to the configuration."""
@@ -53,8 +51,7 @@ class Config:
     def config(self):
         """Return a dict with the configuration."""
         return {
-            key: value
-            for key, value in self._config.items() if key in self.CONFIG_KEYS
+            key: value for key, value in self._config.items() if key in self.CONFIG_KEYS
         }
 
     def _reset(self):
@@ -78,8 +75,8 @@ class Config:
 
     def _from_config(self, config):
         """Convert a config to a params dict."""
-        return {key.replace('-', '_'): value for key, value in config.items()}
+        return {key.replace("-", "_"): value for key, value in config.items()}
 
     def _to_config(self, params):
         """Convert a params dict to a config."""
-        return {key.replace('_', '-'): value for key, value in params.items()}
+        return {key.replace("_", "-"): value for key, value in params.items()}

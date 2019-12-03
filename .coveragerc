@@ -1,9 +1,0 @@
-[run]
-source = sshoot
-omit =
-  sshoot/main.py
-
-[report]
-show_missing = True
-fail_under = 100
-skip_covered = True

@@ -19,7 +19,7 @@ from .profile import (
     ProfileError,
 )
 
-DEFAULT_CONFIG_PATH = Path(xdg_config_home) / 'sshoot'
+DEFAULT_CONFIG_PATH = Path(xdg_config_home) / "sshoot"
 
 
 class ManagerProfileError(Exception):
@@ -30,10 +30,9 @@ class Manager:
     """Profile manager."""
 
     def __init__(self, config_path=None, rundir=None):
-        self.config_path = (
-            Path(config_path) if config_path else DEFAULT_CONFIG_PATH)
-        self.rundir = Path(rundir) if rundir else get_rundir('sshoot')
-        self.sessions_path = self.rundir / 'sessions'
+        self.config_path = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
+        self.rundir = Path(rundir) if rundir else get_rundir("sshoot")
+        self.sessions_path = self.rundir / "sessions"
         self._config = Config(self.config_path)
 
     def load_config(self):
@@ -49,7 +48,8 @@ class Manager:
             self._config.add_profile(name, profile)
         except KeyError:
             raise ManagerProfileError(
-                _('Profile name already in use: {name}').format(name=name))
+                _("Profile name already in use: {name}").format(name=name)
+            )
         except ProfileError as error:
             raise ManagerProfileError(str(error))
 
@@ -60,8 +60,7 @@ class Manager:
         try:
             self._config.remove_profile(name)
         except KeyError:
-            raise ManagerProfileError(
-                _('Unknown profile: {name}').format(name=name))
+            raise ManagerProfileError(_("Unknown profile: {name}").format(name=name))
 
         self._config.save()
 
@@ -74,16 +73,15 @@ class Manager:
         try:
             return self._config.profiles[name]
         except KeyError:
-            raise ManagerProfileError(
-                _('Unknown profile: {name}').format(name=name))
+            raise ManagerProfileError(_("Unknown profile: {name}").format(name=name))
 
     def start_profile(self, name, extra_args=None):
         """Start profile with given name."""
         if self.is_running(name):
-            raise ManagerProfileError(_('Profile is already running'))
+            raise ManagerProfileError(_("Profile is already running"))
 
         cmdline = self.get_cmdline(name, extra_args=extra_args)
-        message = _('Profile failed to start: {error}')
+        message = _("Profile failed to start: {error}")
         try:
             process = Popen(cmdline, stderr=PIPE)
             # Wait until process is started (it daemonizes)
@@ -103,14 +101,15 @@ class Manager:
         self.get_profile(name)
 
         if not self.is_running(name):
-            raise ManagerProfileError(_('Profile is not running'))
+            raise ManagerProfileError(_("Profile is not running"))
 
         try:
             pid = int(self._get_pidfile(name).read_text())
             os.kill(pid, SIGTERM)
         except (IOError, OSError) as error:
             raise ManagerProfileError(
-                _('Failed to stop profile: {error}').format(error=error))
+                _("Failed to stop profile: {error}").format(error=error)
+            )
 
     def is_running(self, name):
         """Return whether the specified profile is running."""
@@ -135,21 +134,22 @@ class Manager:
         profile = self.get_profile(name)
 
         executable = self._get_executable()
-        extra_opts = ['--daemon', '--pidfile', str(self._get_pidfile(name))]
+        extra_opts = ["--daemon", "--pidfile", str(self._get_pidfile(name))]
         if extra_args:
             extra_opts.extend(extra_args)
         return profile.cmdline(executable=executable, extra_opts=extra_opts)
 
     def _get_pidfile(self, name):
         """Return the path of the pidfile for the specified profile."""
-        return self.sessions_path / '{}.pid'.format(name)
+        return self.sessions_path / "{}.pid".format(name)
 
     def _get_executable(self):
         """Return the shuttle executable from the config."""
-        return self._config.config.get('executable', 'sshuttle')
+        return self._config.config.get("executable", "sshuttle")
 
 
 def get_rundir(prefix):
     """Return the directory holding runtime data."""
-    return Path(gettempdir()) / '{prefix}-{username}'.format(
-        prefix=prefix, username=getuser())
+    return Path(gettempdir()) / "{prefix}-{username}".format(
+        prefix=prefix, username=getuser()
+    )

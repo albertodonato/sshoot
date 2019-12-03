@@ -9,7 +9,7 @@ from .manager import Manager
 @pytest.fixture
 def config_dir(tmpdir):
     """A directory for configuration files. """
-    path = Path(tmpdir / 'config')
+    path = Path(tmpdir / "config")
     path.mkdir()
     yield path
 
@@ -17,13 +17,13 @@ def config_dir(tmpdir):
 @pytest.fixture
 def config_file(config_dir):
     """The configuration file."""
-    yield config_dir / 'config.yaml'
+    yield config_dir / "config.yaml"
 
 
 @pytest.fixture
 def profiles_file(config_dir):
     """A Path for profiles configuration file."""
-    yield config_dir / 'profiles.yaml'
+    yield config_dir / "profiles.yaml"
 
 
 @pytest.fixture
@@ -34,14 +34,14 @@ def config(config_dir):
 
 @pytest.fixture
 def run_dir(tmpdir):
-    path = Path(tmpdir / 'run')
+    path = Path(tmpdir / "run")
     path.mkdir()
     yield path
 
 
 @pytest.fixture
 def sessions_dir(run_dir):
-    path = run_dir / 'sessions'
+    path = run_dir / "sessions"
     path.mkdir()
     yield path
 

@@ -16,20 +16,24 @@ from .i18n import _
 # Map names to profile fileds
 _FIELDS_MAP = OrderedDict(
     [
-        (_('Remote host'), 'remote'), (_('Subnets'), 'subnets'),
-        (_('Auto hosts'), 'auto_hosts'), (_('Auto nets'), 'auto_nets'),
-        (_('DNS forward'), 'dns'), (_('Exclude subnets'), 'exclude_subnets'),
-        (_('Seed hosts'), 'seed_hosts'), (_('Extra options'), 'extra_opts')
-    ])
+        (_("Remote host"), "remote"),
+        (_("Subnets"), "subnets"),
+        (_("Auto hosts"), "auto_hosts"),
+        (_("Auto nets"), "auto_nets"),
+        (_("DNS forward"), "dns"),
+        (_("Exclude subnets"), "exclude_subnets"),
+        (_("Seed hosts"), "seed_hosts"),
+        (_("Extra options"), "extra_opts"),
+    ]
+)
 
-NAME_FIELD = _('Name')
-STATUS_FIELD = _('Status')
+NAME_FIELD = _("Name")
+STATUS_FIELD = _("Status")
 
 
 class InvalidFormat(Exception):
-
     def __init__(self, name):
-        super().__init__(_('Invalid output format: {name}').format(name=name))
+        super().__init__(_("Invalid output format: {name}").format(name=name))
 
 
 class ProfileListing:
@@ -40,12 +44,11 @@ class ProfileListing:
 
     @classmethod
     def supported_formats(cls):
-        return sorted(
-            attr[8:] for attr in dir(cls) if attr.startswith('_format_'))
+        return sorted(attr[8:] for attr in dir(cls) if attr.startswith("_format_"))
 
     def get_output(self, _format, verbose=False):
         """Return a string with listing in the specified format."""
-        formatter = getattr(self, '_format_{}'.format(_format), None)
+        formatter = getattr(self, "_format_{}".format(_format), None)
         if formatter is None:
             raise InvalidFormat(_format)
 
@@ -54,7 +57,7 @@ class ProfileListing:
 
     def _format_table(self, profiles_iter, verbose=False):
         """Format profiles data as a table."""
-        titles = ['', NAME_FIELD]
+        titles = ["", NAME_FIELD]
         titles.extend(_FIELDS_MAP)
         columns = list(_FIELDS_MAP.values())
         if not verbose:
@@ -63,8 +66,8 @@ class ProfileListing:
             columns = columns[:2]
 
         table = PrettyTable(titles)
-        table.align = 'l'
-        table.vertical_char = ' '
+        table.align = "l"
+        table.vertical_char = " "
         table.junction_char = table.horizontal_char
         table.padding_width = 0
         table.left_padding_width = 0
@@ -72,11 +75,10 @@ class ProfileListing:
         table.hrules = HEADER
 
         for name, profile in profiles_iter:
-            row = ['*' if self.manager.is_running(name) else '', name]
-            row.extend(
-                _format_value(getattr(profile, column)) for column in columns)
+            row = ["*" if self.manager.is_running(name) else "", name]
+            row.extend(_format_value(getattr(profile, column)) for column in columns)
             table.add_row(row)
-        return table.get_string(sortby=NAME_FIELD) + '\n'
+        return table.get_string(sortby=NAME_FIELD) + "\n"
 
     def _format_csv(self, profiles_iter, verbose=False):
         """Format profiles data as CSV."""
@@ -88,15 +90,10 @@ class ProfileListing:
         writer.writeheader()
 
         for name, profile in profiles_iter:
-            row = {
-                NAME_FIELD: name,
-                STATUS_FIELD: _profile_status(self.manager, name)
-            }
+            row = {NAME_FIELD: name, STATUS_FIELD: _profile_status(self.manager, name)}
             row.update(
-                {
-                    title: getattr(profile, _FIELDS_MAP[title])
-                    for title in titles[2:]
-                })
+                {title: getattr(profile, _FIELDS_MAP[title]) for title in titles[2:]}
+            )
             writer.writerow(row)
         return buf.getvalue()
 
@@ -119,26 +116,24 @@ class ProfileListing:
 def profile_details(manager, name):
     """Return a string with details about a profile, formatted as a table."""
     profile = manager.get_profile(name)
-    table = PrettyTable(
-        field_names=['key', 'value'], header=False, border=False)
-    table.align['key'] = table.align['value'] = 'l'
-    table.add_row(('{}:'.format(NAME_FIELD), name))
-    table.add_row(('{}:'.format(STATUS_FIELD), _profile_status(manager, name)))
+    table = PrettyTable(field_names=["key", "value"], header=False, border=False)
+    table.align["key"] = table.align["value"] = "l"
+    table.add_row(("{}:".format(NAME_FIELD), name))
+    table.add_row(("{}:".format(STATUS_FIELD), _profile_status(manager, name)))
     for name, field in _FIELDS_MAP.items():
-        table.add_row(
-            ('{}:'.format(name), _format_value(getattr(profile, field))))
+        table.add_row(("{}:".format(name), _format_value(getattr(profile, field))))
     return table.get_string()
 
 
 def _profile_status(manager, name):
     """Return a string with the status of a profile."""
-    return _('ACTIVE') if manager.is_running(name) else _('STOPPED')
+    return _("ACTIVE") if manager.is_running(name) else _("STOPPED")
 
 
 def _format_value(value):
     """Convert value to string, handling special cases."""
     if isinstance(value, (list, tuple)):
-        return ' '.join(value)
+        return " ".join(value)
     if value is None:
-        return ''
+        return ""
     return value
