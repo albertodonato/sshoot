@@ -237,17 +237,18 @@ class Sshoot:
         ) and not os.path.exists(DEFAULT_CONFIG_PATH)
         if need_config_path_update:
             shutil.move(old_config_path, DEFAULT_CONFIG_PATH)
-            sys.stderr.write(
+            print(
                 _(
                     "NOTICE: configuration tree moved from {old_path} to "
                     "{new_path}\n"
-                ).format(old_path=old_config_path, new_path=DEFAULT_CONFIG_PATH)
+                ).format(old_path=old_config_path, new_path=DEFAULT_CONFIG_PATH),
+                file=sys.stderr,
             )
 
     def _exit(self, message=None, code=1):
         """Terminate with the specified error and code ."""
         if message:
-            sys.stderr.write("{}\n".format(message))
+            print(f"{message}\n", file=sys.stderr)
         sys.exit(code)
 
 
