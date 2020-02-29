@@ -71,7 +71,7 @@ are supported, via::
 .. |Latest Version| image:: https://img.shields.io/pypi/v/sshoot.svg
    :target: https://pypi.python.org/pypi/sshoot
 .. |Build Status| image:: https://img.shields.io/travis/albertodonato/sshoot.svg
-   :target: https://travis-ci.org/albertodonato/sshoot
+   :target: https://travis-ci.com/albertodonato/sshoot
 .. |Coverage Status| image:: https://img.shields.io/codecov/c/github/albertodonato/sshoot/master.svg
    :target: https://codecov.io/gh/albertodonato/sshoot
 .. |Snap Status| image:: https://build.snapcraft.io/badge/albertodonato/sshoot.svg
