@@ -2,9 +2,8 @@ import csv
 from io import StringIO
 import json
 
-import yaml
-
 import pytest
+import yaml
 
 from ..listing import (
     InvalidFormat,

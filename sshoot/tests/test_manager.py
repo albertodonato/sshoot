@@ -3,9 +3,8 @@ import os
 from pathlib import Path
 from tempfile import gettempdir
 
-import yaml
-
 import pytest
+import yaml
 
 from ..manager import (
     DEFAULT_CONFIG_PATH,

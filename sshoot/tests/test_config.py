@@ -1,9 +1,8 @@
 from io import StringIO
 from textwrap import dedent
 
-import yaml
-
 import pytest
+import yaml
 
 from ..config import yaml_dump
 from ..profile import Profile
