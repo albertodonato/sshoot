@@ -9,6 +9,14 @@ from subprocess import (
     Popen,
 )
 from tempfile import gettempdir
+from typing import (
+    Any,
+    cast,
+    Dict,
+    IO,
+    List,
+    Optional,
+)
 
 from xdg.BaseDirectory import xdg_config_home
 
@@ -29,7 +37,7 @@ class ManagerProfileError(Exception):
 class Manager:
     """Profile manager."""
 
-    def __init__(self, config_path=None, rundir=None):
+    def __init__(self, config_path: Optional[str] = None, rundir: Optional[str] = None):
         self.config_path = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
         self.rundir = Path(rundir) if rundir else get_rundir("sshoot")
         self.sessions_path = self.rundir / "sessions"
@@ -41,7 +49,7 @@ class Manager:
         self.sessions_path.mkdir(parents=True, exist_ok=True)
         self._config.load()
 
-    def create_profile(self, name, details):
+    def create_profile(self, name: str, details: Dict[str, Any]):
         """Create a profile with provided details."""
         try:
             profile = Profile.from_dict(details)
@@ -55,7 +63,7 @@ class Manager:
 
         self._config.save()
 
-    def remove_profile(self, name):
+    def remove_profile(self, name: str):
         """Remove profile with given name."""
         try:
             self._config.remove_profile(name)
@@ -64,18 +72,18 @@ class Manager:
 
         self._config.save()
 
-    def get_profiles(self):
+    def get_profiles(self) -> Dict[str, Profile]:
         """Return profiles defined in config."""
         return self._config.profiles
 
-    def get_profile(self, name):
+    def get_profile(self, name: str) -> Profile:
         """Return profile with given name."""
         try:
             return self._config.profiles[name]
         except KeyError:
             raise ManagerProfileError(_("Unknown profile: {name}").format(name=name))
 
-    def start_profile(self, name, extra_args=None):
+    def start_profile(self, name: str, extra_args: Optional[List[str]] = None):
         """Start profile with given name."""
         if self.is_running(name):
             raise ManagerProfileError(_("Profile is already running"))
@@ -90,13 +98,14 @@ class Manager:
             # To catch file not found errors
             raise ManagerProfileError(message.format(error=str(err)))
 
+        stderr = cast(IO[bytes], process.stderr)
         if process.returncode != 0:
-            error = process.stderr.read().decode()
-            process.stderr.close()
+            error = stderr.read().decode()
+            stderr.close()
             raise ManagerProfileError(message.format(error=error))
-        process.stderr.close()
+        stderr.close()
 
-    def stop_profile(self, name):
+    def stop_profile(self, name: str):
         """Stop profile with given name."""
         self.get_profile(name)
 
@@ -111,7 +120,7 @@ class Manager:
                 _("Failed to stop profile: {error}").format(error=error)
             )
 
-    def is_running(self, name):
+    def is_running(self, name: str) -> bool:
         """Return whether the specified profile is running."""
         pidfile = self._get_pidfile(name)
         try:
@@ -129,7 +138,9 @@ class Manager:
             return False
         return True
 
-    def get_cmdline(self, name, extra_args=None):
+    def get_cmdline(
+        self, name: str, extra_args: Optional[List[str]] = None
+    ) -> List[str]:
         """Return the command line for the specified profile."""
         profile = self.get_profile(name)
 
@@ -139,16 +150,16 @@ class Manager:
             extra_opts.extend(extra_args)
         return profile.cmdline(executable=executable, extra_opts=extra_opts)
 
-    def _get_pidfile(self, name):
+    def _get_pidfile(self, name: str) -> Path:
         """Return the path of the pidfile for the specified profile."""
         return self.sessions_path / "{}.pid".format(name)
 
-    def _get_executable(self):
+    def _get_executable(self) -> str:
         """Return the shuttle executable from the config."""
         return self._config.config.get("executable", "sshuttle")
 
 
-def get_rundir(prefix):
+def get_rundir(prefix: str) -> Path:
     """Return the directory holding runtime data."""
     return Path(gettempdir()) / "{prefix}-{username}".format(
         prefix=prefix, username=getuser()

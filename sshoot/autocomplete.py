@@ -1,5 +1,8 @@
 """Shell completion helpers."""
 
+from argparse import Namespace
+from typing import Optional
+
 from .manager import Manager
 
 
@@ -9,7 +12,9 @@ def complete_argument(argument, completer):
     return argument
 
 
-def profile_completer(prefix, parsed_args, running=None, **kwargs):
+def profile_completer(
+    prefix: str, parsed_args: Namespace, running: Optional[bool] = None, **kwargs
+):
     """Autocomplete helper for profile names.
 
     Parameters:

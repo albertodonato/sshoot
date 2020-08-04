@@ -1,5 +1,12 @@
 """A sshuttle VPN profile."""
 
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+)
+
 
 class ProfileError(Exception):
     """Profile configuration is not correct."""
@@ -22,20 +29,20 @@ class Profile:
         "extra_opts",
     )
 
-    remote = None
-    subnets = None
-    auto_hosts = False
-    auto_nets = False
-    dns = False
-    exclude_subnets = None
-    seed_hosts = None
-    extra_opts = None
+    remote: str = ""
+    subnets: List[str]
+    auto_hosts: bool = False
+    auto_nets: bool = False
+    dns: bool = False
+    exclude_subnets: Optional[List[str]] = None
+    seed_hosts: Optional[List[str]] = None
+    extra_opts: Optional[List[str]] = None
 
-    def __init__(self, subnets):
+    def __init__(self, subnets: List[str]):
         self.subnets = subnets
 
     @classmethod
-    def from_dict(cls, config):
+    def from_dict(cls, config: Dict[str, Any]):
         """Create a profile from a dict holding config attributes."""
         config = config.copy()  # shallow, only first-level keys are changed
         try:
@@ -50,7 +57,9 @@ class Profile:
                 setattr(profile, attr, value)
         return profile
 
-    def cmdline(self, executable="sshuttle", extra_opts=None):
+    def cmdline(
+        self, executable: str = "sshuttle", extra_opts: Optional[List[str]] = None
+    ) -> List[str]:
         """Return a sshuttle cmdline based on the profile."""
         cmd = [executable] + self.subnets
         if self.remote:
@@ -71,7 +80,7 @@ class Profile:
             cmd.extend(extra_opts)
         return cmd
 
-    def config(self):
+    def config(self) -> Dict[str, Any]:
         """Return profile configuration as a dict."""
         conf = {}
         for attr in self._config_attrs:
@@ -80,7 +89,7 @@ class Profile:
                 conf[attr] = value
         return dict(conf)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return all(
             getattr(self, attr) == getattr(other, attr) for attr in self._config_attrs
         )
