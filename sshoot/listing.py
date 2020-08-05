@@ -5,10 +5,10 @@ from csv import DictWriter
 from io import StringIO
 import json
 from typing import (
+    Callable,
     cast,
     Iterable,
     List,
-    Protocol,
     Tuple,
 )
 
@@ -46,13 +46,7 @@ class InvalidFormat(Exception):
 
 
 ProfileIterator = Iterable[Tuple[str, Profile]]
-
-
-class Formatter(Protocol):
-    """Type definition for profiles formatters."""
-
-    def __call__(self, profiles_iter: ProfileIterator, verbose: bool = False) -> str:
-        pass  # pragma: nocover
+Formatter = Callable[..., str]  # XXX switch to Protocol when only supporting Python3.8
 
 
 class ProfileListing:
