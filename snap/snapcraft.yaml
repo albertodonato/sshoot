@@ -41,7 +41,7 @@ parts:
     plugin: python
     source: https://github.com/sshuttle/sshuttle.git
     source-type: git
-    source-tag: v0.78.5
+    source-tag: v1.0.3
     requirements:
        - requirements.txt
     filesets:
