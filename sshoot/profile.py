@@ -6,14 +6,14 @@ from typing import (
     Dict,
     List,
     Optional,
+    Set,
 )
+
+from .i18n import _
 
 
 class ProfileError(Exception):
-    """Profile configuration is not correct."""
-
-    def __init__(self):
-        super().__init__("Subnets must be specified")
+    """Invalid profile configuration."""
 
 
 @dataclasses.dataclass
@@ -30,20 +30,33 @@ class Profile:
     extra_opts: Optional[List[str]] = None
 
     @classmethod
-    def from_dict(cls, config: Dict[str, Any]):
-        """Create a profile from a dict holding config attributes."""
-        config = config.copy()  # shallow, only first-level keys are changed
+    def from_config(cls, config: Dict[str, Any]):
+        """Create a profile from a config dict."""
+        config = config.copy()
         try:
-            subnets = config.pop("subnets")
+            profile = cls(config.pop("subnets"))
         except KeyError:
-            raise ProfileError()
-
-        profile = Profile(subnets=subnets)
-        for attr in cls._field_names():
-            value = config.get(attr)
-            if value is not None:
-                setattr(profile, attr, value)
+            raise ProfileError(_("Profile missing 'subnets' config"))
+        profile.update(config)
         return profile
+
+    def update(self, config: Dict[str, Any]):
+        """Update the profile from the specified config."""
+        field_names = self._field_names()
+        for key, value in config.items():
+            attr = key.replace("-", "_")
+            if attr not in field_names:
+                raise ProfileError(_("Invalid profile config '{key}'").format(key=key))
+            setattr(self, attr, value)
+
+    def config(self) -> Dict[str, Any]:
+        """Return profile configuration as a dict."""
+        conf = {}
+        for attr in self._field_names():
+            value = getattr(self, attr)
+            if value:
+                conf[attr.replace("_", "-")] = value
+        return dict(conf)
 
     def cmdline(
         self, executable: str = "sshuttle", extra_opts: Optional[List[str]] = None
@@ -68,15 +81,6 @@ class Profile:
             cmd.extend(extra_opts)
         return cmd
 
-    def config(self) -> Dict[str, Any]:
-        """Return profile configuration as a dict."""
-        conf = {}
-        for attr in self._field_names():
-            value = getattr(self, attr)
-            if value:
-                conf[attr] = value
-        return dict(conf)
-
     @classmethod
-    def _field_names(cls) -> List[str]:
-        return [field.name for field in dataclasses.fields(cls)]
+    def _field_names(cls) -> Set[str]:
+        return {field.name for field in dataclasses.fields(cls)}

@@ -87,10 +87,21 @@ class TestManager:
         with pytest.raises(ManagerProfileError):
             profile_manager.create_profile("profile", {"subnets": ["10.0.0.0/16"]})
 
-    def test_create_profile_invalid_details(self, profile_manager):
+    @pytest.mark.parametrize(
+        "details,message",
+        [
+            (
+                {"subnets": ["1.2.3.0/24"], "wrong": "params"},
+                "Invalid profile config 'wrong'",
+            ),
+            ({"dns": True}, "Profile missing 'subnets' config"),
+        ],
+    )
+    def test_create_profile_invalid_details(self, profile_manager, details, message):
         """Manager.create_profile raises an error on invalid profile info."""
-        with pytest.raises(ManagerProfileError):
-            profile_manager.create_profile("profile", {"wrong": "data"})
+        with pytest.raises(ManagerProfileError) as error:
+            profile_manager.create_profile("profile", details)
+        assert str(error.value) == message
 
     def test_remove_profile(self, profile_manager, profile, profiles_file):
         """Manager.remove_profile removes the specified profile."""

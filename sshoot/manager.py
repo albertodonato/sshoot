@@ -52,15 +52,13 @@ class Manager:
     def create_profile(self, name: str, details: Dict[str, Any]):
         """Create a profile with provided details."""
         try:
-            profile = Profile.from_dict(details)
-            self._config.add_profile(name, profile)
+            self._config.add_profile(name, Profile.from_config(details))
         except KeyError:
             raise ManagerProfileError(
                 _("Profile name already in use: {name}").format(name=name)
             )
         except ProfileError as error:
             raise ManagerProfileError(str(error))
-
         self._config.save()
 
     def remove_profile(self, name: str):

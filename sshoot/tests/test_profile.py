@@ -12,31 +12,6 @@ def profile():
 
 
 class TestProfile:
-    def test_from_dict(self):
-        """A Profile can be created from a dict with its attributes."""
-        profile = Profile.from_dict(
-            {
-                "remote": "1.2.3.4",
-                "subnets": ["1.1.1.0/24", "10.10.0.0/16"],
-                "dns": True,
-                "auto_hosts": True,
-            }
-        )
-        assert profile.remote == "1.2.3.4"
-        assert profile.subnets == ["1.1.1.0/24", "10.10.0.0/16"]
-        assert profile.dns
-        assert profile.auto_hosts
-        # Other attributes are set to default
-        assert not profile.auto_nets
-        assert profile.exclude_subnets is None
-        assert profile.seed_hosts is None
-        assert profile.extra_opts is None
-
-    def test_from_dict_raise_error(self):
-        """If the 'subnets' key is missing in config, an error is raised."""
-        with pytest.raises(ProfileError):
-            Profile.from_dict({"remote": "1.2.3.4"})
-
     def test_cmdline(self, profile):
         """Profile.cmdline() return the sshuttle cmdline for the config."""
         assert profile.cmdline() == ["sshuttle", "1.1.1.0/24", "10.10.0.0/16"]
@@ -111,21 +86,32 @@ class TestProfile:
         """Profile.config() returns a dict with the profile config."""
         profile.remote = "1.2.3.4"
         profile.dns = True
+        profile.auto_hosts = True
         assert profile.config() == {
+            "auto-hosts": True,
             "remote": "1.2.3.4",
             "dns": True,
             "subnets": ["1.1.1.0/24", "10.10.0.0/16"],
         }
 
-    def test_config_rebuild_profiles(self, profile):
-        """Result of Profile.config() can be used build an equal Profile."""
-        assert Profile(**profile.config()) == profile
+    def test_from_config(self, profile):
+        """Profile.from-config builds a profile from a config."""
+        assert Profile.from_config(profile.config()) == profile
 
-    def test_eq(self, profile):
-        """Profiles can be tested for equality."""
-        assert Profile(["1.1.1.0/24", "10.10.0.0/16"]) == profile
+    def test_from_config_missing_subnets(self):
+        """An error is raised if config is missing the 'subnets' key."""
+        with pytest.raises(ProfileError) as error:
+            Profile.from_config({})
+        assert str(error.value) == "Profile missing 'subnets' config"
 
-    def test_eq_false(self, profile):
-        """Profiles with different config don't evaluate as equal."""
-        other_profile = Profile(["1.1.1.0/24", "10.10.0.0/16"], auto_hosts=True)
-        assert other_profile != profile
+    def test_update(self, profile):
+        """A Profile can be updated."""
+        profile.update({"auto-nets": True, "subnets": ["1.2.3.0/24"]})
+        assert profile.auto_nets
+        assert profile.subnets == ["1.2.3.0/24"]
+
+    def test_update_invalid_config(self, profile):
+        """An error is raised if invalid key is passed to Profile.update()."""
+        with pytest.raises(ProfileError) as error:
+            profile.update({"unknown": "key"})
+        assert str(error.value) == "Invalid profile config 'unknown'"

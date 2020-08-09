@@ -34,11 +34,12 @@ class Config:
         self._config = self._load_yaml_file(self._config_file)
         profiles = self._load_yaml_file(self._profiles_file)
         for name, conf in profiles.items():
-            self._profiles[name] = Profile.from_dict(self._from_config(conf))
+            self._profiles[name] = Profile.from_config(conf)
 
     def save(self):
         """Save profiles configuration to file."""
-        self._profiles_file.write_text(yaml_dump(self._build_profiles_config()))
+        config = {name: profile.config() for name, profile in self._profiles.items()}
+        self._profiles_file.write_text(yaml_dump(config))
 
     def add_profile(self, name: str, profile: Profile):
         """Add a profile to the configuration."""
@@ -73,18 +74,3 @@ class Config:
             return {}
 
         return yaml.safe_load(path.read_text()) or {}
-
-    def _build_profiles_config(self) -> Dict[str, Any]:
-        """Return the profiles config dict to be saved to file."""
-        return {
-            name: self._to_config(profile.config())
-            for name, profile in self._profiles.items()
-        }
-
-    def _from_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
-        """Convert a config to a params dict."""
-        return {key.replace("-", "_"): value for key, value in config.items()}
-
-    def _to_config(self, params: Dict[str, Any]):
-        """Convert a params dict to a config."""
-        return {key.replace("_", "-"): value for key, value in params.items()}
