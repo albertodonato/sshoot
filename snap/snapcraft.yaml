@@ -10,7 +10,7 @@ description: |
 license: GPL-3.0+
 confinement: classic
 grade: stable
-base: core18
+base: core20
 
 apps:
   sshoot:
@@ -24,37 +24,17 @@ parts:
     plugin: python
     source: .
     source-type: git
+    python-packages:
+      - sshuttle
     filesets:
       bins:
+        - bin/python3
         - bin/sshoot
         - bin/sshuttle
-        - usr/bin/python3
-        - usr/bin/python3.6
     prime:
       - $bins
-      - etc
+      - pyvenv.cfg
       - lib
-      - usr/lib
-      - -usr/lib/python3.7
-
-  sshuttle:
-    plugin: python
-    source: https://github.com/sshuttle/sshuttle.git
-    source-type: git
-    source-tag: v1.0.3
-    requirements:
-       - requirements.txt
-    filesets:
-      bins:
-        - bin/*
-        - usr/bin/python3
-        - usr/bin/python3.6
-    prime:
-      - $bins
-      - etc
-      - lib
-      - usr/lib
-      - -usr/lib/python3.7
 
   completion:
     plugin: dump
