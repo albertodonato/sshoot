@@ -108,8 +108,8 @@ class TestManager:
         profile_manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
         profile_manager.create_profile("profile2", {"subnets": ["192.168.0.0/16"]})
         profile_manager.get_profiles() == {
-            "profile1": Profile.from_dict({"subnets": ["10.0.0.0/24"]}),
-            "profile2": Profile.from_dict({"subnets": ["192.168.0.0/16"]}),
+            "profile1": Profile(["10.0.0.0/24"]),
+            "profile2": Profile(["192.168.0.0/16"]),
         }
 
     def test_get_profile(self, profile_manager):
@@ -117,7 +117,7 @@ class TestManager:
         config = {"subnets": ["10.0.0.0/24"]}
         profile_manager.create_profile("profile", config)
         profile = profile_manager.get_profile("profile")
-        assert profile == Profile.from_dict(config)
+        assert profile == Profile(**config)
 
     def test_get_profile_unknown(self, profile_manager):
         """Manager.get_profile raises an error if the name is unknown."""

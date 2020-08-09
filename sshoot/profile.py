@@ -1,5 +1,6 @@
 """A sshuttle VPN profile."""
 
+import dataclasses
 from typing import (
     Any,
     Dict,
@@ -15,31 +16,18 @@ class ProfileError(Exception):
         super().__init__("Subnets must be specified")
 
 
+@dataclasses.dataclass
 class Profile:
     """Hold information about a sshuttle profile."""
 
-    _config_attrs = (
-        "remote",
-        "subnets",
-        "auto_hosts",
-        "auto_nets",
-        "dns",
-        "exclude_subnets",
-        "seed_hosts",
-        "extra_opts",
-    )
-
-    remote: str = ""
     subnets: List[str]
+    remote: str = ""
     auto_hosts: bool = False
     auto_nets: bool = False
     dns: bool = False
     exclude_subnets: Optional[List[str]] = None
     seed_hosts: Optional[List[str]] = None
     extra_opts: Optional[List[str]] = None
-
-    def __init__(self, subnets: List[str]):
-        self.subnets = subnets
 
     @classmethod
     def from_dict(cls, config: Dict[str, Any]):
@@ -51,7 +39,7 @@ class Profile:
             raise ProfileError()
 
         profile = Profile(subnets=subnets)
-        for attr in cls._config_attrs:
+        for attr in cls._field_names():
             value = config.get(attr)
             if value is not None:
                 setattr(profile, attr, value)
@@ -83,13 +71,12 @@ class Profile:
     def config(self) -> Dict[str, Any]:
         """Return profile configuration as a dict."""
         conf = {}
-        for attr in self._config_attrs:
+        for attr in self._field_names():
             value = getattr(self, attr)
             if value:
                 conf[attr] = value
         return dict(conf)
 
-    def __eq__(self, other) -> bool:
-        return all(
-            getattr(self, attr) == getattr(other, attr) for attr in self._config_attrs
-        )
+    @classmethod
+    def _field_names(cls) -> List[str]:
+        return [field.name for field in dataclasses.fields(cls)]

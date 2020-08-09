@@ -119,7 +119,7 @@ class TestProfile:
 
     def test_config_rebuild_profiles(self, profile):
         """Result of Profile.config() can be used build an equal Profile."""
-        assert Profile.from_dict(profile.config()) == profile
+        assert Profile(**profile.config()) == profile
 
     def test_eq(self, profile):
         """Profiles can be tested for equality."""
@@ -127,6 +127,5 @@ class TestProfile:
 
     def test_eq_false(self, profile):
         """Profiles with different config don't evaluate as equal."""
-        other_profile = Profile(["1.1.1.0/24", "10.10.0.0/16"])
-        other_profile.auto_hosts = True
+        other_profile = Profile(["1.1.1.0/24", "10.10.0.0/16"], auto_hosts=True)
         assert other_profile != profile

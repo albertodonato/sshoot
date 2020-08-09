@@ -88,9 +88,7 @@ class TestConfig:
         }
         profiles_file.write_text(yaml.dump(profiles))
         config.load()
-        expected = {
-            name: Profile.from_dict(config) for name, config in profiles.items()
-        }
+        expected = {name: Profile(**config) for name, config in profiles.items()}
         assert config.profiles == expected
 
     def test_save_profiles(self, config, profiles_file):
@@ -101,15 +99,14 @@ class TestConfig:
         }
         config.load()
         for name, conf in profiles.items():
-            config.add_profile(name, Profile.from_dict(conf))
+            config.add_profile(name, Profile(**conf))
         config.save()
         config = yaml.safe_load(profiles_file.read_text())
         assert config == profiles
 
     def test_save_from_file(self, config, profiles_file):
         """The config is saved to file."""
-        conf = {"subnets": ["10.0.0.0/24"], "auto_nets": True}
-        config.add_profile("profile", Profile.from_dict(conf))
+        config.add_profile("profile", Profile(["10.0.0.0/24"], auto_nets=True))
         config.save()
 
         config = dedent(

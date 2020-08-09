@@ -1,7 +1,6 @@
 language: python
 os: linux
 python:
-  - "3.6"
   - "3.7"
   - "3.8"
 stages:
@@ -14,9 +13,9 @@ jobs:
   include:
     - stage: lint
       script: tox -e lint
-      python: "3.6"
+      python: "3.7"
     - stage: check
       script: tox -e check
-      python: "3.6"
+      python: "3.7"
 script: tox -e coverage
 after_success: codecov
