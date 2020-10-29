@@ -9,6 +9,7 @@ from subprocess import (
     Popen,
 )
 from tempfile import gettempdir
+import time
 from typing import (
     Any,
     cast,
@@ -122,6 +123,14 @@ class Manager:
         """Restart profile with given name."""
         if self.is_running(name):
             self.stop_profile(name)
+            # Give OS some time to process async SIGTERM on previous instance
+            # of the session
+            wait = 1
+            time.sleep(wait)
+            if self.is_running(name):
+                raise ManagerProfileError(
+                    _("Profile failed to stop after {wait} seconds").format(wait=wait)
+                )
         self.start_profile(name, extra_args=extra_args)
 
     def is_running(self, name: str) -> bool:

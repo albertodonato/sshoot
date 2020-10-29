@@ -219,18 +219,30 @@ class TestManager:
     ):
         """Manage.restart_profile restarts a running profile."""
         profile_manager._get_executable = lambda: str(bin_succeed)
-        running_state = [True, True, False]
+        running_state = [True, True, False, False]
         profile_manager.is_running = lambda name: running_state.pop(0)
         mock_kill = mocker.patch("sshoot.manager.os.kill")
         pid_file.write_text("100\n")
 
         profile_manager.restart_profile("profile")
-
         mock_kill.assert_called_once_with(100, 15)
         cmdline = (bin_succeed.parent / "cmdline").read_text()
         assert cmdline == (
             "10.0.0.0/24 --daemon --pidfile {}/profile.pid\n".format(sessions_dir)
         )
+
+    def test_restart_profile_stop_failed(
+        self, mocker, profile_manager, pid_file, profile, sessions_dir, bin_succeed
+    ):
+        """Test that failing to stop a profile raises the correct error."""
+        profile_manager._get_executable = lambda: str(bin_succeed)
+        running_state = [True, True, True]
+        profile_manager.is_running = lambda name: running_state.pop(0)
+        mocker.patch("sshoot.manager.os.kill")
+        pid_file.write_text("100\n")
+
+        with pytest.raises(ManagerProfileError):
+            profile_manager.restart_profile("profile")
 
     def test_get_pidfile(self, profile_manager, pid_file):
         """Manager._get_pidfile returns the pidfile path for a session."""
