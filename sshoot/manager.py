@@ -118,6 +118,12 @@ class Manager:
                 _("Failed to stop profile: {error}").format(error=error)
             )
 
+    def restart_profile(self, name: str, extra_args: Optional[List[str]] = None):
+        """Restart profile with given name."""
+        if self.is_running(name):
+            self.stop_profile(name)
+        self.start_profile(name, extra_args=extra_args)
+
     def is_running(self, name: str) -> bool:
         """Return whether the specified profile is running."""
         pidfile = self._get_pidfile(name)

@@ -78,6 +78,11 @@ class Sshoot(Script):
         manager.stop_profile(args.name)
         print(_("Profile stopped"))
 
+    def action_restart(self, manager: Manager, args: Namespace):
+        """Restart sshuttle for the specified profile."""
+        manager.restart_profile(args.name, extra_args=args.args)
+        print(_("Profile restarted"))
+
     def action_is_running(self, manager: Manager, args: Namespace):
         """Return whether the specified profile is running."""
         # raise an error if profile is unknown
@@ -206,6 +211,22 @@ class Sshoot(Script):
         complete_argument(
             stop_parser.add_argument("name", help=_("name of the profile to stop")),
             partial(profile_completer, running=True),
+        )
+
+        # Restart profile
+        restart_parser = subparsers.add_parser(
+            "restart", help=_("restart a VPN session for a profile")
+        )
+        complete_argument(
+            restart_parser.add_argument(
+                "name", help=_("name of the profile to restart")
+            ),
+            partial(profile_completer, running=True),
+        )
+        restart_parser.add_argument(
+            "args",
+            nargs="*",
+            help=("additional arguments passed to sshuttle command line."),
         )
 
         # Return whether profile is running
