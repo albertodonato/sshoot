@@ -10,6 +10,10 @@ import shutil
 import sys
 
 from argcomplete import autocomplete
+from toolrack.script import (
+    ErrorExitMessage,
+    Script,
+)
 
 from . import __version__
 from .autocomplete import (
@@ -28,11 +32,10 @@ from .manager import (
 )
 
 
-class Sshoot:
+class Sshoot(Script):
     """Manage multiple sshuttle VPN sessions."""
 
-    def __call__(self):
-        args = self._get_parser().parse_args()
+    def main(self, args: Namespace):
         # backwards-compatible config lookup
         self._check_update_config_path(args.config)
 
@@ -40,13 +43,13 @@ class Sshoot:
             manager = Manager(config_path=args.config)
             manager.load_config()
         except IOError as error:
-            self._exit(message=str(error), code=3)
+            raise ErrorExitMessage(error, code=3)
         action = args.action.replace("-", "_")
         method = getattr(self, "action_" + action)
         try:
             return method(manager, args)
         except ManagerProfileError as error:
-            self._exit(message=str(error), code=2)
+            raise ErrorExitMessage(error, code=2)
 
     def action_list(self, manager: Manager, args: Namespace):
         """Print out the list of profiles as a table."""
@@ -80,14 +83,14 @@ class Sshoot:
         # raise an error if profile is unknown
         manager.get_profile(args.name)
         retval = 0 if manager.is_running(args.name) else 1
-        self._exit(code=retval)
+        self.exit(retval)
 
     def action_get_command(self, manager: Manager, args: Namespace):
         """Print the sshuttle command for the specified profile."""
         cmdline = manager.get_cmdline(args.name)
         print(" ".join(cmdline))
 
-    def _get_parser(self) -> ArgumentParser:
+    def get_parser(self) -> ArgumentParser:
         """Return a configured argparse.ArgumentParse instance."""
         parser = ArgumentParser(description=_("Manage multiple sshuttle VPN sessions"))
         parser.add_argument(
@@ -247,12 +250,6 @@ class Sshoot:
                 ).format(old_path=old_config_path, new_path=DEFAULT_CONFIG_PATH),
                 file=sys.stderr,
             )
-
-    def _exit(self, message=None, code=1):
-        """Terminate with the specified error and code ."""
-        if message:
-            print(f"{message}\n", file=sys.stderr)
-        sys.exit(code)
 
 
 sshoot = Sshoot()
