@@ -178,7 +178,7 @@ class Sshoot(Script):
         create_parser.add_argument(
             "--extra-opts",
             type=str.split,
-            help=_("extra options to pass to sshuttle command line"),
+            help=_("extra arguments to pass to sshuttle command line"),
         )
 
         # Remove profile
@@ -201,7 +201,7 @@ class Sshoot(Script):
         start_parser.add_argument(
             "args",
             nargs="*",
-            help=("additional arguments passed to sshuttle command line."),
+            help=_("additional arguments passed to sshuttle command line"),
         )
 
         # Stop profile
@@ -226,7 +226,7 @@ class Sshoot(Script):
         restart_parser.add_argument(
             "args",
             nargs="*",
-            help=("additional arguments passed to sshuttle command line."),
+            help=_("additional arguments passed to sshuttle command line"),
         )
 
         # Return whether profile is running
