@@ -3,12 +3,16 @@
 from getpass import getuser
 import os
 from pathlib import Path
-from signal import SIGTERM
+from signal import (
+    SIGKILL,
+    SIGTERM,
+)
 from subprocess import (
     PIPE,
     Popen,
 )
 from tempfile import gettempdir
+import time
 from typing import (
     Any,
     cast,
@@ -112,8 +116,8 @@ class Manager:
 
         try:
             pid = int(self._get_pidfile(name).read_text())
-            os.kill(pid, SIGTERM)
-        except (IOError, OSError) as error:
+            kill_and_wait(pid)
+        except (IOError, OSError, PermissionError) as error:
             raise ManagerProfileError(
                 _("Failed to stop profile: {error}").format(error=error)
             )
@@ -136,7 +140,7 @@ class Manager:
 
         try:
             os.kill(pid, 0)
-        except OSError:
+        except ProcessLookupError:
             # Delete stale pidfile
             pidfile.unlink()
             return False
@@ -161,6 +165,27 @@ class Manager:
     def _get_executable(self) -> str:
         """Return the shuttle executable from the config."""
         return self._config.config.get("executable", "sshuttle")
+
+
+class ProcessKillFail(Exception):
+    """Failed to kill a process."""
+
+    def __init__(self, pid: int):
+        self.pid = pid
+        super().__init__(_("Failed to kill process {pid}").format(pid=pid))
+
+
+def kill_and_wait(pid: int):
+    """Kill a process and wait for it to terminate."""
+    for wait, signal in ((2.0, SIGTERM), (1.0, SIGKILL)):
+        while wait > 0:
+            try:
+                os.kill(pid, signal)
+            except ProcessLookupError:
+                return
+            wait -= 0.2
+            time.sleep(0.2)
+    raise ProcessKillFail(pid)
 
 
 def get_rundir(prefix: str) -> Path:

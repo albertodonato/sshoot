@@ -1,6 +1,7 @@
 from getpass import getuser
 import os
 from pathlib import Path
+import signal
 from tempfile import gettempdir
 
 import pytest
@@ -9,8 +10,10 @@ import yaml
 from ..manager import (
     DEFAULT_CONFIG_PATH,
     get_rundir,
+    kill_and_wait,
     Manager,
     ManagerProfileError,
+    ProcessKillFail,
 )
 from ..profile import Profile
 
@@ -185,11 +188,11 @@ class TestManager:
 
     def test_stop_profile(self, mocker, profile_manager, pid_file):
         """Manager.stop_profile stops a running profile."""
-        mock_kill = mocker.patch("sshoot.manager.os.kill")
+        mock_kill_and_wait = mocker.patch("sshoot.manager.kill_and_wait")
         pid_file.write_text("100\n")
         profile_manager.is_running = lambda name: True
         profile_manager.stop_profile("profile")
-        mock_kill.assert_called_once_with(100, 15)
+        mock_kill_and_wait.assert_called_once_with(100)
 
     def test_stop_profile_unknown(self, profile_manager):
         """Trying to stop an unknown profile raises an error."""
@@ -206,27 +209,31 @@ class TestManager:
         """If the process fails to stop an error is raised."""
         pid_file.write_text("100\n")
 
-        mock_kill = mocker.patch("sshoot.manager.os.kill")
-        mock_kill.side_effect = IOError
+        mock_kill_and_wait = mocker.patch("sshoot.manager.kill_and_wait")
+        mock_kill_and_wait.side_effect = ProcessLookupError
 
         profile_manager.is_running = lambda name: True
         with pytest.raises(ManagerProfileError) as err:
             profile_manager.stop_profile("profile")
         assert "Failed to stop profile" in str(err.value)
+        mock_kill_and_wait.assert_called_once_with(100)
 
     def test_restart_profile(
         self, mocker, profile_manager, pid_file, profile, sessions_dir, bin_succeed
     ):
         """Manage.restart_profile restarts a running profile."""
         profile_manager._get_executable = lambda: str(bin_succeed)
-        running_state = [True, True, False]
-        profile_manager.is_running = lambda name: running_state.pop(0)
-        mock_kill = mocker.patch("sshoot.manager.os.kill")
+        mocker.patch.object(profile_manager, "is_running").side_effect = [
+            True,
+            True,
+            False,
+        ]
+        mock_kill_and_wait = mocker.patch("sshoot.manager.kill_and_wait")
         pid_file.write_text("100\n")
 
         profile_manager.restart_profile("profile")
 
-        mock_kill.assert_called_once_with(100, 15)
+        mock_kill_and_wait.assert_called_once_with(100)
         cmdline = (bin_succeed.parent / "cmdline").read_text()
         assert cmdline == (
             "10.0.0.0/24 --daemon --pidfile {}/profile.pid\n".format(sessions_dir)
@@ -297,6 +304,62 @@ class TestManager:
             "--pidfile",
             str(pid_file),
         ]
+
+
+@pytest.fixture
+def mock_kill(mocker):
+    yield mocker.patch("sshoot.manager.os.kill")
+
+
+@pytest.fixture
+def mock_sleep(mocker):
+    yield mocker.patch("sshoot.manager.time.sleep")
+
+
+class TestKillAndWait:
+    def test_return_if_process_dead(self, mock_kill, mock_sleep):
+        """No erorr is reported if the process is not found."""
+        mock_kill.side_effect = ProcessLookupError
+        kill_and_wait(123)
+        mock_kill.assert_called_once_with(123, signal.SIGTERM)
+        mock_sleep.assert_not_called()
+
+    def test_retry(self, mocker, mock_kill, mock_sleep):
+        """The kill call is retried if process isn't dead yet."""
+        mock_kill.side_effect = [None, None, ProcessLookupError]
+        kill_and_wait(123)
+        assert mock_kill.mock_calls == [mocker.call(123, signal.SIGTERM)] * 3
+        assert mock_sleep.mock_calls == [mocker.call(0.2)] * 2
+
+    def test_retry_term_and_killl(self, mocker, mock_kill, mock_sleep):
+        """The kill is performed with SIGKILL after SIGTERM."""
+        mock_kill.side_effect = [None] * 12 + [ProcessLookupError]
+        kill_and_wait(123)
+        mock_kill
+        assert (
+            mock_kill.mock_calls
+            == [mocker.call(123, signal.SIGTERM)] * 11
+            + [mocker.call(123, signal.SIGKILL)] * 2
+        )
+
+    def test_raises_eventually(self, mocker, mock_kill, mock_sleep):
+        """If the process doesn't die, an error is raised."""
+        with pytest.raises(ProcessKillFail) as error:
+            kill_and_wait(123)
+        assert error.value.pid == 123
+        assert (
+            mock_kill.mock_calls
+            == [mocker.call(123, signal.SIGTERM)] * 11
+            + [mocker.call(123, signal.SIGKILL)] * 6
+        )
+
+    def test_no_retry_on_error(self, mock_kill, mock_sleep):
+        """If the kill call fails, the error is raised."""
+        mock_kill.side_effect = PermissionError
+        with pytest.raises(PermissionError):
+            kill_and_wait(123)
+        mock_kill.assert_called_once_with(123, signal.SIGTERM)
+        mock_sleep.assert_not_called()
 
 
 class TestGetRundir:

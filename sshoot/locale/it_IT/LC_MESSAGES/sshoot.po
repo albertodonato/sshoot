@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sshoot 1.3.2\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-11-03 20:48+0100\n"
-"PO-Revision-Date: 2020-11-03 20:52+0100\n"
+"POT-Creation-Date: 2020-11-15 11:01+0100\n"
+"PO-Revision-Date: 2020-11-15 11:02+0100\n"
 "Last-Translator: Alberto Donato <alberto.donato@gmail.com>\n"
 "Language: it_IT\n"
 "Language-Team: it_IT <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.8.0\n"
+"Generated-By: Babel 2.9.0\n"
 
 #: sshoot/listing.py:28
 msgid "Remote host"
@@ -208,29 +208,33 @@ msgstr "nomde del profilo"
 msgid "NOTICE: configuration tree moved from {old_path} to {new_path}\n"
 msgstr "NOTA: la configurazione è stata spostata da {old_path} a {new_path}\n"
 
-#: sshoot/manager.py:58
+#: sshoot/manager.py:62
 msgid "Profile name already in use: {name}"
 msgstr "Nome di profilo già in uso: {name}"
 
-#: sshoot/manager.py:69 sshoot/manager.py:82
+#: sshoot/manager.py:73 sshoot/manager.py:86
 msgid "Unknown profile: {name}"
 msgstr "Profilo sconosciuto: {name}"
 
-#: sshoot/manager.py:87
+#: sshoot/manager.py:91
 msgid "Profile is already running"
 msgstr "Il profilo è già attivo"
 
-#: sshoot/manager.py:90
+#: sshoot/manager.py:94
 msgid "Profile failed to start: {error}"
 msgstr "Attivazione del profilo fallita: {error}"
 
-#: sshoot/manager.py:111
+#: sshoot/manager.py:115
 msgid "Profile is not running"
 msgstr "Il profilo non è attivo"
 
-#: sshoot/manager.py:118
+#: sshoot/manager.py:122
 msgid "Failed to stop profile: {error}"
 msgstr "Disattivazione del profilo fallita: {error}"
+
+#: sshoot/manager.py:175
+msgid "Failed to kill process {pid}"
+msgstr "Terminazione del processo {pid} fallita"
 
 #: sshoot/profile.py:39
 msgid "Profile missing 'subnets' config"
