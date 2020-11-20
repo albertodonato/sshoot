@@ -1,3 +1,12 @@
+v1.5.0 - 2020-11-20
+===================
+
+- Add ``restart`` option for a profile.
+- Use ``toolrack.script.Script`` as base for main script.
+- [snap] Move to ``core20``.
+- Add type hints.
+
+
 v1.4.2 - 2019-06-13
 ===================
 
