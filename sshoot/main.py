@@ -8,6 +8,7 @@ from functools import partial
 import os
 import shutil
 import sys
+from typing import Set
 
 from argcomplete import autocomplete
 from toolrack.script import (
@@ -46,8 +47,15 @@ class Sshoot(Script):
             raise ErrorExitMessage(error, code=3)
         action = args.action.replace("-", "_")
         method = getattr(self, "action_" + action)
+        action_args = Namespace(
+            **{
+                key: value
+                for key, value in args.__dict__.items()
+                if key not in self.global_args
+            }
+        )
         try:
-            return method(manager, args)
+            return method(manager, action_args)
         except ManagerProfileError as error:
             raise ErrorExitMessage(error, code=2)
 
@@ -62,7 +70,9 @@ class Sshoot(Script):
 
     def action_create(self, manager: Manager, args: Namespace):
         """Create a new profile."""
-        manager.create_profile(args.name, args.__dict__)
+        details = args.__dict__.copy()
+        details.pop("name")
+        manager.create_profile(args.name, details)
 
     def action_delete(self, manager: Manager, args: Namespace):
         """Delete profile with the given name."""
@@ -248,6 +258,11 @@ class Sshoot(Script):
             get_command_parser.add_argument("name", help=_("name of the profile")),
             profile_completer,
         )
+
+        # track global arguments/options so they can be stripped from action namespace
+        self.global_args: Set[str] = set()
+        for group in parser._action_groups:
+            self.global_args.update(action.dest for action in group._group_actions)
 
         # Setup autocompletion
         autocomplete(parser)
