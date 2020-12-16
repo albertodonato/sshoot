@@ -59,14 +59,18 @@ class Sshoot(Script):
         except ManagerProfileError as error:
             raise ErrorExitMessage(error, code=2)
 
+    def print(self, *args, **kwargs):
+        """Print out message."""
+        print(*args, **kwargs, file=self._stdout)
+
     def action_list(self, manager: Manager, args: Namespace):
         """Print out the list of profiles as a table."""
         listing = ProfileListing(manager)
-        print(listing.get_output(args.format, verbose=args.verbose), end="")
+        self.print(listing.get_output(args.format, verbose=args.verbose), end="")
 
     def action_show(self, manager: Manager, args: Namespace):
         """Show details on a profile."""
-        print(profile_details(manager, args.name))
+        self.print(profile_details(manager, args.name))
 
     def action_create(self, manager: Manager, args: Namespace):
         """Create a new profile."""
@@ -81,17 +85,17 @@ class Sshoot(Script):
     def action_start(self, manager: Manager, args: Namespace):
         """Start sshuttle for the specified profile."""
         manager.start_profile(args.name, extra_args=args.args)
-        print(_("Profile started"))
+        self.print(_("Profile started"))
 
     def action_stop(self, manager: Manager, args: Namespace):
         """Stop sshuttle for the specified profile."""
         manager.stop_profile(args.name)
-        print(_("Profile stopped"))
+        self.print(_("Profile stopped"))
 
     def action_restart(self, manager: Manager, args: Namespace):
         """Restart sshuttle for the specified profile."""
         manager.restart_profile(args.name, extra_args=args.args)
-        print(_("Profile restarted"))
+        self.print(_("Profile restarted"))
 
     def action_is_running(self, manager: Manager, args: Namespace):
         """Return whether the specified profile is running."""
@@ -103,7 +107,7 @@ class Sshoot(Script):
     def action_get_command(self, manager: Manager, args: Namespace):
         """Print the sshuttle command for the specified profile."""
         cmdline = manager.get_cmdline(args.name)
-        print(" ".join(cmdline))
+        self.print(" ".join(cmdline))
 
     def get_parser(self) -> ArgumentParser:
         """Return a configured argparse.ArgumentParse instance."""
@@ -279,7 +283,7 @@ class Sshoot(Script):
         ) and not os.path.exists(DEFAULT_CONFIG_PATH)
         if need_config_path_update:
             shutil.move(old_config_path, DEFAULT_CONFIG_PATH)
-            print(
+            self.print(
                 _(
                     "NOTICE: configuration tree moved from {old_path} to "
                     "{new_path}\n"
