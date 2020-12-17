@@ -69,12 +69,17 @@ are supported, via::
 .. _`Snap Store`: https://snapcraft.io
 
 .. |Latest Version| image:: https://img.shields.io/pypi/v/sshoot.svg
+   :alt: Latest Version
    :target: https://pypi.python.org/pypi/sshoot
-.. |Build Status| image:: https://img.shields.io/travis/albertodonato/sshoot.svg
-   :target: https://travis-ci.com/albertodonato/sshoot
+.. |Build Status| image:: https://github.com/albertodonato/sshoot/workflows/CI/badge.svg
+   :alt: Build Status
+   :target: https://github.com/albertodonato/sshoot/actions?query=workflow%3ACI
 .. |Coverage Status| image:: https://img.shields.io/codecov/c/github/albertodonato/sshoot/master.svg
+   :alt: Coverage Status
    :target: https://codecov.io/gh/albertodonato/sshoot
-.. |Snap Status| image:: https://build.snapcraft.io/badge/albertodonato/sshoot.svg
-   :target: https://build.snapcraft.io/user/albertodonato/sshoot
+.. |Snap Package| image:: https://snapcraft.io/sshoot/badge.svg
+   :alt: Snap Package
+   :target: https://snapcraft.io/sshoot
 .. |Get it from the Snap Store| image:: https://snapcraft.io/static/images/badges/en/snap-store-black.svg
+   :alt: Get it from the Snap Store
    :target: https://snapcraft.io/sshoot
