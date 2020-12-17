@@ -5,9 +5,6 @@ from argparse import (
     Namespace,
 )
 from functools import partial
-from pathlib import Path
-import shutil
-import sys
 from typing import Set
 
 from argcomplete import autocomplete
@@ -37,9 +34,6 @@ class Sshoot(Script):
     """Manage multiple sshuttle VPN sessions."""
 
     def main(self, args: Namespace):
-        # backwards-compatible config lookup
-        self._check_update_config_path(args.config)
-
         try:
             manager = Manager(config_path=args.config)
             manager.load_config()
@@ -271,25 +265,6 @@ class Sshoot(Script):
         # Setup autocompletion
         autocomplete(parser)
         return parser
-
-    def _check_update_config_path(self, config: str):
-        """Move config to the new path if the old one is found."""
-        old_config_path = Path("~").expanduser() / ".sshoot"
-        if Path(config) != DEFAULT_CONFIG_PATH:
-            return
-
-        need_config_path_update = (
-            old_config_path.exists() and not DEFAULT_CONFIG_PATH.exists()
-        )
-        if need_config_path_update:
-            shutil.move(str(old_config_path), DEFAULT_CONFIG_PATH)
-            self.print(
-                _(
-                    "NOTICE: configuration tree moved from {old_path} to "
-                    "{new_path}\n"
-                ).format(old_path=old_config_path, new_path=DEFAULT_CONFIG_PATH),
-                file=sys.stderr,
-            )
 
 
 sshoot = Sshoot()
