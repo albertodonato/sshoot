@@ -1,7 +1,7 @@
 sshoot - Manage sshuttle VPN sessions
 =====================================
 
-|Latest Version| |Build Status| |Coverage Status| |Snap Status|
+|Latest Version| |Build Status| |Coverage Status| |Snap Package|
 
 Command-line interface to manage multiple sshuttle_ VPN sessions.
 
