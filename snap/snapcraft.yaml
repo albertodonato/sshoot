@@ -16,7 +16,9 @@ apps:
   sshoot:
     command: bin/sshoot
     environment:
-      PATH: $SNAP/bin:$SNAP/usr/bin:$PATH
+      CORE_SNAP: /snap/core20/current
+      PATH: $SNAP/bin:$SNAP/usr/bin:$CORE_SNAP/sbin:$CORE_SNAP/bin:$CORE_SNAP/usr/sbin:$CORE_SNAP/usr/bin{PATH:+:$PATH}
+      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/lib:$CORE_SNAP/lib:$CORE_SNAP/usr/lib
     completer: sshoot-completion
 
 parts:
@@ -28,12 +30,10 @@ parts:
       - sshuttle
     filesets:
       bins:
-        - bin/python3
         - bin/sshoot
         - bin/sshuttle
     prime:
       - $bins
-      - pyvenv.cfg
       - lib
 
   completion:
