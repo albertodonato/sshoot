@@ -5,7 +5,7 @@ from argparse import (
     Namespace,
 )
 from functools import partial
-import os
+from pathlib import Path
 import shutil
 import sys
 from typing import Set
@@ -274,15 +274,15 @@ class Sshoot(Script):
 
     def _check_update_config_path(self, config: str):
         """Move config to the new path if the old one is found."""
-        old_config_path = os.path.expanduser(os.path.join("~", ".sshoot"))
-        if config != DEFAULT_CONFIG_PATH:
+        old_config_path = Path("~").expanduser() / ".sshoot"
+        if Path(config) != DEFAULT_CONFIG_PATH:
             return
 
-        need_config_path_update = os.path.exists(
-            old_config_path
-        ) and not os.path.exists(DEFAULT_CONFIG_PATH)
+        need_config_path_update = (
+            old_config_path.exists() and not DEFAULT_CONFIG_PATH.exists()
+        )
         if need_config_path_update:
-            shutil.move(old_config_path, DEFAULT_CONFIG_PATH)
+            shutil.move(str(old_config_path), DEFAULT_CONFIG_PATH)
             self.print(
                 _(
                     "NOTICE: configuration tree moved from {old_path} to "

@@ -2,7 +2,7 @@
 
 import argparse
 import gettext
-import os
+from pathlib import Path
 from typing import Callable
 
 
@@ -14,7 +14,7 @@ def _setup_i18n():
 
 def _get_i18n_func(domain: str):
     """Return the internationalization function."""
-    localedir = os.path.join(os.path.dirname(__file__), "locale")
+    localedir = Path(__file__).parent / "locale"
     g = gettext.translation(domain, localedir=localedir, fallback=True)
     return g.gettext
 
