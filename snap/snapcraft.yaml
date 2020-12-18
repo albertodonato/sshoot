@@ -16,9 +16,8 @@ apps:
   sshoot:
     command: bin/sshoot
     environment:
-      CORE_SNAP: /snap/core20/current
-      PATH: $SNAP/bin:$SNAP/usr/bin:$CORE_SNAP/sbin:$CORE_SNAP/bin:$CORE_SNAP/usr/sbin:$CORE_SNAP/usr/bin{PATH:+:$PATH}
-      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/lib:$CORE_SNAP/lib:$CORE_SNAP/usr/lib
+      PATH: $SNAP/bin:$SNAP/usr/bin:/bin:$PATH
+      PYTHONPATH: $SNAP/lib/python3.8/site-packages
     completer: sshoot-completion
 
 parts:
@@ -26,15 +25,27 @@ parts:
     plugin: python
     source: .
     source-type: git
+    stage-packages:
+      - libpython3-stdlib
+      - libpython3.8-stdlib
+      - libpython3.8-minimal
+      - python3-pip
+      - python3-setuptools
+      - python3-wheel
+      - python3-venv
+      - python3-minimal
+      - python3-distutils
+      - python3-pkg-resources
+      - python3.8-minimal
     python-packages:
       - sshuttle
-    filesets:
-      bins:
-        - bin/sshoot
-        - bin/sshuttle
     prime:
-      - $bins
+      - bin/sshoot
+      - bin/sshuttle
+      - pyvenv.cfg
       - lib
+      - usr/bin
+      - usr/lib
 
   completion:
     plugin: dump
