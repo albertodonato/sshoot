@@ -1,3 +1,13 @@
+v1.5.1 - 2020-12-18
+===================
+
+- [snap] Ship Python3.8 in the snap not to depend on version from OS.
+- Drop legacy config file path compatiblity.
+- Drop Python3.6 support.
+* Add unittests for main script.
+* Only pass action parameters to Manager methods (Fixes: #10).
+
+
 v1.5.0 - 2020-11-20
 ===================
 
@@ -10,8 +20,8 @@ v1.5.0 - 2020-11-20
 v1.4.2 - 2019-06-13
 ===================
 
-- Rework tests and project setup
-- Fix yaml warning (Fixes: #6)
+- Rework tests and project setup.
+- Fix yaml warning (Fixes: #6).
 
 
 v1.4.1 - 2018-06-30
@@ -43,8 +53,8 @@ v1.3.0 - 2017-10-02
 ===================
 
 -  Support profiles listing in different formats (table, CSV, YAML,
-   JSON) (Fixes: #3)
--  Move configuration path to XDG conventions (Fixes: #1)
+   JSON) (Fixes: #3).
+-  Move configuration path to XDG conventions (Fixes: #1).
 
 
 v1.2.6 - 2017-05-25
@@ -92,7 +102,7 @@ v1.2.0 - 2015-09-04
 v1.1.0 - 2015-05-27
 ===================
 
--  Switch to python3.
+-  Switch to Python3.
 
 
 v1.0.3 - 2015-04-15
