@@ -318,7 +318,7 @@ def mock_sleep(mocker):
 
 class TestKillAndWait:
     def test_return_if_process_dead(self, mock_kill, mock_sleep):
-        """No erorr is reported if the process is not found."""
+        """No error is reported if the process is not found."""
         mock_kill.side_effect = ProcessLookupError
         kill_and_wait(123)
         mock_kill.assert_called_once_with(123, signal.SIGTERM)
