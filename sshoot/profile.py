@@ -64,7 +64,7 @@ class Profile:
         """Return a sshuttle cmdline based on the profile."""
         cmd = [executable] + self.subnets
         if self.remote:
-            cmd.append("--remote={}".format(self.remote))
+            cmd.append(f"--remote={self.remote}")
         if self.auto_hosts:
             cmd.append("--auto-hosts")
         if self.auto_nets:
@@ -72,9 +72,10 @@ class Profile:
         if self.dns:
             cmd.append("--dns")
         if self.exclude_subnets:
-            cmd.extend("--exclude={}".format(net) for net in self.exclude_subnets)
+            cmd.extend(f"--exclude={net}" for net in self.exclude_subnets)
         if self.seed_hosts:
-            cmd.append("--seed-hosts={}".format(",".join(self.seed_hosts)))
+            seed_hosts = ",".join(self.seed_hosts)
+            cmd.append(f"--seed-hosts={seed_hosts}")
         if self.extra_opts:
             cmd.extend(self.extra_opts)
         if extra_opts:

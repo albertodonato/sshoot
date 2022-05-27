@@ -160,7 +160,7 @@ class Manager:
 
     def _get_pidfile(self, name: str) -> Path:
         """Return the path of the pidfile for the specified profile."""
-        return self.sessions_path / "{}.pid".format(name)
+        return self.sessions_path / f"{name}.pid"
 
     def _get_executable(self) -> str:
         """Return the shuttle executable from the config."""
@@ -190,6 +190,4 @@ def kill_and_wait(pid: int):
 
 def get_rundir(prefix: str) -> Path:
     """Return the directory holding runtime data."""
-    return Path(gettempdir()) / "{prefix}-{username}".format(
-        prefix=prefix, username=getuser()
-    )
+    return Path(gettempdir()) / f"{prefix}-{getuser()}"

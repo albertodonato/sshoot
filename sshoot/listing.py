@@ -9,6 +9,7 @@ from typing import (
     cast,
     Iterable,
     List,
+    Optional,
     Tuple,
 )
 
@@ -61,7 +62,7 @@ class ProfileListing:
 
     def get_output(self, _format: str, verbose: bool = False) -> str:
         """Return a string with listing in the specified format."""
-        formatter: Formatter = getattr(self, "_format_{}".format(_format), None)
+        formatter: Optional[Formatter] = getattr(self, f"_format_{_format}", None)
         if formatter is None:
             raise InvalidFormat(_format)
         profiles_iter = self.manager.get_profiles().items()
@@ -136,10 +137,10 @@ def profile_details(manager: Manager, name: str) -> str:
     profile = manager.get_profile(name)
     table = PrettyTable(field_names=["key", "value"], header=False, border=False)
     table.align["key"] = table.align["value"] = "l"
-    table.add_row(("{}:".format(NAME_FIELD), name))
-    table.add_row(("{}:".format(STATUS_FIELD), _profile_status(manager, name)))
+    table.add_row((f"{NAME_FIELD}:", name))
+    table.add_row((f"{STATUS_FIELD}:", _profile_status(manager, name)))
     for name, field in _FIELDS_MAP.items():
-        table.add_row(("{}:".format(name), _format_value(getattr(profile, field))))
+        table.add_row((f"{name}:", _format_value(getattr(profile, field))))
     return cast(str, table.get_string())
 
 

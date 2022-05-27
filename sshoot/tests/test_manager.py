@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import signal
 from tempfile import gettempdir
+from textwrap import dedent
 
 import pytest
 import yaml
@@ -22,12 +23,14 @@ def fake_executable(base_path, exit_code):
     """Create a fake executable logging command line parameters."""
     executable = Path(base_path) / "executable"
     executable.write_text(
-        (
-            "#!/bin/sh\n"
-            "echo $@ > {}/cmdline\n"
-            "echo -n stderr message >&2\n"
-            "exit {}\n"
-        ).format(str(base_path), exit_code)
+        dedent(
+            f"""\
+            #!/bin/sh
+            echo $@ > {base_path}/cmdline
+            echo -n stderr message >&2
+            exit {exit_code}
+            """
+        )
     )
     executable.chmod(0o755)
     return executable
@@ -121,7 +124,7 @@ class TestManager:
         """Manager.get_profiles returns defined profiles."""
         profile_manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
         profile_manager.create_profile("profile2", {"subnets": ["192.168.0.0/16"]})
-        profile_manager.get_profiles() == {
+        assert profile_manager.get_profiles() == {
             "profile1": Profile(["10.0.0.0/24"]),
             "profile2": Profile(["192.168.0.0/16"]),
         }
@@ -145,7 +148,7 @@ class TestManager:
         profile_manager.start_profile("profile")
         cmdline = (bin_succeed.parent / "cmdline").read_text()
         assert cmdline == (
-            "10.0.0.0/24 --daemon --pidfile {}/profile.pid\n".format(sessions_dir)
+            f"10.0.0.0/24 --daemon --pidfile {sessions_dir}/profile.pid\n"
         )
 
     def test_start_profile_extra_args(
@@ -157,9 +160,7 @@ class TestManager:
         profile_manager.start_profile("profile", extra_args=["--extra1", "--extra2"])
         cmdline = (bin_succeed.parent / "cmdline").read_text()
         assert cmdline == (
-            "10.0.0.0/24 --daemon --pidfile {}/profile.pid --extra1 --extra2\n".format(
-                sessions_dir
-            )
+            f"10.0.0.0/24 --daemon --pidfile {sessions_dir}/profile.pid --extra1 --extra2\n"
         )
 
     def test_start_profile_fail(self, profile_manager, profile, bin_fail):
@@ -236,7 +237,7 @@ class TestManager:
         mock_kill_and_wait.assert_called_once_with(100)
         cmdline = (bin_succeed.parent / "cmdline").read_text()
         assert cmdline == (
-            "10.0.0.0/24 --daemon --pidfile {}/profile.pid\n".format(sessions_dir)
+            f"10.0.0.0/24 --daemon --pidfile {sessions_dir}/profile.pid\n"
         )
 
     def test_get_pidfile(self, profile_manager, pid_file):
@@ -245,7 +246,7 @@ class TestManager:
 
     def test_is_running(self, profile_manager, pid_file):
         """If the process is present, the profile is running."""
-        pid_file.write_text("{}\n".format(os.getpid()))
+        pid_file.write_text(f"{os.getpid()}\n")
         assert profile_manager.is_running("profile")
 
     def test_is_running_no_pidfile(self, profile_manager):
@@ -365,5 +366,5 @@ class TestKillAndWait:
 class TestGetRundir:
     def test_rundir_path(self):
         """get_rundir returns a user-specific tempdir path."""
-        rundir_path = Path(gettempdir()) / "foo-{}".format(getuser())
+        rundir_path = Path(gettempdir()) / f"foo-{getuser()}"
         assert get_rundir("foo") == rundir_path
