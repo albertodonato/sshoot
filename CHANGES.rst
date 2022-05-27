@@ -2,7 +2,7 @@ v1.5.1 - 2020-12-18
 ===================
 
 - [snap] Ship Python3.8 in the snap not to depend on version from OS.
-- Drop legacy config file path compatiblity.
+- Drop legacy config file path compatibility.
 - Drop Python3.6 support.
 * Add unittests for main script.
 * Only pass action parameters to Manager methods (Fixes: #10).

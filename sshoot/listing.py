@@ -22,7 +22,7 @@ from .i18n import _
 from .manager import Manager
 from .profile import Profile
 
-# Map names to profile fileds
+# Map names to profile fields
 _FIELDS_MAP = OrderedDict(
     [
         (_("Remote host"), "remote"),
