@@ -8,7 +8,7 @@ from .manager import Manager
 
 @pytest.fixture
 def config_dir(tmpdir):
-    """A directory for configuration files. """
+    """A directory for configuration files."""
     path = Path(tmpdir / "config")
     path.mkdir()
     yield path
