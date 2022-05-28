@@ -74,7 +74,7 @@ are supported, via::
 .. |Build Status| image:: https://github.com/albertodonato/sshoot/workflows/CI/badge.svg
    :alt: Build Status
    :target: https://github.com/albertodonato/sshoot/actions?query=workflow%3ACI
-.. |Coverage Status| image:: https://img.shields.io/codecov/c/github/albertodonato/sshoot/master.svg
+.. |Coverage Status| image:: https://img.shields.io/codecov/c/github/albertodonato/sshoot/main.svg
    :alt: Coverage Status
    :target: https://codecov.io/gh/albertodonato/sshoot
 .. |Snap Package| image:: https://snapcraft.io/sshoot/badge.svg
