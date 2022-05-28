@@ -27,15 +27,15 @@ parts:
     source-type: git
     stage-packages:
       - libpython3-stdlib
-      - libpython3.8-stdlib
       - libpython3.8-minimal
-      - python3-pip
-      - python3-setuptools
-      - python3-wheel
-      - python3-venv
-      - python3-minimal
+      - libpython3.8-stdlib
       - python3-distutils
+      - python3-minimal
+      - python3-packaging
+      - python3-pip
       - python3-pkg-resources
+      - python3-venv
+      - python3-wheel
       - python3.8-minimal
     python-packages:
       - sshuttle
