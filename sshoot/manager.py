@@ -104,6 +104,8 @@ class Manager:
         if process.returncode != 0:
             error = stderr.read().decode()
             stderr.close()
+            if not error:
+                error = "Please see the log for more details: 'grep sshuttle /var/log/syslog'"
             raise ManagerProfileError(message.format(error=error))
         stderr.close()
 
