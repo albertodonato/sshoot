@@ -155,11 +155,13 @@ class Manager:
         executable = self._get_executable()
         extra_opts = ["--daemon", "--pidfile", str(self._get_pidfile(name))]
         global_extra_opts = self._config.config.get("global_extra_opts", [])
-        if global_extra_opts:
-            extra_opts.extend(global_extra_opts)
         if extra_args:
             extra_opts.extend(extra_args)
-        return profile.cmdline(executable=executable, extra_opts=extra_opts)
+        return profile.cmdline(
+            executable=executable,
+            extra_opts=extra_opts,
+            global_extra_opts=global_extra_opts,
+        )
 
     def _get_pidfile(self, name: str) -> Path:
         """Return the path of the pidfile for the specified profile."""
