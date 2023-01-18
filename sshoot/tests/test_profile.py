@@ -87,11 +87,13 @@ class TestProfile:
         profile.remote = "1.2.3.4"
         profile.dns = True
         profile.auto_hosts = True
+        profile.global_extra_opts = False
         assert profile.config() == {
             "auto-hosts": True,
             "remote": "1.2.3.4",
             "dns": True,
             "subnets": ["1.1.1.0/24", "10.10.0.0/16"],
+            "global-extra-opts": False,
         }
 
     def test_from_config(self, profile):

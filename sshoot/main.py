@@ -188,6 +188,18 @@ class Sshoot(Script):
             type=str.split,
             help=_("extra arguments to pass to sshuttle command line"),
         )
+        create_parser.add_argument(
+            "--global-extra-opts",
+            action="store_true",
+            help=_("enable global extra arguments set in config.yaml"),
+        )
+        create_parser.add_argument(
+            "--no-global-extra-opts",
+            dest="global_extra_opts",
+            action="store_false",
+            help=_("disable global extra arguments set in config.yaml"),
+        )
+        create_parser.set_defaults(global_extra_opts=True)
 
         # Remove profile
         delete_parser = subparsers.add_parser(

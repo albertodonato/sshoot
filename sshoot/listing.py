@@ -34,6 +34,7 @@ _FIELDS_MAP = OrderedDict(
         (_("Exclude subnets"), "exclude_subnets"),
         (_("Seed hosts"), "seed_hosts"),
         (_("Extra options"), "extra_opts"),
+        (_("Global extra options"), "global_extra_opts"),
     ]
 )
 

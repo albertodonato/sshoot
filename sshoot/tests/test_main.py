@@ -71,6 +71,7 @@ class TestSshoot:
                 "exclude_subnets": None,
                 "seed_hosts": None,
                 "extra_opts": None,
+                "global_extra_opts": True,
             },
         )
 
@@ -78,7 +79,7 @@ class TestSshoot:
         """Profile details can be viewed."""
         script(["show", "profile1"])
         manager.get_profile.assert_called_once_with("profile1")
-        assert "Name:             profile1" in stdout.getvalue()
+        assert "Name:                  profile1" in stdout.getvalue()
 
     def test_list(self, script, stdout):
         """Profile list can be viewed."""

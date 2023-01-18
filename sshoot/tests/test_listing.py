@@ -72,6 +72,7 @@ class TestProfileListing:
                 "Exclude subnets",
                 "Seed hosts",
                 "Extra options",
+                "Global extra options",
             ],
             [
                 "profile1",
@@ -84,6 +85,7 @@ class TestProfileListing:
                 "",
                 "",
                 "",
+                "True",
             ],
             [
                 "profile2",
@@ -96,6 +98,7 @@ class TestProfileListing:
                 "",
                 "",
                 "",
+                "True",
             ],
         ]
 
@@ -133,13 +136,14 @@ class TestProfileDetails:
         """profile_details returns a string with profile details."""
         profile_manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
         output = profile_details(profile_manager, "profile")
-        assert "Name:             profile" in output
-        assert "Subnets:          10.0.0.0/24" in output
-        assert "Status:           STOPPED" in output
+        assert "Name:                  profile" in output
+        assert "Subnets:               10.0.0.0/24" in output
+        assert "Status:                STOPPED" in output
 
     def test_active(self, profile_manager, active_profiles):
         """profile_details shows if the profile is active."""
         profile_manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
         active_profiles.append("profile")
         output = profile_details(profile_manager, "profile")
-        assert "Status:           ACTIVE" in output
+        print(output)
+        assert "Status:                ACTIVE" in output
