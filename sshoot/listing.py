@@ -34,7 +34,6 @@ _FIELDS_MAP = OrderedDict(
         (_("Exclude subnets"), "exclude_subnets"),
         (_("Seed hosts"), "seed_hosts"),
         (_("Extra options"), "extra_opts"),
-        (_("Global extra options"), "global_extra_opts"),
     ]
 )
 
@@ -106,7 +105,10 @@ class ProfileListing:
         writer.writeheader()
 
         for name, profile in profiles_iter:
-            row = {NAME_FIELD: name, STATUS_FIELD: _profile_status(self.manager, name)}
+            row = {
+                NAME_FIELD: name,
+                STATUS_FIELD: _profile_status(self.manager, name),
+            }
             row.update(
                 {title: getattr(profile, _FIELDS_MAP[title]) for title in titles[2:]}
             )

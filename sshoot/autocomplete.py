@@ -13,7 +13,10 @@ def complete_argument(argument, completer):
 
 
 def profile_completer(
-    prefix: str, parsed_args: Namespace, running: Optional[bool] = None, **kwargs
+    prefix: str,
+    parsed_args: Namespace,
+    running: Optional[bool] = None,
+    **kwargs,
 ):
     """Autocomplete helper for profile names.
 

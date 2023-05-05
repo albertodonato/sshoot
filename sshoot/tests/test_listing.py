@@ -22,7 +22,12 @@ def active_profiles(profile_manager):
 class TestProfileListing:
     def test_supported_formats(self):
         """supported_formats returns a list with supported formats."""
-        assert ProfileListing.supported_formats() == ["csv", "json", "table", "yaml"]
+        assert ProfileListing.supported_formats() == [
+            "csv",
+            "json",
+            "table",
+            "yaml",
+        ]
 
     def test_get_output_unsupported_format(self, profile_manager):
         """get_output raises an error if an unsupported format is passed."""
@@ -72,7 +77,6 @@ class TestProfileListing:
                 "Exclude subnets",
                 "Seed hosts",
                 "Extra options",
-                "Global extra options",
             ],
             [
                 "profile1",
@@ -85,7 +89,6 @@ class TestProfileListing:
                 "",
                 "",
                 "",
-                "True",
             ],
             [
                 "profile2",
@@ -98,7 +101,6 @@ class TestProfileListing:
                 "",
                 "",
                 "",
-                "True",
             ],
         ]
 
@@ -136,9 +138,9 @@ class TestProfileDetails:
         """profile_details returns a string with profile details."""
         profile_manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
         output = profile_details(profile_manager, "profile")
-        assert "Name:                  profile" in output
-        assert "Subnets:               10.0.0.0/24" in output
-        assert "Status:                STOPPED" in output
+        assert "Name:             profile" in output
+        assert "Subnets:          10.0.0.0/24" in output
+        assert "Status:           STOPPED" in output
 
     def test_active(self, profile_manager, active_profiles):
         """profile_details shows if the profile is active."""
@@ -146,4 +148,4 @@ class TestProfileDetails:
         active_profiles.append("profile")
         output = profile_details(profile_manager, "profile")
         print(output)
-        assert "Status:                ACTIVE" in output
+        assert "Status:           ACTIVE" in output

@@ -220,7 +220,13 @@ class TestManager:
         mock_kill_and_wait.assert_called_once_with(100)
 
     def test_restart_profile(
-        self, mocker, profile_manager, pid_file, profile, sessions_dir, bin_succeed
+        self,
+        mocker,
+        profile_manager,
+        pid_file,
+        profile,
+        sessions_dir,
+        bin_succeed,
     ):
         """Manage.restart_profile restarts a running profile."""
         profile_manager._get_executable = lambda: str(bin_succeed)

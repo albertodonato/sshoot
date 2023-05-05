@@ -59,7 +59,9 @@ class Config:
     @property
     def config(self) -> Dict[str, Any]:
         """Return a dict with the configuration."""
-        return {key: value for key, value in self._config.items() if key in self.CONFIG_KEYS}
+        return {
+            key: value for key, value in self._config.items() if key in self.CONFIG_KEYS
+        }
 
     def _reset(self):
         """Reset default empty config."""
