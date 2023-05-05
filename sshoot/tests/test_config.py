@@ -75,10 +75,17 @@ class TestConfig:
 
     def test_load_config_options(self, config, config_file):
         """Only known config options are loaded from config file."""
-        config_data = {"executable": "/usr/bin/shuttle", "other-conf": "no"}
+        config_data = {
+            "executable": "/usr/bin/shuttle",
+            "other-conf": "no",
+            "extra-options": ["--no-latency-control", "--disable-ipv6"],
+        }
         config_file.write_text(yaml.dump(config_data))
         config.load()
-        assert config.config == {"executable": "/usr/bin/shuttle"}
+        assert config.config == {
+            "executable": "/usr/bin/shuttle",
+            "extra-options": ["--no-latency-control", "--disable-ipv6"],
+        }
 
     def test_load_profiles(self, config, profiles_file):
         """The 'profiles' config field is loaded from the config file."""
