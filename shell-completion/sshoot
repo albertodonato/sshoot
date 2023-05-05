@@ -3,4 +3,4 @@
 # Bash-completion for sshoot
 #
 
-eval "$(register-python-argcomplete3 sshoot)"
+eval "$(register-python-argcomplete sshoot)"

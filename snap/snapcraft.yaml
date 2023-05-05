@@ -10,14 +10,11 @@ description: |
 license: GPL-3.0+
 confinement: classic
 grade: stable
-base: core20
+base: core22
 
 apps:
   sshoot:
     command: bin/sshoot
-    environment:
-      PATH: $SNAP/bin:$SNAP/usr/bin:/bin:$PATH
-      PYTHONPATH: $SNAP/lib/python3.8/site-packages
     completer: sshoot-completion
 
 parts:
@@ -26,26 +23,22 @@ parts:
     source: .
     source-type: git
     stage-packages:
-      - libpython3-stdlib
-      - libpython3.8-minimal
-      - libpython3.8-stdlib
-      - python3-distutils
-      - python3-minimal
-      - python3-packaging
-      - python3-pip
-      - python3-pkg-resources
-      - python3-venv
-      - python3-wheel
-      - python3.8-minimal
+      - libpython3.10-minimal
+      - libpython3.10-stdlib
+      - python3.10-minimal
+      - python3.10-venv
     python-packages:
       - sshuttle
     prime:
       - bin/sshoot
       - bin/sshuttle
+      - bin/register-python-argcomplete
+      - bin/python*
+      - etc/
+      - lib/
+      - lib64/
+      - usr/
       - pyvenv.cfg
-      - lib
-      - usr/bin
-      - usr/lib
 
   completion:
     plugin: dump
