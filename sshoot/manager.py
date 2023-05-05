@@ -58,9 +58,7 @@ class Manager:
         try:
             self._config.add_profile(name, Profile.from_config(details))
         except KeyError:
-            raise ManagerProfileError(
-                _("Profile name already in use: {name}").format(name=name)
-            )
+            raise ManagerProfileError(_("Profile name already in use: {name}").format(name=name))
         except ProfileError as error:
             raise ManagerProfileError(str(error))
         self._config.save()
@@ -118,9 +116,7 @@ class Manager:
             pid = int(self._get_pidfile(name).read_text())
             kill_and_wait(pid)
         except (IOError, OSError, PermissionError) as error:
-            raise ManagerProfileError(
-                _("Failed to stop profile: {error}").format(error=error)
-            )
+            raise ManagerProfileError(_("Failed to stop profile: {error}").format(error=error))
 
     def restart_profile(self, name: str, extra_args: Optional[List[str]] = None):
         """Restart profile with given name."""
@@ -146,15 +142,13 @@ class Manager:
             return False
         return True
 
-    def get_cmdline(
-        self, name: str, extra_args: Optional[List[str]] = None
-    ) -> List[str]:
+    def get_cmdline(self, name: str, extra_args: Optional[List[str]] = None) -> List[str]:
         """Return the command line for the specified profile."""
         profile = self.get_profile(name)
 
         executable = self._get_executable()
         extra_opts = ["--daemon", "--pidfile", str(self._get_pidfile(name))]
-        global_extra_opts = self._config.config.get("global_extra_opts", [])
+        global_extra_opts = self._config.config.get("extra-options", [])
         if extra_args:
             extra_opts.extend(extra_args)
         return profile.cmdline(
