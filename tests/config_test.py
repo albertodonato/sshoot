@@ -4,8 +4,8 @@ from textwrap import dedent
 import pytest
 import yaml
 
-from ..config import yaml_dump
-from ..profile import Profile
+from sshoot.config import yaml_dump
+from sshoot.profile import Profile
 
 
 class TestYamlDump:
@@ -95,7 +95,9 @@ class TestConfig:
         }
         profiles_file.write_text(yaml.dump(profiles))
         config.load()
-        expected = {name: Profile(**config) for name, config in profiles.items()}
+        expected = {
+            name: Profile(**config) for name, config in profiles.items()
+        }
         assert config.profiles == expected
 
     def test_save_profiles(self, config, profiles_file):

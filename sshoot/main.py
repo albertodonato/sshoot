@@ -60,7 +60,9 @@ class Sshoot(Script):
     def action_list(self, manager: Manager, args: Namespace):
         """Print out the list of profiles as a table."""
         listing = ProfileListing(manager)
-        self.print(listing.get_output(args.format, verbose=args.verbose), end="")
+        self.print(
+            listing.get_output(args.format, verbose=args.verbose), end=""
+        )
 
     def action_show(self, manager: Manager, args: Namespace):
         """Show details on a profile."""
@@ -109,13 +111,17 @@ class Sshoot(Script):
     def action_get_command(self, manager: Manager, args: Namespace):
         """Print the sshuttle command for the specified profile."""
         cmdline = manager.get_cmdline(
-            args.name, disable_global_extra_options=args.disable_global_extra_options
+            args.name,
+            disable_global_extra_options=args.disable_global_extra_options,
         )
         self.print(" ".join(cmdline))
 
     def get_parser(self) -> ArgumentParser:
         """Return a configured argparse.ArgumentParse instance."""
-        parser = ArgumentParser(description=_("Manage multiple sshuttle VPN sessions"))
+        parser = ArgumentParser(
+            prog="sshoot",
+            description=_("Manage multiple sshuttle VPN sessions"),
+        )
         parser.add_argument(
             "-V",
             "--version",
@@ -134,7 +140,9 @@ class Sshoot(Script):
         subparsers.required = True
 
         # List profiles
-        list_parser = subparsers.add_parser("list", help=_("list defined profiles"))
+        list_parser = subparsers.add_parser(
+            "list", help=_("list defined profiles")
+        )
         list_parser.add_argument(
             "-v", "--verbose", action="store_true", help=_("verbose listing")
         )
@@ -156,7 +164,9 @@ class Sshoot(Script):
         )
 
         # Add profile
-        create_parser = subparsers.add_parser("create", help=_("define a new profile"))
+        create_parser = subparsers.add_parser(
+            "create", help=_("define a new profile")
+        )
         create_parser.add_argument("name", help=_("profile name"))
         create_parser.add_argument(
             "subnets", nargs="+", help=_("subnets to route over the VPN")
@@ -205,7 +215,9 @@ class Sshoot(Script):
             "delete", help=_("delete an existing profile")
         )
         complete_argument(
-            delete_parser.add_argument("name", help=_("name of the profile to remove")),
+            delete_parser.add_argument(
+                "name", help=_("name of the profile to remove")
+            ),
             profile_completer,
         )
 
@@ -214,7 +226,9 @@ class Sshoot(Script):
             "start", help=_("start a VPN session for a profile")
         )
         complete_argument(
-            start_parser.add_argument("name", help=_("name of the profile to start")),
+            start_parser.add_argument(
+                "name", help=_("name of the profile to start")
+            ),
             partial(profile_completer, running=False),
         )
         start_parser.add_argument(
@@ -234,7 +248,9 @@ class Sshoot(Script):
             "stop", help=_("stop a running VPN session for a profile")
         )
         complete_argument(
-            stop_parser.add_argument("name", help=_("name of the profile to stop")),
+            stop_parser.add_argument(
+                "name", help=_("name of the profile to stop")
+            ),
             partial(profile_completer, running=True),
         )
 
@@ -276,7 +292,9 @@ class Sshoot(Script):
             "get-command", help=_("return the sshuttle command for a profile")
         )
         complete_argument(
-            get_command_parser.add_argument("name", help=_("name of the profile")),
+            get_command_parser.add_argument(
+                "name", help=_("name of the profile")
+            ),
             profile_completer,
         )
         get_command_parser.add_argument(
@@ -289,7 +307,9 @@ class Sshoot(Script):
         # track global arguments/options so they can be stripped from action namespace
         self.global_args: Set[str] = set()
         for group in parser._action_groups:
-            self.global_args.update(action.dest for action in group._group_actions)
+            self.global_args.update(
+                action.dest for action in group._group_actions
+            )
 
         # Setup autocompletion
         autocomplete(parser)

@@ -41,8 +41,12 @@ class ManagerProfileError(Exception):
 class Manager:
     """Profile manager."""
 
-    def __init__(self, config_path: Optional[str] = None, rundir: Optional[str] = None):
-        self.config_path = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
+    def __init__(
+        self, config_path: Optional[str] = None, rundir: Optional[str] = None
+    ):
+        self.config_path = (
+            Path(config_path) if config_path else DEFAULT_CONFIG_PATH
+        )
         self.rundir = Path(rundir) if rundir else get_rundir("sshoot")
         self.sessions_path = self.rundir / "sessions"
         self._config = Config(self.config_path)
@@ -70,7 +74,9 @@ class Manager:
         try:
             self._config.remove_profile(name)
         except KeyError:
-            raise ManagerProfileError(_("Unknown profile: {name}").format(name=name))
+            raise ManagerProfileError(
+                _("Unknown profile: {name}").format(name=name)
+            )
 
         self._config.save()
 
@@ -83,7 +89,9 @@ class Manager:
         try:
             return self._config.profiles[name]
         except KeyError:
-            raise ManagerProfileError(_("Unknown profile: {name}").format(name=name))
+            raise ManagerProfileError(
+                _("Unknown profile: {name}").format(name=name)
+            )
 
     def start_profile(
         self,

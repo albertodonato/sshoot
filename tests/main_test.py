@@ -2,8 +2,8 @@ from io import StringIO
 
 import pytest
 
-from .. import main
-from ..manager import ManagerProfileError
+from sshoot import main
+from sshoot.manager import ManagerProfileError
 
 
 @pytest.fixture
@@ -92,9 +92,19 @@ class TestSshoot:
 
     def test_start(self, stdout, script, manager):
         """A profile can be started."""
-        script(["start", "--no-global-extra-options", "profile1", "--", "--syslog"])
+        script(
+            [
+                "start",
+                "--no-global-extra-options",
+                "profile1",
+                "--",
+                "--syslog",
+            ]
+        )
         manager.start_profile.assert_called_once_with(
-            "profile1", extra_args=["--syslog"], disable_global_extra_options=True
+            "profile1",
+            extra_args=["--syslog"],
+            disable_global_extra_options=True,
         )
         assert stdout.getvalue() == "Profile started\n"
 
@@ -108,12 +118,16 @@ class TestSshoot:
         """A profile can be restarted."""
         script(["restart", "profile1", "--", "--syslog"])
         manager.restart_profile.assert_called_once_with(
-            "profile1", extra_args=["--syslog"], disable_global_extra_options=False
+            "profile1",
+            extra_args=["--syslog"],
+            disable_global_extra_options=False,
         )
         assert stdout.getvalue() == "Profile restarted\n"
 
     @pytest.mark.parametrize("running,exit_value", [(True, 0), (False, 1)])
-    def test_is_running(self, mocker, sys_exit, script, manager, running, exit_value):
+    def test_is_running(
+        self, mocker, sys_exit, script, manager, running, exit_value
+    ):
         """It's possible to check if a profile is running."""
         manager.is_running.return_value = running
         script(["is-running", "profile1"])
