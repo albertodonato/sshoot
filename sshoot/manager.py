@@ -136,7 +136,7 @@ class Manager:
         try:
             pid = int(self._get_pidfile(name).read_text())
             kill_and_wait(pid)
-        except (IOError, OSError, PermissionError) as error:
+        except (OSError, PermissionError) as error:
             raise ManagerProfileError(
                 _("Failed to stop profile: {error}").format(error=error)
             )

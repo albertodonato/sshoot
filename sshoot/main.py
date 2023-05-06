@@ -37,7 +37,7 @@ class Sshoot(Script):
         try:
             manager = Manager(config_path=args.config)
             manager.load_config()
-        except IOError as error:
+        except OSError as error:
             raise ErrorExitMessage(error, code=3)
         action = args.action.replace("-", "_")
         method = getattr(self, "action_" + action)
