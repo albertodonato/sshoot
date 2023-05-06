@@ -5,7 +5,7 @@ import json
 import pytest
 import yaml
 
-from ..listing import (
+from sshoot.listing import (
     InvalidFormat,
     profile_details,
     ProfileListing,
@@ -36,8 +36,12 @@ class TestProfileListing:
 
     def test_get_output_table(self, profile_manager, active_profiles):
         """Profiles can be listed as a table."""
-        profile_manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
-        profile_manager.create_profile("profile2", {"subnets": ["192.168.0.0/16"]})
+        profile_manager.create_profile(
+            "profile1", {"subnets": ["10.0.0.0/24"]}
+        )
+        profile_manager.create_profile(
+            "profile2", {"subnets": ["192.168.0.0/16"]}
+        )
         active_profiles.append("profile2")
         output = ProfileListing(profile_manager).get_output("table")
         assert "   profile1               10.0.0.0/24" in output
@@ -49,19 +53,27 @@ class TestProfileListing:
             "profile1", {"subnets": ["10.0.0.0/24"], "auto_hosts": True}
         )
         active_profiles.append("profile2")
-        output = ProfileListing(profile_manager).get_output("table", verbose=True)
-        assert (
-            "Name      Remote host  Subnets      Auto hosts  Auto nets"
-            "  DNS forward  Exclude subnets  Seed hosts  Extra options" in output
+        output = ProfileListing(profile_manager).get_output(
+            "table", verbose=True
         )
         assert (
-            "profile1               10.0.0.0/24  True        False      False" in output
+            "Name      Remote host  Subnets      Auto hosts  Auto nets"
+            "  DNS forward  Exclude subnets  Seed hosts  Extra options"
+            in output
+        )
+        assert (
+            "profile1               10.0.0.0/24  True        False      False"
+            in output
         )
 
     def test_get_output_csv(self, profile_manager, active_profiles):
         """Profiles can be listed as CSV."""
-        profile_manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
-        profile_manager.create_profile("profile2", {"subnets": ["192.168.0.0/16"]})
+        profile_manager.create_profile(
+            "profile1", {"subnets": ["10.0.0.0/24"]}
+        )
+        profile_manager.create_profile(
+            "profile2", {"subnets": ["192.168.0.0/16"]}
+        )
         active_profiles.append("profile2")
         output = ProfileListing(profile_manager).get_output("csv")
         reader = csv.reader(StringIO(output))
@@ -106,7 +118,9 @@ class TestProfileListing:
 
     def test_get_output_json(self, profile_manager, active_profiles):
         """Profiles can be listed as JSON."""
-        profile_manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
+        profile_manager.create_profile(
+            "profile1", {"subnets": ["10.0.0.0/24"]}
+        )
         profile_manager.create_profile(
             "profile2", {"subnets": ["192.168.0.0/16"], "auto-hosts": True}
         )
@@ -120,7 +134,9 @@ class TestProfileListing:
 
     def test_get_output_yaml(self, profile_manager, active_profiles):
         """Profiles can be listed as YAML."""
-        profile_manager.create_profile("profile1", {"subnets": ["10.0.0.0/24"]})
+        profile_manager.create_profile(
+            "profile1", {"subnets": ["10.0.0.0/24"]}
+        )
         profile_manager.create_profile(
             "profile2", {"subnets": ["192.168.0.0/16"], "auto-hosts": True}
         )

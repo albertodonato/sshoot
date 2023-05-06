@@ -2,7 +2,7 @@ from argparse import Namespace
 
 import pytest
 
-from ..autocomplete import (
+from sshoot.autocomplete import (
     complete_argument,
     profile_completer,
 )

@@ -45,7 +45,9 @@ class Profile:
         for key, value in config.items():
             attr = key.replace("-", "_")
             if attr not in field_names:
-                raise ProfileError(_("Invalid profile config '{key}'").format(key=key))
+                raise ProfileError(
+                    _("Invalid profile config '{key}'").format(key=key)
+                )
             setattr(self, attr, value)
 
     def config(self) -> Dict[str, Any]:

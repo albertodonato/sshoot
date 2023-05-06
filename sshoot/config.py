@@ -15,7 +15,9 @@ from .profile import Profile
 
 def yaml_dump(data: Dict, fh: Optional[IO] = None):
     """Dump data in YAML format with sane defaults for readability."""
-    return yaml.safe_dump(data, fh, default_flow_style=False, allow_unicode=True)
+    return yaml.safe_dump(
+        data, fh, default_flow_style=False, allow_unicode=True
+    )
 
 
 class Config:
@@ -38,7 +40,9 @@ class Config:
 
     def save(self):
         """Save profiles configuration to file."""
-        config = {name: profile.config() for name, profile in self._profiles.items()}
+        config = {
+            name: profile.config() for name, profile in self._profiles.items()
+        }
         self._profiles_file.write_text(yaml_dump(config))
 
     def add_profile(self, name: str, profile: Profile):
@@ -60,10 +64,12 @@ class Config:
     def config(self) -> Dict[str, Any]:
         """Return a dict with the configuration."""
         return {
-            key: value for key, value in self._config.items() if key in self.CONFIG_KEYS
+            key: value
+            for key, value in self._config.items()
+            if key in self.CONFIG_KEYS
         }
 
-    def _reset(self):
+    def _reset(self) -> None:
         """Reset default empty config."""
         self._profiles: Dict[str, Profile] = {}
         self._config = {}

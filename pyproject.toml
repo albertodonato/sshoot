@@ -1,10 +1,71 @@
-[tool.coverage.report]
-show_missing = true
-fail_under = 100.0
-skip_covered = true
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools",
+]
 
-[tool.coverage.run]
-source = ["sshoot"]
+[project]
+name = "sshoot"
+description = "Manage multiple sshuttle VPN sessions"
+readme = "README.rst"
+keywords = [
+  "ssh",
+  "sshuttle",
+  "vpn",
+]
+license = {file = "LICENSE.txt"}
+maintainers = [
+    {name = "Alberto Donato", email = "alberto.donato@gmail.com"},
+]
+authors = [
+    {name = "Alberto Donato", email = "alberto.donato@gmail.com"},
+]
+requires-python = ">=3.8"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: System :: Networking",
+  "Topic :: Utilities",
+]
+dynamic = [
+  "version",
+]
+dependencies = [
+  "argcomplete",
+  "prettytable",
+  "pyxdg",
+  "PyYAML",
+  "toolrack>=3",
+]
+[project.optional-dependencies]
+testing = [
+  "pytest",
+  "pytest-mock",
+]
+[project.urls]
+changelog = "https://github.com/albertodonato/sshoot/blob/main/CHANGES.rst"
+homepage = "https://github.com/albertodonato/sshoot"
+[project.scripts]
+sshoot = "sshoot.main:sshoot"
+
+[tool.setuptools.dynamic]
+version = {attr = "sshoot.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["sshoot*"]
+
+[tool.black]
+line-length = 79
 
 [tool.isort]
 combine_as_imports = true
@@ -17,9 +78,22 @@ order_by_type = false
 profile = "black"
 use_parentheses = true
 
+[tool.flake8]
+ignore = ["E203", "E501", "W503"]
+max-line-length = 80
+select = ["C", "E", "F", "W", "B", "B950"]
+
+[tool.coverage.report]
+fail_under = 100.0
+show_missing = true
+skip_covered = true
+
+[tool.coverage.run]
+source = ["sshoot"]
+
 [tool.mypy]
+ignore_missing_imports = true
 install_types = true
 non_interactive = true
 warn_return_any = true
 warn_unused_configs = true
-ignore_missing_imports = true

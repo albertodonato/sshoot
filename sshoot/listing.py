@@ -5,11 +5,11 @@ from csv import DictWriter
 from io import StringIO
 import json
 from typing import (
-    Callable,
     cast,
     Iterable,
     List,
     Optional,
+    Protocol,
     Tuple,
 )
 
@@ -47,7 +47,13 @@ class InvalidFormat(Exception):
 
 
 ProfileIterator = Iterable[Tuple[str, Profile]]
-Formatter = Callable[..., str]  # XXX switch to Protocol when only supporting Python3.8
+
+
+class Formatter(Protocol):
+    def __call__(
+        self, profile_iter: ProfileIterator, verbose: bool = False
+    ) -> str:
+        ...  # pragma: nocoverage
 
 
 class ProfileListing:
@@ -58,11 +64,15 @@ class ProfileListing:
 
     @classmethod
     def supported_formats(cls) -> List[str]:
-        return sorted(attr[8:] for attr in dir(cls) if attr.startswith("_format_"))
+        return sorted(
+            attr[8:] for attr in dir(cls) if attr.startswith("_format_")
+        )
 
     def get_output(self, _format: str, verbose: bool = False) -> str:
         """Return a string with listing in the specified format."""
-        formatter: Optional[Formatter] = getattr(self, f"_format_{_format}", None)
+        formatter: Optional[Formatter] = getattr(
+            self, f"_format_{_format}", None
+        )
         if formatter is None:
             raise InvalidFormat(_format)
         profiles_iter = self.manager.get_profiles().items()
@@ -91,11 +101,15 @@ class ProfileListing:
 
         for name, profile in profiles_iter:
             row = ["*" if self.manager.is_running(name) else "", name]
-            row.extend(_format_value(getattr(profile, column)) for column in columns)
+            row.extend(
+                _format_value(getattr(profile, column)) for column in columns
+            )
             table.add_row(row)
         return cast(str, table.get_string(sortby=NAME_FIELD)) + "\n"
 
-    def _format_csv(self, profiles_iter: ProfileIterator, verbose: bool = False) -> str:
+    def _format_csv(
+        self, profiles_iter: ProfileIterator, verbose: bool = False
+    ) -> str:
         """Format profiles data as CSV."""
         titles = [NAME_FIELD, STATUS_FIELD]
         titles.extend(_FIELDS_MAP)
@@ -110,7 +124,10 @@ class ProfileListing:
                 STATUS_FIELD: _profile_status(self.manager, name),
             }
             row.update(
-                {title: getattr(profile, _FIELDS_MAP[title]) for title in titles[2:]}
+                {
+                    title: getattr(profile, _FIELDS_MAP[title])
+                    for title in titles[2:]
+                }
             )
             writer.writerow(row)
         return buf.getvalue()
@@ -138,7 +155,9 @@ class ProfileListing:
 def profile_details(manager: Manager, name: str) -> str:
     """Return a string with details about a profile, formatted as a table."""
     profile = manager.get_profile(name)
-    table = PrettyTable(field_names=["key", "value"], header=False, border=False)
+    table = PrettyTable(
+        field_names=["key", "value"], header=False, border=False
+    )
     table.align["key"] = table.align["value"] = "l"
     table.add_row((f"{NAME_FIELD}:", name))
     table.add_row((f"{STATUS_FIELD}:", _profile_status(manager, name)))

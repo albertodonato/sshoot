@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from .config import Config
-from .manager import Manager
+from sshoot.config import Config
+from sshoot.manager import Manager
 
 
 @pytest.fixture

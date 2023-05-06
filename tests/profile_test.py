@@ -1,6 +1,6 @@
 import pytest
 
-from ..profile import (
+from sshoot.profile import (
     Profile,
     ProfileError,
 )
@@ -80,6 +80,16 @@ class TestProfile:
             "/bin/foo",
             "1.1.1.0/24",
             "10.10.0.0/16",
+        ]
+
+    def test_cmdline_with_global_extra_options(self, profile):
+        """Profile.cmdline() includes global extra options."""
+        profile.cmdline(global_extra_options=["--verbose", "--daemon"]), [
+            "sshuttle",
+            "1.1.1.0/24",
+            "10.10.0.0/16",
+            "--verbose",
+            "--daemon",
         ]
 
     def test_config(self, profile):
