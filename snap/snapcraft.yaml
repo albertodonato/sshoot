@@ -28,17 +28,18 @@ parts:
       - python3.10-minimal
       - python3.10-venv
     python-packages:
+      - .
       - sshuttle
     prime:
+      - bin/python*
+      - bin/register-python-argcomplete
       - bin/sshoot
       - bin/sshuttle
-      - bin/register-python-argcomplete
-      - bin/python*
       - etc/
       - lib/
       - lib64/
-      - usr/
       - pyvenv.cfg
+      - usr/
 
   completion:
     plugin: dump
