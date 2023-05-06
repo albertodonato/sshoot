@@ -119,7 +119,8 @@ class Sshoot(Script):
     def get_parser(self) -> ArgumentParser:
         """Return a configured argparse.ArgumentParse instance."""
         parser = ArgumentParser(
-            description=_("Manage multiple sshuttle VPN sessions")
+            prog="sshoot",
+            description=_("Manage multiple sshuttle VPN sessions"),
         )
         parser.add_argument(
             "-V",
