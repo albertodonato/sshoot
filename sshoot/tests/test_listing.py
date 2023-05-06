@@ -22,7 +22,12 @@ def active_profiles(profile_manager):
 class TestProfileListing:
     def test_supported_formats(self):
         """supported_formats returns a list with supported formats."""
-        assert ProfileListing.supported_formats() == ["csv", "json", "table", "yaml"]
+        assert ProfileListing.supported_formats() == [
+            "csv",
+            "json",
+            "table",
+            "yaml",
+        ]
 
     def test_get_output_unsupported_format(self, profile_manager):
         """get_output raises an error if an unsupported format is passed."""
@@ -142,4 +147,5 @@ class TestProfileDetails:
         profile_manager.create_profile("profile", {"subnets": ["10.0.0.0/24"]})
         active_profiles.append("profile")
         output = profile_details(profile_manager, "profile")
+        print(output)
         assert "Status:           ACTIVE" in output

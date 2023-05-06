@@ -92,9 +92,9 @@ class TestSshoot:
 
     def test_start(self, stdout, script, manager):
         """A profile can be started."""
-        script(["start", "profile1", "--", "--syslog"])
+        script(["start", "--no-global-extra-options", "profile1", "--", "--syslog"])
         manager.start_profile.assert_called_once_with(
-            "profile1", extra_args=["--syslog"]
+            "profile1", extra_args=["--syslog"], disable_global_extra_options=True
         )
         assert stdout.getvalue() == "Profile started\n"
 
@@ -108,7 +108,7 @@ class TestSshoot:
         """A profile can be restarted."""
         script(["restart", "profile1", "--", "--syslog"])
         manager.restart_profile.assert_called_once_with(
-            "profile1", extra_args=["--syslog"]
+            "profile1", extra_args=["--syslog"], disable_global_extra_options=False
         )
         assert stdout.getvalue() == "Profile restarted\n"
 
@@ -123,5 +123,7 @@ class TestSshoot:
         """It's possible to get the sshuttle commandline."""
         manager.get_cmdline.return_value = ["sshuttle", "-r", "example.net"]
         script(["get-command", "profile1"])
-        manager.get_cmdline.assert_called_once_with("profile1")
+        manager.get_cmdline.assert_called_once_with(
+            "profile1", disable_global_extra_options=False
+        )
         assert stdout.getvalue() == "sshuttle -r example.net\n"

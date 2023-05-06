@@ -21,7 +21,7 @@ def yaml_dump(data: Dict, fh: Optional[IO] = None):
 class Config:
     """Handle configuration file loading/saving."""
 
-    CONFIG_KEYS = frozenset(["executable"])
+    CONFIG_KEYS = frozenset(["executable", "extra-options"])
 
     def __init__(self, path: Path):
         self._config_file = path / "config.yaml"

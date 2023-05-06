@@ -78,7 +78,11 @@ class Sshoot(Script):
 
     def action_start(self, manager: Manager, args: Namespace):
         """Start sshuttle for the specified profile."""
-        manager.start_profile(args.name, extra_args=args.args)
+        manager.start_profile(
+            args.name,
+            extra_args=args.args,
+            disable_global_extra_options=args.disable_global_extra_options,
+        )
         self.print(_("Profile started"))
 
     def action_stop(self, manager: Manager, args: Namespace):
@@ -88,7 +92,11 @@ class Sshoot(Script):
 
     def action_restart(self, manager: Manager, args: Namespace):
         """Restart sshuttle for the specified profile."""
-        manager.restart_profile(args.name, extra_args=args.args)
+        manager.restart_profile(
+            args.name,
+            extra_args=args.args,
+            disable_global_extra_options=args.disable_global_extra_options,
+        )
         self.print(_("Profile restarted"))
 
     def action_is_running(self, manager: Manager, args: Namespace):
@@ -100,7 +108,9 @@ class Sshoot(Script):
 
     def action_get_command(self, manager: Manager, args: Namespace):
         """Print the sshuttle command for the specified profile."""
-        cmdline = manager.get_cmdline(args.name)
+        cmdline = manager.get_cmdline(
+            args.name, disable_global_extra_options=args.disable_global_extra_options
+        )
         self.print(" ".join(cmdline))
 
     def get_parser(self) -> ArgumentParser:
@@ -141,7 +151,8 @@ class Sshoot(Script):
             "show", help=_("show profile configuration")
         )
         complete_argument(
-            show_parser.add_argument("name", help=_("profile name")), profile_completer
+            show_parser.add_argument("name", help=_("profile name")),
+            profile_completer,
         )
 
         # Add profile
@@ -207,6 +218,12 @@ class Sshoot(Script):
             partial(profile_completer, running=False),
         )
         start_parser.add_argument(
+            "--no-global-extra-options",
+            dest="disable_global_extra_options",
+            action="store_true",
+            help=_("disable global extra-options set in config.yaml"),
+        )
+        start_parser.add_argument(
             "args",
             nargs="*",
             help=_("additional arguments passed to sshuttle command line"),
@@ -232,6 +249,12 @@ class Sshoot(Script):
             partial(profile_completer, running=True),
         )
         restart_parser.add_argument(
+            "--no-global-extra-options",
+            dest="disable_global_extra_options",
+            action="store_true",
+            help=_("disable global extra-options set in config.yaml"),
+        )
+        restart_parser.add_argument(
             "args",
             nargs="*",
             help=_("additional arguments passed to sshuttle command line"),
@@ -255,6 +278,12 @@ class Sshoot(Script):
         complete_argument(
             get_command_parser.add_argument("name", help=_("name of the profile")),
             profile_completer,
+        )
+        get_command_parser.add_argument(
+            "--no-global-extra-options",
+            dest="disable_global_extra_options",
+            action="store_true",
+            help=_("disable global extra-options set in config.yaml"),
         )
 
         # track global arguments/options so they can be stripped from action namespace
