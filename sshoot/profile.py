@@ -41,7 +41,7 @@ class Profile:
 
     def update(self, config: Dict[str, Any]):
         """Update the profile from the specified config."""
-        field_names = self._fields().keys()
+        field_names = list(self._fields())
         for key, value in config.items():
             attr = key.replace("-", "_")
             if attr not in field_names:

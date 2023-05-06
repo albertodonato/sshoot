@@ -6,11 +6,6 @@ skip_covered = true
 [tool.coverage.run]
 source = ["sshoot"]
 
-[tool.black]
-line-length = 88
-target-version = ['py37', 'py38', 'py39', 'py310', 'py311']
-include = '\.pyi?$'
-
 [tool.isort]
 combine_as_imports = true
 force_grid_wrap = 2
