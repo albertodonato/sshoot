@@ -19,7 +19,7 @@ from ..manager import (
 from ..profile import Profile
 
 
-def fake_executable(base_path, exit_code):
+def fake_executable(base_path, exit_code, error_message="stderr message"):
     """Create a fake executable logging command line parameters."""
     executable = Path(base_path) / "executable"
     executable.write_text(
@@ -27,7 +27,7 @@ def fake_executable(base_path, exit_code):
             f"""\
             #!/bin/sh
             echo $@ > {base_path}/cmdline
-            echo -n stderr message >&2
+            echo -n {error_message} >&2
             exit {exit_code}
             """
         )
@@ -44,6 +44,11 @@ def bin_succeed(tmpdir):
 @pytest.fixture
 def bin_fail(tmpdir):
     yield fake_executable(tmpdir, 1)
+
+
+@pytest.fixture
+def bin_fail_silent(tmpdir):
+    yield fake_executable(tmpdir, 1, error_message="")
 
 
 @pytest.fixture
@@ -169,6 +174,18 @@ class TestManager:
         with pytest.raises(ManagerProfileError) as err:
             profile_manager.start_profile("profile")
         assert str(err.value) == "Profile failed to start: stderr message"
+
+    def test_start_profile_fail_no_error_message(
+        self, profile_manager, profile, bin_fail_silent
+    ):
+        """An error is raised if starting a profile fails."""
+        profile_manager._get_executable = lambda: str(bin_fail_silent)
+        with pytest.raises(ManagerProfileError) as err:
+            profile_manager.start_profile("profile")
+        assert (
+            str(err.value)
+            == "Profile failed to start: Please see the log for more details: 'grep sshuttle /var/log/syslog'"
+        )
 
     def test_start_profile_executable_not_found(self, profile_manager, profile):
         """Profile start raises an error if executable is not found."""
