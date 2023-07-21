@@ -1,11 +1,22 @@
+v1.6.0 - 2022-07-21
+===================
+
+- Support defining global extra options to pass to ``sshuttle`` (#14).
+- Add hint to look at syslog log for ``sshuttle`` output (#13).
+- Require Python3.8+.
+- [snap] Rebase snap on core22.
+- Rework project setup.
+- Update i18n setup.
+
+
 v1.5.1 - 2020-12-18
 ===================
 
 - [snap] Ship Python3.8 in the snap not to depend on version from OS.
 - Drop legacy config file path compatibility.
 - Drop Python3.6 support.
-* Add unittests for main script.
-* Only pass action parameters to Manager methods (Fixes: #10).
+- Add unittests for main script.
+- Only pass action parameters to Manager methods (Fixes: #10).
 
 
 v1.5.0 - 2020-11-20

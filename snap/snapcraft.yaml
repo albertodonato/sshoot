@@ -36,8 +36,7 @@ parts:
       - bin/sshoot
       - bin/sshuttle
       - etc/
-      - lib/
-      - lib64/
+      - lib*/
       - pyvenv.cfg
       - usr/
 
