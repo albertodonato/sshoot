@@ -5,6 +5,7 @@ from argparse import (
     Namespace,
 )
 from functools import partial
+import shlex
 from typing import Set
 
 from argcomplete import autocomplete
@@ -206,7 +207,7 @@ class Sshoot(Script):
         )
         create_parser.add_argument(
             "--extra-opts",
-            type=str.split,
+            type=shlex.split,
             help=_("extra arguments to pass to sshuttle command line"),
         )
 
