@@ -204,7 +204,7 @@ class Manager:
 
     def _get_executable(self) -> str:
         """Return the shuttle executable from the config."""
-        return self._config.config.get("executable", "sshuttle")
+        return cast(str, self._config.config.get("executable", "sshuttle"))
 
 
 class ProcessKillFail(Exception):

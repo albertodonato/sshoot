@@ -13,12 +13,12 @@ keywords = [
   "sshuttle",
   "vpn",
 ]
-license = {file = "LICENSE.txt"}
+license = { file = "LICENSE.txt" }
 maintainers = [
-    {name = "Alberto Donato", email = "alberto.donato@gmail.com"},
+  { name = "Alberto Donato", email = "alberto.donato@gmail.com" },
 ]
 authors = [
-    {name = "Alberto Donato", email = "alberto.donato@gmail.com"},
+  { name = "Alberto Donato", email = "alberto.donato@gmail.com" },
 ]
 requires-python = ">=3.8"
 classifiers = [
@@ -34,6 +34,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: System :: Networking",
   "Topic :: Utilities",
 ]
@@ -44,25 +45,22 @@ dependencies = [
   "argcomplete",
   "prettytable",
   "pyxdg",
-  "PyYAML",
+  "pyyaml",
   "toolrack>=3",
 ]
-[project.optional-dependencies]
-testing = [
+optional-dependencies.testing = [
   "pytest",
   "pytest-mock",
 ]
-[project.urls]
-changelog = "https://github.com/albertodonato/sshoot/blob/main/CHANGES.rst"
-homepage = "https://github.com/albertodonato/sshoot"
-[project.scripts]
-sshoot = "sshoot.main:sshoot"
+urls.changelog = "https://github.com/albertodonato/sshoot/blob/main/CHANGES.rst"
+urls.homepage = "https://github.com/albertodonato/sshoot"
+scripts.sshoot = "sshoot.main:sshoot"
 
 [tool.setuptools.dynamic]
-version = {attr = "sshoot.__version__"}
+version = { attr = "sshoot.__version__" }
 
 [tool.setuptools.packages.find]
-include = ["sshoot*"]
+include = [ "sshoot*" ]
 
 [tool.black]
 line-length = 79
@@ -79,20 +77,20 @@ profile = "black"
 use_parentheses = true
 
 [tool.flake8]
-ignore = ["E203", "E501", "W503"]
+ignore = [ "E203", "E501", "W503" ]
 max-line-length = 80
-select = ["C", "E", "F", "W", "B", "B950"]
+select = [ "C", "E", "F", "W", "B", "B950" ]
 
 [tool.coverage.report]
 fail_under = 100.0
 show_missing = true
 skip_covered = true
 omit = [
-   "__main__.py"
+  "__main__.py",
 ]
 
 [tool.coverage.run]
-source = ["sshoot"]
+source = [ "sshoot" ]
 
 [tool.mypy]
 ignore_missing_imports = true

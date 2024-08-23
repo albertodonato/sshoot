@@ -53,7 +53,7 @@ class Formatter(Protocol):
     def __call__(
         self, profile_iter: ProfileIterator, verbose: bool = False
     ) -> str:
-        ...  # pragma: nocoverage
+        pass  # pragma: nocoverage
 
 
 class ProfileListing:
