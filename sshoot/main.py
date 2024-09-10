@@ -117,6 +117,11 @@ class Sshoot(Script):
         )
         self.print(" ".join(cmdline))
 
+    def action_rename(self, manager: Manager, args: Namespace):
+        """Rename a sshoot profile."""
+        manager.rename_profile(args.name, args.new_name)
+        self.print(_(f"Profile renamed to '{args.new_name}'."))
+
     def get_parser(self) -> ArgumentParser:
         """Return a configured argparse.ArgumentParse instance."""
         parser = ArgumentParser(
@@ -286,6 +291,20 @@ class Sshoot(Script):
                 "name", help=_("name of the profile to query")
             ),
             profile_completer,
+        )
+
+        # Rename a profile
+        rename_parser = subparsers.add_parser(
+            "rename", help=_("rename a profile")
+        )
+        complete_argument(
+            rename_parser.add_argument(
+                "name", help=_("name of the profile to rename"),
+            ),
+            profile_completer
+        )
+        rename_parser.add_argument(
+            "new_name", help=_("profile new name")
         )
 
         # Get profile command

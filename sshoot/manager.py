@@ -174,6 +174,12 @@ class Manager:
             return False
         return True
 
+    def rename_profile(self, old_name: str, new_name: str):
+        """Rename a profile."""
+        profile = self.get_profile(old_name)
+        self._config.add_profile(new_name, profile)
+        self.remove_profile(old_name)
+
     def get_cmdline(
         self,
         name: str,
