@@ -313,6 +313,18 @@ class TestManager:
         # The stale pidfile is deleted.
         assert not pid_file.exists()
 
+    def test_rename_profile(self, profile_manager: Manager, profile):
+        """If the profile exists, rename it."""
+        profile_manager.rename_profile("profile", "new_profile")
+        new_profile = profile_manager.get_profile("new_profile")
+
+        assert new_profile is not None
+
+    def test_rename_profile_unknown(self, profile_manager: Manager):
+        """Manager.rename_profile raises an error if name is unknown."""
+        with pytest.raises(ManagerProfileError):
+            profile_manager.rename_profile("unknown", "new_profile")
+
     def test_get_cmdline(self, profile_manager, pid_file):
         """Manager.get_cmdline returns the command line for the profile."""
         assert profile_manager.get_cmdline("profile") == [
