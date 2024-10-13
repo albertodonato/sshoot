@@ -10,7 +10,10 @@ description: |
 license: GPL-3.0+
 confinement: classic
 grade: stable
-base: core22
+base: core24
+
+environment:
+  PYTHONPATH: "$SNAP/lib/python3.12/site-packages"
 
 apps:
   sshoot:
@@ -23,10 +26,10 @@ parts:
     source: .
     source-type: git
     stage-packages:
-      - libpython3.10-minimal
-      - libpython3.10-stdlib
-      - python3.10-minimal
-      - python3.10-venv
+      - libpython3.12-minimal
+      - libpython3.12-stdlib
+      - python3.12-minimal
+      - python3.12-venv
     python-packages:
       - .
       - sshuttle
